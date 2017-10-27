@@ -1,0 +1,12 @@
+CFLAGS += -Wall -Werror -Wextra -pedantic -g -O0
+CCFLAGS += -std=c99
+CPPFLAGS += -std=c++11
+
+CFLAGS += -I$(TUP_CWD)/../extern/GLFW/include -I$(TUP_CWD)/../extern/glew/include -I$(TUP_CWD)/../extern/glm
+LIBS += $(TUP_CWD)/../extern/GLFW/src/libglfw3.a $(TUP_CWD)/../extern/glew/tmp/linux/default/static/glew.o -lGLU -lGL -lX11 -lXrandr -lXinerama -lXxf86vm -lXcursor -lrt -lm -ldl -pthread
+
+!cc = |> gcc $(CFLAGS) $(CCFLAGS) -c %f -o %o |> %B.o
+!cpp = |> g++ $(CFLAGS) $(CPPFLAGS) -c %f -o %o |> %B.o
+!ldcc = |> gcc $(LDFLAGS) -o %o %f |>
+!ldcpp = |> g++ $(LDFLAGS) -o %o %f $(LIBS) |>
+!ar = |> ar rcs %o %f |>
