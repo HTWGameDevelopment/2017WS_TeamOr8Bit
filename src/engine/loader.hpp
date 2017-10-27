@@ -36,63 +36,65 @@ bool startswith(std::string s, std::string f) {
 
 namespace qe {
 
-    template<flag_t t>
-    class Loader;
+template<flag_t t>
+class Loader;
 
-    struct loader_error: public std::runtime_error {
-        loader_error(std::string s, const char* file, int line): runtime_error(std::string(file) + ":" + std::to_string(line) + ": Failed reading " + s) {}
-    };
+struct loader_error: public std::runtime_error {
+    loader_error(std::string s, const char* file, int line): runtime_error(std::string(file) + ":" + std::to_string(line) + ": Failed reading " + s) {}
+};
 
-    template<> class Loader<OBJV1> {
-    private:
-        std::vector<glm::vec3> _vertices;
-        std::string _path;
-        void load() {
-            std::ifstream file(_path);
-            file.exceptions(std::ifstream::badbit);
-            std::vector<glm::vec3> tvertices;
-            std::vector<unsigned int> indices;
-            for(std::string line; std::getline(file, line);) {
-                if(startswith(line, "v ")) {
-                    glm::vec3 v;
-                    switch(sscanf(line.c_str(), "v %f %f %f", &v.x, &v.y, &v.z)) {
-                        case 0:
-                        case EOF:
-                            throw loader_error(std::string(_path) + "(" + line + ")", __FILE__, __LINE__);
-                    }
-                    tvertices.push_back(v);
-                } else if(startswith(line, "f")) {
-                    unsigned int vi[3];
-                    switch(sscanf(line.c_str(), "f %u %u %u", &vi[0], &vi[1], &vi[2])) {
-                        case 0:
-                        case EOF:
-                            throw loader_error(std::string(_path) + "(" + line + ")", __FILE__, __LINE__);
-                    }
-                    indices.push_back(vi[0]);
-                    indices.push_back(vi[1]);
-                    indices.push_back(vi[2]);
+template<> class Loader<OBJV1> {
+private:
+    std::vector<glm::vec3> _vertices;
+    std::string _path;
+    void load() {
+        std::ifstream file(_path);
+        file.exceptions(std::ifstream::badbit);
+        std::vector<glm::vec3> tvertices;
+        std::vector<unsigned int> indices;
+        for(std::string line; std::getline(file, line);) {
+            if(startswith(line, "v ")) {
+                glm::vec3 v;
+                switch(sscanf(line.c_str(), "v %f %f %f", &v.x, &v.y, &v.z)) {
+                case 0:
+                case EOF:
+                    throw loader_error(std::string(_path) + "(" + line + ")", __FILE__, __LINE__);
                 }
+                tvertices.push_back(v);
+            } else if(startswith(line, "f")) {
+                unsigned int vi[3];
+                switch(sscanf(line.c_str(), "f %u %u %u", &vi[0], &vi[1], &vi[2])) {
+                case 0:
+                case EOF:
+                    throw loader_error(std::string(_path) + "(" + line + ")", __FILE__, __LINE__);
+                }
+                indices.push_back(vi[0]);
+                indices.push_back(vi[1]);
+                indices.push_back(vi[2]);
             }
-            if(file.bad() || indices.size() == 0) throw loader_error(_path, __FILE__, __LINE__);
-            assert(indices.size() % 3 == 0);
-            for(unsigned int i = 0; i < indices.size(); ++i) {
-                assert(indices[i] <= tvertices.size());
-                _vertices.push_back(tvertices[indices[i] - 1]);
-            }
         }
-    public:
-        Loader(std::string path): _path(path) {}
-        std::vector<glm::vec3> &parse() {
-            if(_vertices.size() != 0) return _vertices;
-            load();
-            return _vertices;
+        if(file.bad() || indices.size() == 0) throw loader_error(_path, __FILE__, __LINE__);
+        assert(indices.size() % 3 == 0);
+        for(unsigned int i = 0; i < indices.size(); ++i) {
+            assert(indices[i] <= tvertices.size());
+            _vertices.push_back(tvertices[indices[i] - 1]);
         }
-        unsigned int size() {
-            if(_vertices.size() == 0) parse();
-            return _vertices.size();
-        }
-        unsigned int elementSize() {return sizeof(glm::vec3);}
-    };
+    }
+public:
+    Loader(std::string path): _path(path) {}
+    std::vector<glm::vec3> &parse() {
+        if(_vertices.size() != 0) return _vertices;
+        load();
+        return _vertices;
+    }
+    unsigned int size() {
+        if(_vertices.size() == 0) parse();
+        return _vertices.size();
+    }
+    unsigned int elementSize() {
+        return sizeof(glm::vec3);
+    }
+};
 
 }
 

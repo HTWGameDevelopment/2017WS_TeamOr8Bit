@@ -48,7 +48,8 @@ public:
         return _buffer;
     }
     void bind() {
-        glBindBuffer(target, _buffer); GLSERRORCHECK;
+        glBindBuffer(target, _buffer);
+        GLSERRORCHECK;
     }
     template<GLenum usage>
     void data(void *data, size_t size) {

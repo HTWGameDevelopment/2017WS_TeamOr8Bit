@@ -91,9 +91,15 @@ public:
         glfwTerminate();
     }
     Context &operator=(const Context &other) = delete;
-    void resetMouse() {glfwSetCursorPos(_window, _w/2, _h/2);}
-    inline bool shouldClose() {return glfwWindowShouldClose(_window);}
-    void close() {glfwSetWindowShouldClose(_window, 1);}
+    void resetMouse() {
+        glfwSetCursorPos(_window, _w/2, _h/2);
+    }
+    inline bool shouldClose() {
+        return glfwWindowShouldClose(_window);
+    }
+    void close() {
+        glfwSetWindowShouldClose(_window, 1);
+    }
     inline void ready() {
         _lasttime = glfwGetTime();
         _deltat = 0;
@@ -129,11 +135,21 @@ public:
         context = MESH;
         GLERRORCHECK;
     }
-    inline double deltaT() {return _deltat;}
-    inline double deltaTN() {return 1.0/_fps;}
-    inline glm::vec2 getResolution() {return glm::vec2(_w, _h);}
-    inline double getAR() {return 1.0 * _w / _h;}
-    inline unsigned int fps() {return _fps;}
+    inline double deltaT() {
+        return _deltat;
+    }
+    inline double deltaTN() {
+        return 1.0/_fps;
+    }
+    inline glm::vec2 getResolution() {
+        return glm::vec2(_w, _h);
+    }
+    inline double getAR() {
+        return 1.0 * _w / _h;
+    }
+    inline unsigned int fps() {
+        return _fps;
+    }
 };
 }
 

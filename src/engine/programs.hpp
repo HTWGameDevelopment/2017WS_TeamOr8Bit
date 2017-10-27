@@ -50,7 +50,9 @@ public:
         _program = other._program;
         other._initialized = false;
     }
-    ~Program() {if(_initialized) glDeleteProgram(_program);}
+    ~Program() {
+        if(_initialized) glDeleteProgram(_program);
+    }
     Program &operator=(const Program &other) = delete;
     Program &operator=(Program &&other) {
         if(_initialized) glDeleteProgram(_program);
@@ -59,7 +61,9 @@ public:
         other._initialized = false;
         return *this;
     }
-    operator GLuint() {return _program;}
+    operator GLuint() {
+        return _program;
+    }
     void use() {
         assert(_initialized);
         glUseProgram(_program);
@@ -82,16 +86,23 @@ std::string getFileContents(std::string p) {
 
 template<flag_t type> constexpr GLenum _createshadercall();
 
-template<> constexpr GLenum _createshadercall<VERTEX>() {return GL_VERTEX_SHADER;}
-template<> constexpr GLenum _createshadercall<FRAGMENT>() {return GL_FRAGMENT_SHADER;}
+template<> constexpr GLenum _createshadercall<VERTEX>() {
+    return GL_VERTEX_SHADER;
+}
+template<> constexpr GLenum _createshadercall<FRAGMENT>() {
+    return GL_FRAGMENT_SHADER;
+}
 
 template<flag_t type>
 shader_t compileShader(std::string c) {
-    shader_t s = glCreateShader(_createshadercall<type>()); GLSERRORCHECK;
+    shader_t s = glCreateShader(_createshadercall<type>());
+    GLSERRORCHECK;
     const char* t[1];
     t[0] = c.c_str();
-    glShaderSource(s, 1, t, NULL); GLSERRORCHECK;
-    glCompileShader(s); GLSERRORCHECK;
+    glShaderSource(s, 1, t, NULL);
+    GLSERRORCHECK;
+    glCompileShader(s);
+    GLSERRORCHECK;
 
     GLint p;
     glGetShaderiv(s, GL_COMPILE_STATUS, &p);
@@ -115,10 +126,14 @@ shader_t mkShader(std::string file) {
 }
 
 Program mkProgram(std::string vsh, std::string fsh) {
-    Program p(glCreateProgram()); GLSERRORCHECK;
-    glAttachShader(p, mkShader<VERTEX>(vsh)); GLSERRORCHECK;
-    glAttachShader(p, mkShader<FRAGMENT>(fsh)); GLSERRORCHECK;
-    glLinkProgram(p); GLSERRORCHECK;
+    Program p(glCreateProgram());
+    GLSERRORCHECK;
+    glAttachShader(p, mkShader<VERTEX>(vsh));
+    GLSERRORCHECK;
+    glAttachShader(p, mkShader<FRAGMENT>(fsh));
+    GLSERRORCHECK;
+    glLinkProgram(p);
+    GLSERRORCHECK;
 
     GLint status;
     glGetProgramiv(p, GL_LINK_STATUS, &status);
