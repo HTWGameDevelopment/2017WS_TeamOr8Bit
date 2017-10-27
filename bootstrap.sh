@@ -11,6 +11,7 @@ make
 cd ../glm
 cmake .
 make
-cd ../..
+cd ../../src
 tup init
+cd ..
 mkdir -p docs src/{engine,game} assets/{models,textures,sound,anim,shaders} out
