@@ -24,8 +24,6 @@
 
 #include<logger.h>
 
-#include<GL/glew.h>
-
 namespace qe {
 
 template<GLenum target>

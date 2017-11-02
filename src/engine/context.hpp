@@ -78,13 +78,7 @@ public:
         glfwSetCursorPos(_window, _w/2, _h/2);
         glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
-        glewExperimental = 1;
-        GLenum glew_status = glewInit();
-
-        if(glew_status != GLEW_OK) {
-            glfwTerminate();
-            throw backend_error(backend_error_glew);
-        }
+        gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
     }
     Context(const Context &other) = delete;
     ~Context() {

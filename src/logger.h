@@ -3,7 +3,7 @@
 
 #include<stdio.h>
 #include<assert.h>
-#include<GL/glew.h>
+#include<glad/glad.h>
 
 #ifdef __cplusplus
 #include<string>
@@ -27,12 +27,25 @@ struct glerror: public std::runtime_error {
 struct glshadererror: public std::runtime_error {
     glshadererror(std::string s): runtime_error(s) {}
 };
+const char* getErrorString(GLenum error) {
+    switch(error) {
+        case GL_NO_ERROR: return "no error";
+        case GL_INVALID_ENUM: return "invalid enum";
+        case GL_INVALID_VALUE: return "invalid value";
+        case GL_INVALID_OPERATION: return "invalid operation";
+        case GL_INVALID_FRAMEBUFFER_OPERATION: return "invalid framebuffer operation";
+        case GL_OUT_OF_MEMORY: return "out of memory";
+        case GL_STACK_UNDERFLOW: return "stack undeflow";
+        case GL_STACK_OVERFLOW: return "stack overflow";
+        default: return "unknown error";
+    }
+}
 void throw_glerror(GLenum error, const char* file, int line) {
     std::string r(file);
     r += ":";
     r += std::to_string(line);
     r += ": ";
-    r += (const char*)gluErrorString(error);
+    r += (const char*)getErrorString(error);
     throw glerror(r);
 }
 #else
