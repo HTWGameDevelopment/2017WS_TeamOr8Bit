@@ -1,0 +1,121 @@
+\documentclass[
+	fontsize=12pt,
+    paper=a4,
+    pagesize=auto,
+    parskip=half,
+    titlepage=on,
+    ngerman
+]{scrartcl}
+
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+\begin{document}
+	
+\title{
+    NONAMEGAME\\
+	Team Or8Bit
+}
+\subtitle{
+  by Fabian Stiewitz, Manuel Jung, Simon Triem
+}
+
+\maketitle
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\section{Game Design}
+
+\subsection{General Idea}
+
+    Round-based strategy game with 3D view on 2D map. Basic idea from "Battle Isle" with elements of base building and
+    event-based major map changes.
+
+\subsection{Details}
+
+  Goal: Two factions enter. One leaves.
+
+\subsection{Map}
+  \begin{itemize}
+  	\item Map is split up in hexagonal tiles.
+  	\item Each tile has a terrain type which modify properties of units on top of it.
+  	\item \textit{Version no. 0: Static map with ground and water type}
+  	\item \textit{Version no. 1: Static map with plains, sea, river, forest, mountains and hills type.}
+  	\item \textit{Version no. 2: Add a large dam (major map event: dam destruction/flooding)}
+    \item \textit{Version no. 3: Second map with nuclear plant (major map event: fallout)}
+  	\item \textit{Version no. 4: More maps (see Campaign)}
+  \end{itemize}
+
+\subsection{Units}
+  \begin{itemize}
+  	\item Each faction has the same units.
+  	\item Different walking distance for each terrain type.
+  	\item Different effectiveness for each terrain type.
+  	\item Health Points, Defense Points, Attack Points.
+  	\item \textit{Version no. 0: One unit type (ground troops)}
+  	\item \textit{Version no. 1: Constellation Bonus (taking nearby units into consideration)}
+  	\item \textit{Version no. 2: More units}
+  \end{itemize}
+
+\subsection {Buildings}
+\begin{itemize}
+	\item Buildings are static objects on the map.
+	\item Gives bonus to whoever owns it.
+	\item Gives huge defensive advantage to owning faction.
+	\item Some can be built by the player.
+	\item Promotion system: Sacrifice a "big" moveable unit (tanks, artillery, idk) for a static defensive building.
+	\item \textit{Version no. 0: One building type (base)}
+	\item \textit{Version no. 1: Event buildings (see Terrain)}
+	\item \textit{Version no. 2: Production plant}
+	\item \textit{****** Version no. 3: Promotion system}
+\end{itemize}
+
+\section{Menus}
+
+\subsection{Main Menu}
+  \begin{itemize}
+  	\item  New Game
+  	\item Load Game
+  	\item Options
+  	\begin{itemize}
+  	\item  Gameplay
+  	\item  Graphics
+  	\item  Keys
+  	\item  Audio	
+  	\end{itemize}
+   \item Exit
+  \end{itemize}
+
+\subsection{Pause Menu}
+  \begin{itemize}
+  	\item Continue
+  	\item Save Game
+  	\item Options (see Main Menu)
+  	\item Exit
+  \end{itemize}
+
+\section{AI}
+
+\section{technical details}
+
+\subsection{tools}
+  \begin{itemize}
+  	\item C++ Language
+  	\item git
+  	\item cmake
+  \end{itemize}
+\subsection{engine}
+  self-developed OpenGL graphics engine
+\section{assets}
+
+\section{docs}
+
+\end{document}

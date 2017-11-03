@@ -19,6 +19,8 @@
 // SOFTWARE.
 #ifndef QE_MAIN_HPP
 #define QE_MAIN_HPP
+#undef near
+#undef far
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include<glm/glm.hpp>
