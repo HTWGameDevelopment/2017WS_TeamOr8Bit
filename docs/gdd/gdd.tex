@@ -1,0 +1,38 @@
+\documentclass[a4paper,12pt]{book}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{makeidx}
+\hypersetup{pdftex,colorlinks=true,allcolors=blue}
+\makeindex
+\title{NONAMEGAME - Game Design Document}
+\author{Team Or8Bit: Fabian Stiewitz, Manuel Jung, Simon Triem}
+\date{03.11.2017}
+\begin{document}
+\frontmatter
+\maketitle
+\tableofcontents
+\listoffigures
+\mainmatter
+\include{chapters/overview}
+\include{chapters/gameplay}
+\include{chapters/levels}
+\include{chapters/interface}
+\include{chapters/ai}
+\include{chapters/technical}
+\include{chapters/art}
+\include{chapters/secondary}
+\include{chapters/management}
+\appendix
+\include{chapters/assets}
+\chapter{History}
+\begin{tabularx}{\textwidth}{ l X }
+  2017-11-03 & Start des Projekts \\
+\end{tabularx}
+\backmatter
+\chapter{Index}
+\printindex
+\end{document}
