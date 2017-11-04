@@ -79,6 +79,11 @@ public:
         glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
         gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+
+        int nw, nh;
+        glfwGetFramebufferSize(_window, &nw, &nh);
+        _w = w;
+        _h = h;
     }
     Context(const Context &other) = delete;
     ~Context() {
@@ -143,6 +148,12 @@ public:
     }
     inline unsigned int fps() {
         return _fps;
+    }
+    inline unsigned int width() {
+        return _w;
+    }
+    inline unsigned int height() {
+        return _h;
     }
 };
 }

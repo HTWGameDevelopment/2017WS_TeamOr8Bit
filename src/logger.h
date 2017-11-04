@@ -8,7 +8,7 @@
 #ifdef __cplusplus
 #include<string>
 #include<iostream>
-GLenum _logger_e;
+extern GLenum _logger_e;
 #define GLERRORCHECK if((_logger_e = glGetError()) != GL_NO_ERROR) throw_glerror(_logger_e, __FILE__, __LINE__);
 #ifndef NDEBUG
 #define GERR(x)  std::cerr << "GERROR " << x << " (" << __FILE__ << ":" << __LINE__ << ")" << std::endl;
@@ -27,27 +27,8 @@ struct glerror: public std::runtime_error {
 struct glshadererror: public std::runtime_error {
     glshadererror(std::string s): runtime_error(s) {}
 };
-const char* getErrorString(GLenum error) {
-    switch(error) {
-        case GL_NO_ERROR: return "no error";
-        case GL_INVALID_ENUM: return "invalid enum";
-        case GL_INVALID_VALUE: return "invalid value";
-        case GL_INVALID_OPERATION: return "invalid operation";
-        case GL_INVALID_FRAMEBUFFER_OPERATION: return "invalid framebuffer operation";
-        case GL_OUT_OF_MEMORY: return "out of memory";
-        case GL_STACK_UNDERFLOW: return "stack undeflow";
-        case GL_STACK_OVERFLOW: return "stack overflow";
-        default: return "unknown error";
-    }
-}
-void throw_glerror(GLenum error, const char* file, int line) {
-    std::string r(file);
-    r += ":";
-    r += std::to_string(line);
-    r += ": ";
-    r += (const char*)getErrorString(error);
-    throw glerror(r);
-}
+const char* getErrorString(GLenum error);
+void throw_glerror(GLenum error, const char* file, int line);
 #else
 #ifndef NDEBUG
 #define GERR(x)  fprintf(stderr, "GERROR %s (%s:%s)\n", x, __FILE__, __LINE__);

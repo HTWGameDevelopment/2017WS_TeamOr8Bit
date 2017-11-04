@@ -23,6 +23,7 @@
 #include<engine/constants.hpp>
 
 #include<glm/vec3.hpp>
+#include<glm/vec2.hpp>
 
 #include<png.h>
 
@@ -38,7 +39,7 @@ extern "C" {
     extern enum _qe_read_png_error_t _qe_read_png_error;
 }
 
-bool startswith(std::string s, std::string f) {
+static bool startswith(std::string s, std::string f) {
     for(unsigned int i = 0; i < f.size(); ++i)
         if(s[i] != f[i]) return false;
     return true;

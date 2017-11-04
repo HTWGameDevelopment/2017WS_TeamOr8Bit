@@ -53,6 +53,7 @@ public:
         _shaders.objv2.use();
         unsigned int fps = 0;
         glm::mat4 m = glm::translate(glm::vec3(0, 0, 0));
+        glClearColor(0.3, 0.3, 0.3, 1);
         while(!_ctxt->shouldClose()) {
             glm::mat4 mvp = _cam.camera->matrices().pv * m;
             _shaders.objv2.setUniform<qe::UNIMVP>(mvp);
@@ -91,6 +92,8 @@ namespace qe {
         if(action == GLFW_REPEAT) return;
         if(key == GLFW_KEY_Q)
             game->context()->close();
+        if(key == GLFW_KEY_P)
+            qe::screenshot("screenshot.png", game->context()->width(), game->context()->height());
         else if(key == GLFW_KEY_A) movementmask[MOVELEFT] = action == GLFW_PRESS;
         else if(key == GLFW_KEY_D) movementmask[MOVERIGHT] = action == GLFW_PRESS;
         else if(key == GLFW_KEY_W) movementmask[MOVEFORWARD] = action == GLFW_PRESS;

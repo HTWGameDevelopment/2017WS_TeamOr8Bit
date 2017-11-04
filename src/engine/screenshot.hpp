@@ -17,37 +17,20 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef QE_CONSTANTS_HPP
-#define QE_CONSTANTS_HPP
-
-#include<type_traits>
+#ifndef QE_SCREENSHOT_H
+#define QE_SCREENSHOT_H
 
 #include<glad/glad.h>
-#include<GLFW/glfw3.h>
+
+#include<stdexcept>
+#include<string>
 
 namespace qe {
-typedef unsigned int flag_t;
+    void screenshot(std::string path, unsigned int w, unsigned int h);
 
-const char* const backend_error_glfw = "could not initialize glfw";
-const char* const backend_error_window = "could not create window";
-const char* const backend_error_glew = "could not initialize glew";
-
-const flag_t VERTEX = 0;
-const flag_t FRAGMENT = 1;
-const flag_t OBJV1 = 2;
-const flag_t OBJV2 = 3;
-const flag_t PNGRGBA = 4;
-
-// UNIFORMS
-const flag_t UNIMVP = 0;
-const flag_t UNIM = 1;
-const flag_t UNIV = 2;
-const flag_t UNIL = 3;
-const flag_t UNIDIFFTEX = 4;
-
-// TEXTURE BINDING POINTS
-const flag_t DIFFTEXBIND = 0;
-
+    struct writer_error: public std::runtime_error {
+        writer_error(std::string s, const char* file, int line): runtime_error(std::string(file) + ":" + std::to_string(line) + ": Failed writing " + s) {}
+    };
 }
 
 #endif

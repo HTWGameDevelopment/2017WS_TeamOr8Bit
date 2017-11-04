@@ -35,5 +35,6 @@
 #include<engine/mesh.hpp>
 #include<engine/camera.hpp>
 #include<engine/textures.hpp>
+#include<engine/screenshot.hpp>
 
 #endif
