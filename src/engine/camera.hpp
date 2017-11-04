@@ -32,11 +32,11 @@ class Camera {
 public:
     struct Matrices {
         glm::mat4 pv;
+        glm::mat4 v;
     };
 private:
     Matrices _matrices;
     glm::mat4 _p;
-    glm::mat4 _v;
     glm::vec3 _pos;
     glm::vec3 _dir;
     glm::vec3 _right;
@@ -67,8 +67,8 @@ public:
         _up = glm::cross(_right, _dir);
         _right = glm::normalize(_right);
         _up = glm::normalize(_up);
-        _v = glm::lookAt(_pos, _pos + _dir, _up);
-        _matrices.pv = _p * _v;
+        _matrices.v = glm::lookAt(_pos, _pos + _dir, _up);
+        _matrices.pv = _p * _matrices.v;
     }
     inline glm::vec3 generateDirection() {
         return glm::vec3(cos(_angles.y) * sin(_angles.x),

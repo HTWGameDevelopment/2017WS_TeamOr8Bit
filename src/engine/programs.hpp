@@ -69,10 +69,9 @@ public:
         glUseProgram(_program);
         GLSERRORCHECK;
     }
-    template<flag_t binding>
-    void setUniform(glm::mat4 &m) {
-        glUniformMatrix4fv(binding, 1, GL_FALSE, (float*)(&m));
-    }
+    template<flag_t binding> void setUniform(glm::mat4 m) {glUniformMatrix4fv(binding, 1, GL_FALSE, (float*)(&m));GLSERRORCHECK;}
+    template<flag_t binding> void setUniform(int i) {glUniform1i(binding, i);GLSERRORCHECK;}
+    template<flag_t binding> void setUniform(glm::vec3 v) {glUniform3fv(binding, 1, (float*)&v);GLSERRORCHECK;}
 };
 
 std::string getFileContents(std::string p) {

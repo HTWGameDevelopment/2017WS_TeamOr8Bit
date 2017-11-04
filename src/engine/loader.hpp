@@ -24,6 +24,7 @@
 
 #include<glm/vec3.hpp>
 
+#include<array>
 #include<fstream>
 #include<vector>
 #include<string>
@@ -41,6 +42,91 @@ class Loader;
 
 struct loader_error: public std::runtime_error {
     loader_error(std::string s, const char* file, int line): runtime_error(std::string(file) + ":" + std::to_string(line) + ": Failed reading " + s) {}
+};
+
+struct objv2_point_t {
+    glm::vec3 vertex;
+    glm::vec2 uv;
+    glm::vec3 normal;
+    objv2_point_t(glm::vec3 v, glm::vec2 u, glm::vec3 n): vertex(v), uv(u), normal(n) {}
+};
+
+template<> class Loader<OBJV2> {
+private:
+    std::vector<objv2_point_t> _points;
+    std::string _path;
+    void load() {
+        std::ifstream file(_path);
+        file.exceptions(std::ifstream::badbit);
+        std::vector<glm::vec3> tvertices;
+        std::vector<glm::vec2> tuvs;
+        std::vector<glm::vec3> tnormals;
+        std::vector<glm::ivec3> indices;
+        for(std::string line; std::getline(file, line);) {
+            if(startswith(line, "v ")) {
+                glm::vec3 v;
+                switch(sscanf(line.c_str(), "v %f %f %f", &v.x, &v.y, &v.z)) {
+                case 0:
+                case EOF:
+                    throw loader_error(std::string(_path) + "(" + line + ")", __FILE__, __LINE__);
+                }
+                tvertices.push_back(v);
+            } else if(startswith(line, "vt ")) {
+                glm::vec2 v;
+                switch(sscanf(line.c_str(), "vt %f %f", &v.x, &v.y)) {
+                case 0:
+                case EOF:
+                    throw loader_error(std::string(_path) + "(" + line + ")", __FILE__, __LINE__);
+                }
+                tuvs.push_back(v);
+            } else if(startswith(line, "vn ")) {
+                glm::vec3 v;
+                switch(sscanf(line.c_str(), "vn %f %f %f", &v.x, &v.y, &v.z)) {
+                case 0:
+                case EOF:
+                    throw loader_error(std::string(_path) + "(" + line + ")", __FILE__, __LINE__);
+                }
+                tnormals.push_back(v);
+            } else if(startswith(line, "f ")) {
+                std::array<glm::ivec3,3> points;
+                switch(sscanf(line.c_str(), "f %u/%u/%u %u/%u/%u %u/%u/%u",
+                                &points[0].x, &points[0].y, &points[0].z,
+                                &points[1].x, &points[1].y, &points[1].z,
+                                &points[2].x, &points[2].y, &points[2].z)) {
+                case 0:
+                case EOF:
+                    throw loader_error(std::string(_path) + " (" + line + ")", __FILE__, __LINE__);
+                }
+                indices.push_back(points[0]);
+                indices.push_back(points[1]);
+                indices.push_back(points[2]);
+            }
+        }
+        if(file.bad()) throw loader_error(_path, __FILE__, __LINE__);
+        if(indices.size() == 0) throw loader_error(std::string(_path) + " (no indices found)", __FILE__, __LINE__);
+        assert(indices.size() % 3 == 0);
+        for(unsigned int i = 0; i < indices.size(); ++i) {
+            assert(indices[i].x <= tvertices.size());
+            assert(indices[i].y <= tuvs.size());
+            assert(indices[i].z <= tnormals.size());
+            glm::ivec3 index = indices[i];
+            _points.emplace_back(tvertices[index.x - 1], tuvs[index.y - 1], tnormals[index.z - 1]);
+        }
+    }
+public:
+    Loader(std::string path): _path(path) {}
+    std::vector<objv2_point_t> &parse() {
+        if(_points.size() != 0) return _points;
+        load();
+        return _points;
+    }
+    unsigned int size() {
+        if(_points.size() == 0) load();
+        return _points.size();
+    }
+    unsigned int elementSize() {
+        return sizeof(objv2_point_t);
+    }
 };
 
 template<> class Loader<OBJV1> {

@@ -35,9 +35,17 @@ const char* backend_error_glew = "could not initialize glew";
 const flag_t VERTEX = 0;
 const flag_t FRAGMENT = 1;
 const flag_t OBJV1 = 2;
+const flag_t OBJV2 = 3;
 
-// UNIFORM BLOCKS
+// UNIFORMS
 const flag_t UNIMVP = 0;
+const flag_t UNIM = 1;
+const flag_t UNIV = 2;
+const flag_t UNIL = 3;
+const flag_t UNIDIFFTEX = 4;
+
+// TEXTURE BINDING POINTS
+const flag_t DIFFTEXBIND = 0;
 
 }
 

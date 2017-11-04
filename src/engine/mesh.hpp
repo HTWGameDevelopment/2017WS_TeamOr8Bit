@@ -35,8 +35,10 @@ private:
     Buffer<GL_ARRAY_BUFFER> _buffer;
     GLuint _vao;
     size_t _size;
+    size_t _elementsize;
     void initVAO() {
         if(T == OBJV1) return initVAOAsOBJV1();
+        else if(T == OBJV2) return initVAOAsOBJV2();
         assert(false);
     }
     void initVAOAsOBJV1() {
@@ -58,9 +60,46 @@ private:
         GLSERRORCHECK;
         glBindVertexArray(0);
     }
+    void initVAOAsOBJV2() {
+        glGenVertexArrays(1, &_vao);
+        GLSERRORCHECK;
+        glBindVertexArray(_vao);
+        GLSERRORCHECK;
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
+        GLSERRORCHECK;
+        _buffer.bind();
+        glVertexAttribPointer(
+            (GLuint)0, // vertex
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            _elementsize,
+            (void*)0
+        );
+        glVertexAttribPointer(
+            (GLuint)1, // uv
+            2,
+            GL_FLOAT,
+            GL_FALSE,
+            _elementsize,
+            (void*)12 // 3 * float
+        );
+        glVertexAttribPointer(
+            (GLuint)2, // normal
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            _elementsize,
+            (void*)20 // 5 * float
+        );
+        GLSERRORCHECK;
+        glBindVertexArray(0);
+    }
 public:
-    Mesh(Loader<T> &&l): _size(l.size()) {
-        _buffer.data<GL_STATIC_DRAW>(l.parse().data(), l.elementSize() * l.size());
+    Mesh(Loader<T> &&l): _size(l.size()), _elementsize(l.elementSize()) {
+        _buffer.data<GL_STATIC_DRAW>(l.parse().data(), _elementsize * _size);
         initVAO();
     }
     Mesh(const Mesh<T> &other) = delete;
