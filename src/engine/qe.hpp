@@ -34,5 +34,6 @@
 #include<engine/loader.hpp>
 #include<engine/mesh.hpp>
 #include<engine/camera.hpp>
+#include<engine/textures.hpp>
 
 #endif

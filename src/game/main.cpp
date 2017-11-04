@@ -16,18 +16,29 @@ private:
         qe::Program objv1;
         qe::Program objv2;
     } _shaders;
+    struct Textures {
+        std::unique_ptr<qe::Texture<qe::PNGRGBA>> hextile_grass;
+    } _textures;
 public:
     Game(qe::Context *ctxt): _ctxt(ctxt) {
         assert(ctxt);
     }
     void initializeAssets() {
+        // MODELS
         _cube.reset(new qe::Mesh<qe::OBJV1>(qe::Loader<qe::OBJV1>("assets/models/cube.objv1")));
         _tile.reset(new qe::Mesh<qe::OBJV2>(qe::Loader<qe::OBJV2>("assets/models/hextile.objv2")));
+        // TEXTURES
+        _textures.hextile_grass.reset(new qe::Texture<qe::PNGRGBA>(qe::Loader<qe::PNGRGBA>("assets/textures/hextile-grass.png")));
+        // SHADERS
         _shaders.objv1 = qe::mkProgram("assets/shaders/objv1.vsh", "assets/shaders/objv1.fsh");
         _shaders.objv2 = qe::mkProgram("assets/shaders/objv2.vsh", "assets/shaders/objv2.fsh");
         _shaders.objv2.use();
+        // SETUP
         _shaders.objv2.setUniform<qe::UNIDIFFTEX>(qe::DIFFTEXBIND);
         _shaders.objv2.setUniform<qe::UNIL>(glm::vec3(0, 5, 0));
+
+        _textures.hextile_grass->bindTo<GL_TEXTURE0>();
+
         _cam.camera.reset(new qe::Camera(
             glm::vec3(4, 4, 4),
             glm::vec2(-45, -45),

@@ -18,5 +18,6 @@ void main() {
     vec3 l = normalize(light_camera);
     float distance = length(light_world - vertex_world);
     float cosTheta = clamp(dot(n,l),0,1);
-    color = vec3(0.2, 0.2, 0.2) + texture(diffuse, uv_fragment).rgb * cosTheta / (distance * distance);
+    vec3 tex = texture(diffuse, uv_fragment).rgb;
+    color = cosTheta * tex;
 }

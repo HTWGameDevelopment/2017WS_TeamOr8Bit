@@ -36,6 +36,7 @@ const flag_t VERTEX = 0;
 const flag_t FRAGMENT = 1;
 const flag_t OBJV1 = 2;
 const flag_t OBJV2 = 3;
+const flag_t PNGRGBA = 4;
 
 // UNIFORMS
 const flag_t UNIMVP = 0;

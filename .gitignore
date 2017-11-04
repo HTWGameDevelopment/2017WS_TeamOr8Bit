@@ -18,3 +18,5 @@ cmake-build-debug/
 *.pdf
 *.gz
 *.toc
+*.cson
+*~

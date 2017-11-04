@@ -24,10 +24,19 @@
 
 #include<glm/vec3.hpp>
 
+#include<png.h>
+
 #include<array>
 #include<fstream>
+#include<memory>
 #include<vector>
 #include<string>
+
+extern "C" {
+    unsigned char *_qe_read_png(FILE *fd, size_t *size, size_t *width, size_t *height);
+    enum _qe_read_png_error_t {READ_STRUCT = 1, INFO_STRUCT = 2, READ_IMAGE = 3};
+    extern enum _qe_read_png_error_t _qe_read_png_error;
+}
 
 bool startswith(std::string s, std::string f) {
     for(unsigned int i = 0; i < f.size(); ++i)
@@ -49,6 +58,54 @@ struct objv2_point_t {
     glm::vec2 uv;
     glm::vec3 normal;
     objv2_point_t(glm::vec3 v, glm::vec2 u, glm::vec3 n): vertex(v), uv(u), normal(n) {}
+};
+
+template<> class Loader<PNGRGBA> {
+private:
+    std::unique_ptr<unsigned char[]> _pixels;
+    size_t _size;
+    size_t _width;
+    size_t _height;
+    std::string _path;
+    void load() {
+        // Open file
+        std::unique_ptr<std::FILE, decltype(&std::fclose)> fd(fopen(_path.c_str(), "r"), &std::fclose);
+        if(!fd) throw loader_error(std::string(_path), __FILE__, __LINE__);
+        unsigned char header[8];
+        std::fread(header, 1, 8, fd.get());
+        if(png_sig_cmp(header, 0, 8)) throw loader_error(std::string(_path) + " (png_sig_cmp)", __FILE__, __LINE__);
+        _pixels.reset(_qe_read_png(fd.get(), &_size, &_width, &_height));
+        if(!_pixels.get()) {
+            switch(_qe_read_png_error) {
+                case READ_STRUCT: throw loader_error(std::string(_path) + " (png: read_struct)", __FILE__, __LINE__);
+                case INFO_STRUCT: throw loader_error(std::string(_path) + " (png: read_struct)", __FILE__, __LINE__);
+                default: throw loader_error(std::string(_path) + " (png: read_struct)", __FILE__, __LINE__);
+            }
+        }
+        if(_size == 0) throw loader_error(std::string(_path) + " (read_png)", __FILE__, __LINE__);
+    }
+public:
+    Loader(std::string path): _path(path), _size(0) {}
+    unsigned char *parse() {
+        if(_size != 0) return _pixels.get();
+        load();
+        return _pixels.get();
+    }
+    size_t size() {
+        if(_size == 0) load();
+        return _size;
+    }
+    size_t width() {
+        if(_size == 0) load();
+        return _width;
+    }
+    size_t height() {
+        if(_size == 0) load();
+        return _height;
+    }
+    unsigned int elementSize() {
+        return sizeof(unsigned char[4]);
+    }
 };
 
 template<> class Loader<OBJV2> {
@@ -78,6 +135,7 @@ private:
                 case EOF:
                     throw loader_error(std::string(_path) + "(" + line + ")", __FILE__, __LINE__);
                 }
+                v.y = 1 - v.y; // Invert UV.y coordinate
                 tuvs.push_back(v);
             } else if(startswith(line, "vn ")) {
                 glm::vec3 v;
