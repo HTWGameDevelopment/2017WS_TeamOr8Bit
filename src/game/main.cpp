@@ -6,6 +6,9 @@
 
 #include<string.h>
 
+/**
+ * \brief Main game class
+ */
 class Game {
 private:
     qe::Context *_ctxt;

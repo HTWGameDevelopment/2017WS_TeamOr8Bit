@@ -25,6 +25,10 @@
 #include<logger.h>
 
 namespace qe {
+
+    /**
+     * \brief Set of flags for handling GL Textures
+     */
     struct GLFlagSet {
         GLenum target;
         GLint internalFormat;
@@ -32,6 +36,9 @@ namespace qe {
         GLenum type;
     };
 
+    /**
+     * \brief Return GLFlagSet for given qe type flag
+     */
     const GLFlagSet getGLFlagSet(flag_t flag) {
         switch(flag) {
             case qe::PNGRGBA: return qe::GLFlagSet {GL_TEXTURE_2D, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
@@ -39,15 +46,26 @@ namespace qe {
         }
     }
 
+/**
+ * \brief An OpenGL texture class
+ */
     template<flag_t T> class Texture {
     private:
-        Loader<T> _source;
-        GLuint _texture;
-        const GLFlagSet _gl = getGLFlagSet(T);
+        Loader<T> _source; //!< Loader with data in memory/on-disk
+        GLuint _texture; //!< OpenGL texture handle
+        const GLFlagSet _gl = getGLFlagSet(T); //!< GLFlagSet for working with texture data
+        /**
+         * \brief Intialize texture and load from _source
+         */
         void initTexture() {
             if(T == PNGRGBA) return initTextureAsRGBA();
             assert(false);
         }
+        /**
+         * \brief Specialization for RGBA data
+         *
+         * \todo necessary?
+         */
         void initTextureAsRGBA() {
             glGenTextures(1, &_texture); GLSERRORCHECK;
             glBindTexture(_gl.target, _texture); GLSERRORCHECK;
@@ -67,19 +85,33 @@ namespace qe {
             GLERRORCHECK;
         }
     public:
+        /**
+         * \brief Construct texture from Loader
+         *
+         * \param l Instance of Loader
+         */
         Texture(Loader<T> &&l): _source(std::move(l)) {
             initTexture();
         }
         Texture(const Texture<T> &other) = delete;
         Texture(Texture<T> &&other) = delete;
+        /**
+         * \brief Destroy OpenGL texture handle and data
+         */
         ~Texture() {
             glDeleteTextures(1, &_texture);
         }
         Texture<T> &operator=(const Texture<T> &other) = delete;
         Texture<T> &operator=(Texture<T> &&other) = delete;
+        /**
+         * \brief Bind texture to target
+         */
         void bind() {
             glBindTexture(_gl.target, _texture); GLERRORCHECK;
         }
+        /**
+         * \brief Bind texture to active texture target
+         */
         template<GLenum target>
         void bindTo() {
             glActiveTexture(target); GLERRORCHECK;

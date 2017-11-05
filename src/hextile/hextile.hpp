@@ -30,6 +30,9 @@ namespace hextile {
         size_t y;
     };
 
+    /**
+     * \brief Type trait for HexTile elements
+     */
     template<typename T>
     struct is_hextile_tile {
         template<typename U, U& (U::*)(hexpoint_t)> struct yes {};
@@ -38,10 +41,16 @@ namespace hextile {
         static const bool value = sizeof(test<T>(0,0)) == sizeof(char);
     };
 
+/**
+ * \brief A 2D board of hexagonal tiles of type T
+ */
     template<typename T, typename = std::enable_if<is_hextile_tile<T>::value>>
     class HexTile {
     public:
         typedef T tile_type;
+        /**
+         * \brief Sub-class representing one row of tiles
+         */
         struct col_type {
             std::vector<tile_type> rows;
             col_type(size_t i): rows(i, tile_type()) {}
@@ -60,6 +69,9 @@ namespace hextile {
         size_t x() {return _x;}
         size_t y() {return _y;}
         col_type &operator[](size_t i) {return _data[i];}
+        /**
+         * \brief Iterator over all tiles
+         */
         class hexiterator {
         private:
             typedef typename std::vector<col_type>::iterator bigiter;

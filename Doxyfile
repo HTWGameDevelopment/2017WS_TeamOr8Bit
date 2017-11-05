@@ -435,7 +435,7 @@ LOOKUP_CACHE_SIZE      = 0
 # normally produced when WARNINGS is set to YES.
 # The default value is: NO.
 
-EXTRACT_ALL            = NO
+EXTRACT_ALL            = YES
 
 # If the EXTRACT_PRIVATE tag is set to YES, all private members of a class will
 # be included in the documentation.
@@ -762,7 +762,7 @@ WARN_NO_PARAMDOC       = YES
 # a warning is encountered.
 # The default value is: NO.
 
-WARN_AS_ERROR          = YES
+WARN_AS_ERROR          = NO
 
 # The WARN_FORMAT tag determines the format of the warning messages that doxygen
 # can produce. The string should contain the $file, $line, and $text tags, which

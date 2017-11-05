@@ -7,6 +7,9 @@
 
 namespace gamespace {
 
+    /**
+     * \brief Our tile type for HexTile elements
+     */
     class BoardTile {
     private:
         hextile::hexpoint_t _p;

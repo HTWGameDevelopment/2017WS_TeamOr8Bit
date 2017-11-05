@@ -33,27 +33,57 @@
 
 namespace qe {
 
+/**
+ * \brief Exception for backend
+ */
 struct backend_error: public std::runtime_error {
+    /**
+     * Construct new backend_error
+     *
+     * \param s Message
+     */
     backend_error(std::string s): runtime_error(s) {}
 };
 
+/**
+ * \brief GLFW key callback
+ */
 void keycallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+/**
+ * \brief GLFW error callback
+ */
 void errorcallback(int code, const char* desc);
+/**
+ * \brief GLFW mouse callback
+ */
 void mousecallback(GLFWwindow*, double, double);
+/**
+ * \brief Callback right after event handlers after every frame
+ */
 void idlecallback();
 
+/**
+ * \brief Class representing the current window and OpenGL context
+ */
 class Context {
 private:
-    unsigned int _w, _h;
-    std::string _title;
-    GLFWwindow *_window;
-    enum _context_t {NONE,MESH} context = NONE;
-    double _lasttime;
-    double _deltat;
-    unsigned int _fps;
-    double _lastfpstime;
-    unsigned int _fpsc;
+    unsigned int _w, _h; //!< Width and height of framebuffer
+    std::string _title; //!< Window title
+    GLFWwindow *_window; //!< GLFW handle
+    enum _context_t {NONE,MESH} context = NONE; //!< Current glEnable configuration
+    double _lasttime; //!< Timestamp of last frame
+    double _deltat; //!< Time difference between last two frames
+    unsigned int _fps; //!< Normalized FPS
+    double _lastfpstime; //!< Time since last FPS update
+    unsigned int _fpsc; //!< Frames since last FPS update
 public:
+    /**
+     * Construct new OpenGL context and window
+     *
+     * \param title Window title
+     * \param w Width in px
+     * \param h Height in px
+     */
     Context(std::string title, unsigned int w, unsigned int h): _w(w), _h(h), _title(title) {
         assert(_w != 0);
         assert(_h != 0);
@@ -90,15 +120,27 @@ public:
         glfwTerminate();
     }
     Context &operator=(const Context &other) = delete;
+    /**
+     * \brief Center mouse
+     */
     void resetMouse() {
         glfwSetCursorPos(_window, _w/2, _h/2);
     }
+    /**
+     * \brief true if close() call or window was closed by user
+     */
     inline bool shouldClose() {
         return glfwWindowShouldClose(_window);
     }
+    /**
+     * \brief Close context after this frame
+     */
     void close() {
         glfwSetWindowShouldClose(_window, 1);
     }
+    /**
+     * \brief Initialize timers
+     */
     inline void ready() {
         _lasttime = glfwGetTime();
         _deltat = 0;
@@ -106,12 +148,21 @@ public:
         _fpsc = 0;
         _lastfpstime = _lasttime;
     }
+    /**
+     * \brief Swap buffers
+     */
     inline void swap() {
         glfwSwapBuffers(_window);
     }
+    /**
+     * \brief Start of frame
+     */
     inline void start() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
+    /**
+     * \brief Handle GLFW events and call idlecallback
+     */
     void events() {
         auto now = glfwGetTime();
         _deltat = now - _lasttime;
@@ -125,6 +176,9 @@ public:
         glfwPollEvents();
         idlecallback();
     }
+    /**
+     * \brief Set glEnable config to MESH rendering
+     */
     void meshcontext() {
         if(context == MESH)
             return;
@@ -134,24 +188,45 @@ public:
         context = MESH;
         GLERRORCHECK;
     }
+    /**
+     * \brief Return time since last frame
+     */
     inline double deltaT() {
         return _deltat;
     }
+    /**
+     * \brief deltaT normalized over a second
+     */
     inline double deltaTN() {
         return 1.0/_fps;
     }
+    /**
+     * \brief Get framebuffer resolution
+     */
     inline glm::vec2 getResolution() {
         return glm::vec2(_w, _h);
     }
+    /**
+     * \brief Get aspect ratio
+     */
     inline double getAR() {
         return 1.0 * _w / _h;
     }
+    /**
+     * \brief Return frames per second
+     */
     inline unsigned int fps() {
         return _fps;
     }
+    /**
+     * \brief Return width of framebuffer
+     */
     inline unsigned int width() {
         return _w;
     }
+    /**
+     * \brief Return height of framebuffer
+     */
     inline unsigned int height() {
         return _h;
     }

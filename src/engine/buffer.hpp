@@ -26,6 +26,9 @@
 
 namespace qe {
 
+/**
+ * \brief Generic OpenGL buffer implementation
+ */
 template<GLenum target>
 class Buffer {
 private:

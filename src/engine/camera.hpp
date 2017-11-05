@@ -28,27 +28,51 @@
 
 namespace qe {
 
+/**
+ * \brief Managing camera state (location, rotation) and matrix generation
+ */
 class Camera {
 public:
+    /**
+     * \brief PV and V matrix
+     */
     struct Matrices {
-        glm::mat4 pv;
-        glm::mat4 v;
+        glm::mat4 pv; //!< P * V
+        glm::mat4 v; //!< V
     };
 private:
-    Matrices _matrices;
-    glm::mat4 _p;
-    glm::vec3 _pos;
-    glm::vec3 _dir;
-    glm::vec3 _right;
-    glm::vec3 _up;
-    glm::dvec2 _angles;
-    glm::vec2 _resolution;
+    Matrices _matrices; //!< Final matrices
+    glm::mat4 _p; //!< P matrix
+    glm::vec3 _pos; //!< Camera position
+    glm::vec3 _dir; //!< lookAt direction
+    glm::vec3 _right; //!< Right vector
+    glm::vec3 _up; //!< Up vector
+    glm::dvec2 _angles; //!< View angles
+    glm::vec2 _resolution; //!< Screen resolution
 public:
+    /**
+     * Constructs a new camera object
+     *
+     * \param pos Position of camera
+     * \param angles View angles
+     * \param resolution Screen resolution
+     * \param near Near plane distance
+     * \param far Far plane distance
+     * \param ar Aspect ratio
+     * \param fov Field of view
+     */
     Camera(glm::vec3 pos, glm::dvec2 angles, glm::vec2 resolution, float near, float far, float ar, float fov)
         : _pos(pos), _angles(angles), _resolution(resolution) {
         _p = glm::perspective<float>(2 * fov * M_PI / 360.0, ar, near, far);
         regenerate();
     }
+    /**
+     * \brief Callback for mouse movement
+     *
+     * \param deltaT time difference since last call
+     * \param x X coord of pointer
+     * \param y Y coord of pointer
+     */
     void mouseMoved(double deltaT, double x, double y) {
         double dx = _resolution.x / 2.0 - x;
         double dy = _resolution.y / 2.0 - y;
@@ -59,6 +83,9 @@ public:
         else if(_angles.y <= -M_PI / 2.0) _angles.y = -M_PI / 2.0;
         regenerate();
     }
+    /**
+     * \brief Regenerate matrices
+     */
     inline void regenerate() {
         _dir = generateDirection();
         _right = glm::vec3(sin(_angles.x - M_PI/2.0),

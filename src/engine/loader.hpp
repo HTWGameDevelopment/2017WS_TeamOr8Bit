@@ -50,24 +50,46 @@ namespace qe {
 template<flag_t t>
 class Loader;
 
+/**
+ * \brief Exception from Loader
+ */
 struct loader_error: public std::runtime_error {
+    /**
+     * \brief Constructs a new loader_error
+     *
+     * \param s Message
+     * \param file File path
+     * \param line Source line
+     */
     loader_error(std::string s, const char* file, int line): runtime_error(std::string(file) + ":" + std::to_string(line) + ": Failed reading " + s) {}
 };
 
+/**
+ * \brief Data about one vertex in OBJV2 meshes
+ */
 struct objv2_point_t {
-    glm::vec3 vertex;
-    glm::vec2 uv;
-    glm::vec3 normal;
+    glm::vec3 vertex; //!< vertex location
+    glm::vec2 uv; //!< UV coordinate
+    glm::vec3 normal; //!< Normal
+    /**
+     * \brief Constructor
+     */
     objv2_point_t(glm::vec3 v, glm::vec2 u, glm::vec3 n): vertex(v), uv(u), normal(n) {}
 };
 
+/**
+ * \brief Loader for RGBA png files
+ */
 template<> class Loader<PNGRGBA> {
 private:
-    std::unique_ptr<unsigned char[]> _pixels;
-    size_t _size;
-    size_t _width;
-    size_t _height;
-    std::string _path;
+    std::unique_ptr<unsigned char[]> _pixels; //!< Pixel array
+    size_t _size; //!< Size of pixel array in bytes
+    size_t _width; //!< Width in pixels
+    size_t _height; //!< Height in pixels
+    std::string _path; //!< Origin path
+    /**
+     * \brief Load data from file
+     */
     void load() {
         // Open file
         std::unique_ptr<std::FILE, decltype(&std::fclose)> fd(fopen(_path.c_str(), "r"), &std::fclose);
@@ -86,33 +108,57 @@ private:
         if(_size == 0) throw loader_error(std::string(_path) + " (read_png)", __FILE__, __LINE__);
     }
 public:
+    /**
+     * \brief Construct loader from file path
+     */
     Loader(std::string path): _path(path), _size(0) {}
+    /**
+     * \brief Parse file and return data pointer
+     */
     unsigned char *parse() {
         if(_size != 0) return _pixels.get();
         load();
         return _pixels.get();
     }
+    /**
+     * \brief Return size of pixel array
+     */
     size_t size() {
         if(_size == 0) load();
         return _size;
     }
+    /**
+     * \brief Return width of pixel array
+     */
     size_t width() {
         if(_size == 0) load();
         return _width;
     }
+    /**
+     * \brief Return height of pixel array
+     */
     size_t height() {
         if(_size == 0) load();
         return _height;
     }
+    /**
+     * \brief Return element size of pixel in bytes
+     */
     unsigned int elementSize() {
         return sizeof(unsigned char[4]);
     }
 };
 
+/**
+ * \brief Loader for .objv2 meshes
+ */
 template<> class Loader<OBJV2> {
 private:
     std::vector<objv2_point_t> _points;
     std::string _path;
+    /**
+     * \brief Load data from file
+     */
     void load() {
         std::ifstream file(_path);
         file.exceptions(std::ifstream::badbit);
@@ -173,25 +219,43 @@ private:
         }
     }
 public:
+    /**
+     * \brief Construct loader from file path
+     */
     Loader(std::string path): _path(path) {}
+    /**
+     * \brief Parse file and return data vector
+     */
     std::vector<objv2_point_t> &parse() {
         if(_points.size() != 0) return _points;
         load();
         return _points;
     }
+    /**
+     * \brief Return size of pixel array
+     */
     unsigned int size() {
         if(_points.size() == 0) load();
         return _points.size();
     }
+    /**
+     * \brief Return element size of vertex in bytes
+     */
     unsigned int elementSize() {
         return sizeof(objv2_point_t);
     }
 };
 
+/**
+ * \brief Loader for .objv1 meshes
+ */
 template<> class Loader<OBJV1> {
 private:
     std::vector<glm::vec3> _vertices;
     std::string _path;
+    /**
+     * \brief Load data from file
+     */
     void load() {
         std::ifstream file(_path);
         file.exceptions(std::ifstream::badbit);
@@ -226,16 +290,28 @@ private:
         }
     }
 public:
+    /**
+     * \brief Construct loader from file path
+     */
     Loader(std::string path): _path(path) {}
+    /**
+     * \brief Parse file and return data vector
+     */
     std::vector<glm::vec3> &parse() {
         if(_vertices.size() != 0) return _vertices;
         load();
         return _vertices;
     }
+    /**
+     * \brief Return size of pixel array
+     */
     unsigned int size() {
         if(_vertices.size() == 0) parse();
         return _vertices.size();
     }
+    /**
+     * \brief Return element size of vertex in bytes
+     */
     unsigned int elementSize() {
         return sizeof(glm::vec3);
     }

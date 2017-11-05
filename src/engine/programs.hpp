@@ -37,12 +37,21 @@ namespace qe {
 
 typedef GLuint shader_t;
 
+/**
+ * \brief An OpenGL program
+ */
 class Program {
 private:
-    GLuint _program;
-    bool _initialized;
+    GLuint _program; //!< OpenGL handle
+    bool _initialized; //!< Ready to use?
 public:
+    /**
+     * Default constructor
+     */
     Program(): _initialized(false) {}
+    /**
+     * \brief Construct from OpenGL handle
+     */
     Program(GLuint p): _program(p), _initialized(true) {}
     Program(const Program &other) = delete;
     Program(Program &&other) {
@@ -50,6 +59,9 @@ public:
         _program = other._program;
         other._initialized = false;
     }
+    /**
+     * \brief Destroy OpenGL handle
+     */
     ~Program() {
         if(_initialized) glDeleteProgram(_program);
     }
@@ -61,19 +73,37 @@ public:
         other._initialized = false;
         return *this;
     }
+    /**
+     * \brief Cast to OpenGL handle
+     */
     operator GLuint() {
         return _program;
     }
+    /**
+     * \brief Use program
+     */
     void use() {
         assert(_initialized);
         glUseProgram(_program);
         GLSERRORCHECK;
     }
+    /**
+     * \brief Set uniform to 4x4 matrix
+     */
     template<flag_t binding> void setUniform(glm::mat4 m) {glUniformMatrix4fv(binding, 1, GL_FALSE, (float*)(&m));GLSERRORCHECK;}
+    /**
+     * \brief Set uniform to int
+     */
     template<flag_t binding> void setUniform(int i) {glUniform1i(binding, i);GLSERRORCHECK;}
+    /**
+     * \brief Set uniform to 3-vector
+     */
     template<flag_t binding> void setUniform(glm::vec3 v) {glUniform3fv(binding, 1, (float*)&v);GLSERRORCHECK;}
 };
 
+/**
+ * \brief Get file contents from path
+ */
 std::string getFileContents(std::string p) {
     std::stringbuf buf;
     std::ifstream f(p);
@@ -92,6 +122,9 @@ template<> constexpr GLenum _createshadercall<FRAGMENT>() {
     return GL_FRAGMENT_SHADER;
 }
 
+/**
+ * \brief Compile shader from source code string
+ */
 template<flag_t type>
 shader_t compileShader(std::string c) {
     shader_t s = glCreateShader(_createshadercall<type>());
@@ -117,6 +150,9 @@ shader_t compileShader(std::string c) {
     return s;
 }
 
+/**
+ * \brief Compile shader from file path
+ */
 template<flag_t type>
 shader_t mkShader(std::string file) {
     std::string path = getPath(file);
@@ -124,6 +160,9 @@ shader_t mkShader(std::string file) {
     return compileShader<type>(contents);
 }
 
+/**
+ * \brief Compile program from vertex and fragment shader file paths
+ */
 Program mkProgram(std::string vsh, std::string fsh) {
     Program p(glCreateProgram());
     GLSERRORCHECK;

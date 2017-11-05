@@ -28,7 +28,17 @@
 namespace qe {
     void screenshot(std::string path, unsigned int w, unsigned int h);
 
+/**
+ * \brief Exception thrown by screenshot
+ */
     struct writer_error: public std::runtime_error {
+        /**
+         * \brief Constructs a new writer_error
+         *
+         * \param s Message
+         * \param file File path
+         * \param line Source line
+         */
         writer_error(std::string s, const char* file, int line): runtime_error(std::string(file) + ":" + std::to_string(line) + ": Failed writing " + s) {}
     };
 }
