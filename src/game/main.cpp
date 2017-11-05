@@ -1,5 +1,7 @@
 #include<engine/qe.hpp>
 
+#include "board.hpp"
+
 #include<logger.h>
 
 #include<string.h>
@@ -19,8 +21,9 @@ private:
     struct Textures {
         std::unique_ptr<qe::Texture<qe::PNGRGBA>> hextile_grass;
     } _textures;
+    gamespace::GameBoard _board;
 public:
-    Game(qe::Context *ctxt): _ctxt(ctxt) {
+    Game(qe::Context *ctxt): _ctxt(ctxt), _board(10, 5) {
         assert(ctxt);
     }
     void initializeAssets() {
@@ -35,7 +38,7 @@ public:
         _shaders.objv2.use();
         // SETUP
         _shaders.objv2.setUniform<qe::UNIDIFFTEX>(qe::DIFFTEXBIND);
-        _shaders.objv2.setUniform<qe::UNIL>(glm::vec3(0, 5, 0));
+        _shaders.objv2.setUniform<qe::UNIL>(glm::vec3(0, -1, 0));
 
         _textures.hextile_grass->bindTo<GL_TEXTURE0>();
 
@@ -62,15 +65,24 @@ public:
             _ctxt->start();
             render();
             _ctxt->swap();
-            _ctxt->events();
             if(fps != _ctxt->fps()) {
                 fps = _ctxt->fps();
                 GINFO("FPS " << std::to_string(fps));
             }
+            _ctxt->events();
         }
     }
     void render() {
-        _tile->render();
+        auto b = _board.begin();
+        auto e = _board.end();
+        for(; b != e; ++b) {
+            glm::vec2 p = b->centerPos();
+            glm::mat4 m = glm::translate(glm::vec3(p.x, 0, p.y));
+            glm::mat4 mvp = _cam.camera->matrices().pv * m;
+            _shaders.objv2.setUniform<qe::UNIMVP>(mvp);
+            _shaders.objv2.setUniform<qe::UNIM>(m);
+            _tile->render();
+        }
     }
     qe::Camera *camera() {return _cam.camera.get();}
     qe::Context *context() {return _ctxt;}
@@ -107,17 +119,17 @@ namespace qe {
     }
 
     void mousecallback(GLFWwindow*, double x, double y) {
-        game->camera()->mouseMoved(game->context()->deltaTN() * 30, x, y);
+        game->camera()->mouseMoved(game->context()->deltaT() * 30, x, y);
         game->context()->resetMouse();
     }
 
     void idlecallback() {
-        if(movementmask[MOVEUP]) game->camera()->moveUp(10 * game->context()->deltaTN());
-        if(movementmask[MOVEDOWN]) game->camera()->moveDown(10 * game->context()->deltaTN());
-        if(movementmask[MOVELEFT]) game->camera()->moveLeft(10 * game->context()->deltaTN());
-        if(movementmask[MOVERIGHT]) game->camera()->moveRight(10 * game->context()->deltaTN());
-        if(movementmask[MOVEFORWARD]) game->camera()->moveForward(10 * game->context()->deltaTN());
-        if(movementmask[MOVEBACKWARD]) game->camera()->moveBackward(10 * game->context()->deltaTN());
+        if(movementmask[MOVEUP]) game->camera()->moveUp(10 * game->context()->deltaT());
+        if(movementmask[MOVEDOWN]) game->camera()->moveDown(10 * game->context()->deltaT());
+        if(movementmask[MOVELEFT]) game->camera()->moveLeft(10 * game->context()->deltaT());
+        if(movementmask[MOVERIGHT]) game->camera()->moveRight(10 * game->context()->deltaT());
+        if(movementmask[MOVEFORWARD]) game->camera()->moveForward(10 * game->context()->deltaT());
+        if(movementmask[MOVEBACKWARD]) game->camera()->moveBackward(10 * game->context()->deltaT());
     }
 
 }

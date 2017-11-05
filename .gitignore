@@ -23,3 +23,4 @@ cmake-build-debug/
 screenshot.png
 *.blend
 *.kra
+docs/doxygen
