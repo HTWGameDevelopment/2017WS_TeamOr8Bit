@@ -30,21 +30,10 @@ namespace hextile {
         size_t y;
     };
 
-    /**
-     * \brief Type trait for HexTile elements
-     */
-    template<typename T>
-    struct is_hextile_tile {
-        template<typename U, U& (U::*)(hexpoint_t)> struct yes {};
-        template<typename U> static char test(yes<U, &U::operator=>*);
-        template<typename U> static int test(...);
-        static const bool value = sizeof(test<T>(0,0)) == sizeof(char);
-    };
-
 /**
  * \brief A 2D board of hexagonal tiles of type T
  */
-    template<typename T, typename = std::enable_if<is_hextile_tile<T>::value>>
+    template<typename T>
     class HexTile {
     public:
         typedef T tile_type;
@@ -63,8 +52,10 @@ namespace hextile {
     public:
         HexTile(size_t x, size_t y): _x(x), _y(y), _data(_x, col_type(y)) {
             for(size_t i = 0; i < _data.size(); ++i)
-                for(size_t j = 0; j < _data[i].rows.size(); ++j)
+                for(size_t j = 0; j < _data[i].rows.size(); ++j) {
+                    _data[i][j].board(this);
                     _data[i][j] = hexpoint_t {i, j};
+                }
         }
         size_t x() {return _x;}
         size_t y() {return _y;}
