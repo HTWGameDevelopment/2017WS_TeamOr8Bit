@@ -17,39 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef QE_CONSTANTS_HPP
-#define QE_CONSTANTS_HPP
+#include "glyphmap.hpp"
 
-#include<type_traits>
+using namespace qe;
 
-#include<glad/glad.h>
-#include<GLFW/glfw3.h>
-
-namespace qe {
-typedef unsigned int flag_t;
-
-const char* const backend_error_glfw = "could not initialize glfw";
-const char* const backend_error_window = "could not create window";
-const char* const backend_error_glew = "could not initialize glew";
-
-const flag_t VERTEX = 0;
-const flag_t FRAGMENT = 1;
-const flag_t OBJV1 = 2;
-const flag_t OBJV2 = 3;
-const flag_t PNGRGBA = 4;
-const flag_t TEXTG = 5;
-
-// UNIFORMS
-const flag_t UNIMVP = 0;
-const flag_t UNIM = 1;
-const flag_t UNIV = 2;
-const flag_t UNIL = 3;
-const flag_t UNIDIFFTEX = 4;
-
-// TEXTURE BINDING POINTS
-const flag_t DIFFTEXBIND = 0;
-const flag_t FONTMAPBIND = 1;
-
-}
-
-#endif
+Glyphmap::Glyphmap(): _glyphmap(1024) {}

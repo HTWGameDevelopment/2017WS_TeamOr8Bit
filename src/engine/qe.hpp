@@ -36,5 +36,6 @@
 #include<engine/camera.hpp>
 #include<engine/textures.hpp>
 #include<engine/screenshot.hpp>
+#include<engine/glyphmap.hpp>
 
 #endif

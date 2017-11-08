@@ -39,11 +39,11 @@ namespace qe {
     /**
      * \brief Return GLFlagSet for given qe type flag
      */
-    const GLFlagSet getGLFlagSet(flag_t flag) {
+    constexpr GLFlagSet getGLFlagSet(flag_t flag) {
         switch(flag) {
-            case qe::PNGRGBA: return qe::GLFlagSet {GL_TEXTURE_2D, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
-            default: assert(false);
+            case qe::TEXTG: return qe::GLFlagSet {GL_TEXTURE_2D, GL_R8, GL_R, GL_UNSIGNED_BYTE};
         }
+        return qe::GLFlagSet {GL_TEXTURE_2D, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
     }
 
 /**
@@ -59,6 +59,7 @@ namespace qe {
          */
         void initTexture() {
             if(T == PNGRGBA) return initTextureAsRGBA();
+            else if(T == TEXTG) return initTextureAsGlyphmap();
             assert(false);
         }
         /**
@@ -69,17 +70,24 @@ namespace qe {
         void initTextureAsRGBA() {
             glGenTextures(1, &_texture); GLSERRORCHECK;
             glBindTexture(_gl.target, _texture); GLSERRORCHECK;
-            glTexImage2D(_gl.target,
-                0,
-                _gl.internalFormat,
-                _source.width(),
-                _source.height(),
-                0,
-                _gl.format,
-                _gl.type,
-                _source.parse());
+            glTexImage2D(_gl.target, 0, _gl.internalFormat, _source.width(), _source.height(), 0, _gl.format, _gl.type, _source.parse());
             glTexParameteri(_gl.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(_gl.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(_gl.target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(_gl.target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            GLERRORCHECK;
+        }
+        /**
+         * \brief Specialization for greyscale glyphmap data
+         *
+         * \todo necessary?
+         */
+        void initTextureAsGlyphmap() {
+            glGenTextures(1, &_texture); GLSERRORCHECK;
+            glBindTexture(_gl.target, _texture); GLSERRORCHECK;
+            glTexImage2D(_gl.target, 0, _gl.internalFormat, _source.width(), _source.height(), 0, _gl.format, _gl.type, _source.parse());
+            glTexParameteri(_gl.target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(_gl.target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(_gl.target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(_gl.target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             GLERRORCHECK;
@@ -91,6 +99,14 @@ namespace qe {
          * \param l Instance of Loader
          */
         Texture(Loader<T> &&l): _source(std::move(l)) {
+            initTexture();
+        }
+        /**
+         * \brief Construct empty Texture
+         *
+         * \param x size of each side
+         */
+        Texture(size_t s): _source(s) {
             initTexture();
         }
         Texture(const Texture<T> &other) = delete;

@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 project (TeamOr8Bit)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -8,5 +8,11 @@ find_package(PNG REQUIRED)
 add_subdirectory(extern/GLFW)
 add_definitions(${PNG_DEFINITIONS})
 include_directories(src extern/glad/include extern/glm ${PNG_INCLUDE_DIRS})
-add_executable(TeamOr8Bit src/game/main.cpp extern/glad/src/glad.c src/engine/loader.c src/engine/screenshot.cpp src/logger.cpp)
+add_executable(TeamOr8Bit
+    src/game/main.cpp
+    extern/glad/src/glad.c
+    src/engine/loader.c
+    src/engine/screenshot.cpp
+    src/engine/glyphmap.cpp
+    src/logger.cpp)
 target_link_libraries(TeamOr8Bit glfw ${PNG_LIBRARIES})

@@ -17,38 +17,37 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef QE_CONSTANTS_HPP
-#define QE_CONSTANTS_HPP
+#ifndef QE_GLYPHMAP_HPP
+#define QE_GLYPHMAP_HPP
 
-#include<type_traits>
-
-#include<glad/glad.h>
-#include<GLFW/glfw3.h>
+#include<engine/textures.hpp>
 
 namespace qe {
-typedef unsigned int flag_t;
 
-const char* const backend_error_glfw = "could not initialize glfw";
-const char* const backend_error_window = "could not create window";
-const char* const backend_error_glew = "could not initialize glew";
+    template<> class Loader<TEXTG> {
+    private:
+        std::unique_ptr<unsigned char[]> _pixels;
+        size_t _size;
+        size_t _length;
+    public:
+        Loader(size_t l): _size(l * l), _length(l), _pixels(new unsigned char[_size]) {}
+        unsigned char* parse() {return _pixels.get();}
+        size_t size() {return _size;}
+        size_t width() {return _length;}
+        size_t height() {return _length;}
+        unsigned int elementSize() {return 1;}
+    };
 
-const flag_t VERTEX = 0;
-const flag_t FRAGMENT = 1;
-const flag_t OBJV1 = 2;
-const flag_t OBJV2 = 3;
-const flag_t PNGRGBA = 4;
-const flag_t TEXTG = 5;
-
-// UNIFORMS
-const flag_t UNIMVP = 0;
-const flag_t UNIM = 1;
-const flag_t UNIV = 2;
-const flag_t UNIL = 3;
-const flag_t UNIDIFFTEX = 4;
-
-// TEXTURE BINDING POINTS
-const flag_t DIFFTEXBIND = 0;
-const flag_t FONTMAPBIND = 1;
+    class Glyphmap {
+    private:
+        Texture<TEXTG> _glyphmap;
+    public:
+        Glyphmap();
+        Glyphmap(const Glyphmap &other) = delete;
+        Glyphmap(Glyphmap &&other) = delete;
+        Glyphmap &operator=(const Glyphmap &other) = delete;
+        Glyphmap &operator=(Glyphmap &&other) = delete;
+    };
 
 }
 
