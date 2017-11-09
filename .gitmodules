@@ -6,3 +6,7 @@
 	path = extern/glm
 	url = https://github.com/g-truc/glm
 	ignore = all
+[submodule "extern/zlib"]
+	path = extern/zlib
+	url = https://github.com/madler/zlib
+	ignore = all
