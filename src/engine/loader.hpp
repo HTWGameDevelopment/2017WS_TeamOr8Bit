@@ -95,7 +95,7 @@ private:
         std::unique_ptr<std::FILE, decltype(&std::fclose)> fd(fopen(_path.c_str(), "r"), &std::fclose);
         if(!fd) throw loader_error(std::string(_path), __FILE__, __LINE__);
         unsigned char header[8];
-        std::fread(header, 1, 8, fd.get());
+        if(std::fread(header, 1, 8, fd.get()) != 8) throw loader_error(std::string(_path) + " (fread)", __FILE__, __LINE__);
         if(png_sig_cmp(header, 0, 8)) throw loader_error(std::string(_path) + " (png_sig_cmp)", __FILE__, __LINE__);
         _pixels.reset(_qe_read_png(fd.get(), &_size, &_width, &_height));
         if(!_pixels.get()) {
