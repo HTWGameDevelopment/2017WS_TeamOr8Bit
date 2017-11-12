@@ -166,7 +166,7 @@ private:
         std::vector<glm::vec2> tuvs;
         std::vector<glm::vec3> tnormals;
         std::vector<glm::ivec3> indices;
-        for(std::string line; std::getline(file, line);) {
+        for(std::string line; std::getline(file, line, '\n');) {
             if(startswith(line, "v ")) {
                 glm::vec3 v;
                 switch(sscanf(line.c_str(), "v %f %f %f", &v.x, &v.y, &v.z)) {
@@ -261,7 +261,7 @@ private:
         file.exceptions(std::ifstream::badbit);
         std::vector<glm::vec3> tvertices;
         std::vector<unsigned int> indices;
-        for(std::string line; std::getline(file, line);) {
+        for(std::string line; std::getline(file, line, '\n');) {
             if(startswith(line, "v ")) {
                 glm::vec3 v;
                 switch(sscanf(line.c_str(), "v %f %f %f", &v.x, &v.y, &v.z)) {
