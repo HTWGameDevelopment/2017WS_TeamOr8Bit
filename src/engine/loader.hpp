@@ -92,7 +92,7 @@ private:
      */
     void load() {
         // Open file
-        std::unique_ptr<std::FILE, decltype(&std::fclose)> fd(fopen(_path.c_str(), "r"), &std::fclose);
+        std::unique_ptr<std::FILE, decltype(&std::fclose)> fd(fopen(_path.c_str(), "rb"), &std::fclose);
         if(!fd) throw loader_error(std::string(_path), __FILE__, __LINE__);
         unsigned char header[8];
         if(std::fread(header, 1, 8, fd.get()) != 8) throw loader_error(std::string(_path) + " (fread)", __FILE__, __LINE__);
