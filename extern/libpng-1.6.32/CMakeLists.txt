@@ -516,6 +516,29 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${ZLIB_INCLUDE_DIR})
 
 unset(PNG_LIB_TARGETS)
 
+if(PNG_SHARED)
+  add_library(png SHARED ${libpng_sources})
+  set(PNG_LIB_TARGETS png)
+  set_target_properties(png PROPERTIES OUTPUT_NAME ${PNG_LIB_NAME})
+  add_dependencies(png genfiles)
+  if(MSVC)
+    # msvc does not append 'lib' - do it here to have consistent name
+    set_target_properties(png PROPERTIES PREFIX "lib")
+    set_target_properties(png PROPERTIES IMPORT_PREFIX "lib")
+  endif()
+  target_link_libraries(png ${ZLIB_LIBRARY} ${M_LIBRARY})
+
+  if(UNIX AND AWK)
+    if(HAVE_LD_VERSION_SCRIPT)
+      set_target_properties(png PROPERTIES LINK_FLAGS
+        "-Wl,--version-script='${CMAKE_CURRENT_BINARY_DIR}/libpng.vers'")
+    elseif(HAVE_SOLARIS_LD_VERSION_SCRIPT)
+      set_target_properties(png PROPERTIES LINK_FLAGS
+        "-Wl,-M -Wl,'${CMAKE_CURRENT_BINARY_DIR}/libpng.vers'")
+    endif()
+  endif()
+endif()
+
 if(PNG_STATIC)
   # does not work without changing name
   set(PNG_LIB_NAME_STATIC png_static)
@@ -567,6 +590,169 @@ endif()
 
 if(PNG_SHARED AND WIN32)
   set_target_properties(png PROPERTIES DEFINE_SYMBOL PNG_BUILD_DLL)
+endif()
+
+function(png_add_test)
+  set(options)
+  set(oneValueArgs NAME COMMAND)
+  set(multiValueArgs OPTIONS FILES)
+  cmake_parse_arguments(_PAT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+  if (NOT _PAT_NAME)
+    message(FATAL_ERROR "Invalid arguments.  png_add_test requires name.")
+  endif()
+  if (NOT _PAT_COMMAND)
+    message(FATAL_ERROR "Invalid arguments.  png_add_test requires command.")
+  endif()
+
+  set(TEST_OPTIONS "${_PAT_OPTIONS}")
+  set(TEST_FILES "${_PAT_FILES}")
+
+  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/scripts/test.cmake.in"
+                 "${CMAKE_CURRENT_BINARY_DIR}/tests/${_PAT_NAME}.cmake" @ONLY)
+  if(CMAKE_MAJOR_VERSION GREATER 2) # have generator expressions
+    add_test(NAME "${_PAT_NAME}"
+             COMMAND "${CMAKE_COMMAND}"
+             "-DLIBPNG=$<TARGET_FILE:png>"
+             "-DTEST_COMMAND=$<TARGET_FILE:${_PAT_COMMAND}>"
+             -P "${CMAKE_CURRENT_BINARY_DIR}/tests/${_PAT_NAME}.cmake")
+  else() # old 2.x add_test; limited and won't work well on Windows
+    # Note LIBPNG is a dummy value as there are no generator expressions
+    add_test("${_PAT_NAME}" "${CMAKE_COMMAND}"
+             "-DLIBPNG=${CMAKE_CURRENT_BINARY_DIR}/libpng.so"
+             "-DTEST_COMMAND=./${_PAT_COMMAND}"
+             -P "${CMAKE_CURRENT_BINARY_DIR}/tests/${_PAT_NAME}.cmake")
+  endif()
+endfunction()
+
+if(PNG_TESTS AND PNG_SHARED)
+  # Find test PNG files by globbing, but sort lists to ensure
+  # consistency between different filesystems.
+  file(GLOB PNGSUITE_PNGS "${CMAKE_CURRENT_SOURCE_DIR}/contrib/pngsuite/*.png")
+  list(SORT PNGSUITE_PNGS)
+  file(GLOB TEST_PNGS "${CMAKE_CURRENT_SOURCE_DIR}/contrib/testpngs/*.png")
+  list(SORT TEST_PNGS)
+
+  set(PNGTEST_PNG "${CMAKE_CURRENT_SOURCE_DIR}/pngtest.png")
+
+  add_executable(pngtest ${pngtest_sources})
+  target_link_libraries(pngtest png)
+
+  png_add_test(NAME pngtest COMMAND pngtest FILES "${PNGTEST_PNG}")
+
+  add_executable(pngvalid ${pngvalid_sources})
+  target_link_libraries(pngvalid png)
+
+  png_add_test(NAME pngvalid-gamma-16-to-8
+               COMMAND pngvalid OPTIONS --gamma-16-to-8)
+  png_add_test(NAME pngvalid-gamma-alpha-mode
+               COMMAND pngvalid OPTIONS --gamma-alpha-mode)
+  png_add_test(NAME pngvalid-gamma-background
+               COMMAND pngvalid OPTIONS --gamma-background)
+  png_add_test(NAME pngvalid-gamma-expand16-alpha-mode
+               COMMAND pngvalid OPTIONS --gamma-alpha-mode --expand16)
+  png_add_test(NAME pngvalid-gamma-expand16-background
+               COMMAND pngvalid OPTIONS --gamma-background --expand16)
+  png_add_test(NAME pngvalid-gamma-expand16-transform
+               COMMAND pngvalid OPTIONS --gamma-transform --expand16)
+  png_add_test(NAME pngvalid-gamma-sbit
+               COMMAND pngvalid OPTIONS --gamma-sbit)
+  png_add_test(NAME pngvalid-gamma-threshold
+               COMMAND pngvalid OPTIONS --gamma-threshold)
+  png_add_test(NAME pngvalid-gamma-transform
+               COMMAND pngvalid OPTIONS --gamma-transform)
+  png_add_test(NAME pngvalid-progressive-interlace-standard
+               COMMAND pngvalid OPTIONS --standard --progressive-read --interlace)
+  png_add_test(NAME pngvalid-progressive-size
+               COMMAND pngvalid OPTIONS --size --progressive-read)
+  png_add_test(NAME pngvalid-progressive-standard
+               COMMAND pngvalid OPTIONS --standard --progressive-read)
+  png_add_test(NAME pngvalid-standard
+               COMMAND pngvalid OPTIONS --standard)
+  png_add_test(NAME pngvalid-transform
+               COMMAND pngvalid OPTIONS --transform)
+
+  add_executable(pngstest ${pngstest_sources})
+  target_link_libraries(pngstest png)
+
+  foreach(gamma_type 1.8 linear none sRGB)
+    foreach(alpha_type none alpha)
+      set(PNGSTEST_FILES)
+      foreach(test_png ${TEST_PNGS})
+        string(REGEX MATCH ".*-linear[-.].*" TEST_PNG_LINEAR "${test_png}")
+        string(REGEX MATCH ".*-sRGB[-.].*" TEST_PNG_SRGB "${test_png}")
+        string(REGEX MATCH ".*-1.8[-.].*" TEST_PNG_G18 "${test_png}")
+        string(REGEX MATCH ".*-alpha-.*" TEST_PNG_ALPHA "${test_png}")
+
+        set(TEST_PNG_VALID TRUE)
+
+        if(TEST_PNG_ALPHA)
+          if (NOT "${alpha_type}" STREQUAL "alpha")
+            set(TEST_PNG_VALID FALSE)
+          endif()
+        else()
+          if ("${alpha_type}" STREQUAL "alpha")
+            set(TEST_PNG_VALID FALSE)
+          endif()
+        endif()
+
+        if(TEST_PNG_LINEAR)
+          if(NOT "${gamma_type}" STREQUAL "linear")
+            set(TEST_PNG_VALID FALSE)
+          endif()
+        elseif(TEST_PNG_SRGB)
+          if(NOT "${gamma_type}" STREQUAL "sRGB")
+            set(TEST_PNG_VALID FALSE)
+          endif()
+        elseif(TEST_PNG_G18)
+          if(NOT "${gamma_type}" STREQUAL "1.8")
+            set(TEST_PNG_VALID FALSE)
+          endif()
+        else()
+          if(NOT "${gamma_type}" STREQUAL "none")
+            set(TEST_PNG_VALID FALSE)
+          endif()
+        endif()
+
+        if(TEST_PNG_VALID)
+          list(APPEND PNGSTEST_FILES "${test_png}")
+        endif()
+      endforeach()
+      # Should already be sorted, but sort anyway to be certain.
+      list(SORT PNGSTEST_FILES)
+      png_add_test(NAME pngstest-${gamma_type}-${alpha_type}
+                   COMMAND pngstest
+                   OPTIONS --tmpfile "${gamma_type}-${alpha_type}-" --log
+                   FILES ${PNGSTEST_FILES})
+    endforeach()
+  endforeach()
+
+  add_executable(pngunknown ${pngunknown_sources})
+  target_link_libraries(pngunknown png)
+
+  png_add_test(NAME pngunknown-discard COMMAND pngunknown OPTIONS --strict default=discard FILES "${PNGTEST_PNG}")
+  png_add_test(NAME pngunknown-IDAT COMMAND pngunknown OPTIONS --strict default=discard IDAT=save FILES "${PNGTEST_PNG}")
+  png_add_test(NAME pngunknown-if-safe COMMAND pngunknown OPTIONS --strict default=if-safe FILES "${PNGTEST_PNG}")
+  png_add_test(NAME pngunknown-sAPI COMMAND pngunknown OPTIONS --strict bKGD=save cHRM=save gAMA=save all=discard iCCP=save sBIT=save sRGB=save FILES "${PNGTEST_PNG}")
+  png_add_test(NAME pngunknown-save COMMAND pngunknown OPTIONS --strict default=save FILES "${PNGTEST_PNG}")
+  png_add_test(NAME pngunknown-sTER COMMAND pngunknown OPTIONS --strict sTER=if-safe FILES "${PNGTEST_PNG}")
+  png_add_test(NAME pngunknown-vpAg COMMAND pngunknown OPTIONS --strict vpAg=if-safe FILES "${PNGTEST_PNG}")
+
+  add_executable(pngimage ${pngimage_sources})
+  target_link_libraries(pngimage png)
+
+  png_add_test(NAME pngimage-quick COMMAND pngimage OPTIONS --list-combos --log FILES ${PNGSUITE_PNGS})
+  png_add_test(NAME pngimage-full COMMAND pngimage OPTIONS --exhaustive --list-combos --log FILES ${PNGSUITE_PNGS})
+endif()
+
+if(PNG_SHARED)
+  add_executable(pngfix ${pngfix_sources})
+  target_link_libraries(pngfix png)
+  set(PNG_BIN_TARGETS pngfix)
+
+  add_executable(png-fix-itxt ${png_fix_itxt_sources})
+  target_link_libraries(png-fix-itxt ${ZLIB_LIBRARY} ${M_LIBRARY})
+  list(APPEND PNG_BIN_TARGETS png-fix-itxt)
 endif()
 
 # Set a variable with CMake code which:
@@ -636,6 +822,25 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
   set(CMAKE_INSTALL_LIBDIR lib)
 endif(NOT DEFINED CMAKE_INSTALL_LIBDIR)
 
+# CREATE PKGCONFIG FILES
+# we use the same files like ./configure, so we have to set its vars
+# Only do this on Windows for Cygwin - the files don't make much sense outside
+# a UNIX look alike
+if(NOT WIN32 OR CYGWIN OR MINGW)
+  set(prefix      ${CMAKE_INSTALL_PREFIX})
+  set(exec_prefix ${CMAKE_INSTALL_PREFIX})
+  set(libdir      ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
+  set(includedir  ${CMAKE_INSTALL_PREFIX}/include)
+  set(LIBS        "-lz -lm")
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libpng.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${PNGLIB_NAME}.pc @ONLY)
+  CREATE_SYMLINK(libpng.pc FILE ${PNGLIB_NAME}.pc)
+
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libpng-config.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${PNGLIB_NAME}-config @ONLY)
+  CREATE_SYMLINK(libpng-config FILE ${PNGLIB_NAME}-config)
+endif(NOT WIN32 OR CYGWIN OR MINGW)
+
 # SET UP LINKS
 if(PNG_SHARED)
   set_target_properties(png PROPERTIES
@@ -653,3 +858,88 @@ if(CMAKE_MAJOR_VERSION GREATER 1 AND CMAKE_MINOR_VERSION GREATER 4)
 elseif(CMAKE_MAJOR_VERSION GREATER 2) # future proof
   set(PNG_EXPORT_RULE EXPORT libpng)
 endif()
+
+# INSTALL
+if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
+  install(TARGETS ${PNG_LIB_TARGETS}
+      ${PNG_EXPORT_RULE}
+      RUNTIME DESTINATION bin
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+  if(PNG_SHARED)
+    # Create a symlink for libpng.dll.a => libpng16.dll.a on Cygwin
+    if(CYGWIN OR MINGW)
+      CREATE_SYMLINK(libpng${CMAKE_IMPORT_LIBRARY_SUFFIX} TARGET png)
+      install(FILES $<TARGET_LINKER_FILE_DIR:png>/libpng${CMAKE_IMPORT_LIBRARY_SUFFIX} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    endif(CYGWIN OR MINGW)
+
+    if(NOT WIN32)
+      CREATE_SYMLINK(libpng${CMAKE_SHARED_LIBRARY_SUFFIX} TARGET png)
+      install(FILES $<TARGET_LINKER_FILE_DIR:png>/libpng${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    endif(NOT WIN32)
+  endif(PNG_SHARED)
+
+  if(PNG_STATIC)
+    if(NOT WIN32 OR CYGWIN OR MINGW)
+      CREATE_SYMLINK( libpng${CMAKE_STATIC_LIBRARY_SUFFIX} TARGET png_static)
+      install(FILES $<TARGET_LINKER_FILE_DIR:png_static>/libpng${CMAKE_STATIC_LIBRARY_SUFFIX} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    endif(NOT WIN32 OR CYGWIN OR MINGW)
+ endif()
+endif()
+
+if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
+  install(FILES ${libpng_public_hdrs}   DESTINATION include)
+  install(FILES ${libpng_public_hdrs}   DESTINATION include/${PNGLIB_NAME})
+endif()
+if(NOT SKIP_INSTALL_EXECUTABLES AND NOT SKIP_INSTALL_ALL )
+  if(NOT WIN32 OR CYGWIN OR MINGW)
+    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/libpng-config DESTINATION bin)
+    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${PNGLIB_NAME}-config
+            DESTINATION bin)
+  endif(NOT WIN32 OR CYGWIN OR MINGW)
+endif()
+
+if(NOT SKIP_INSTALL_PROGRAMS AND NOT SKIP_INSTALL_ALL )
+  install(TARGETS ${PNG_BIN_TARGETS}
+      RUNTIME DESTINATION bin)
+endif()
+
+if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
+  # Install man pages
+  if(NOT PNG_MAN_DIR)
+    set(PNG_MAN_DIR "share/man")
+  endif()
+  install(FILES libpng.3 libpngpf.3      DESTINATION ${PNG_MAN_DIR}/man3)
+  install(FILES png.5                    DESTINATION ${PNG_MAN_DIR}/man5)
+  # Install pkg-config files
+  if(NOT CMAKE_HOST_WIN32 OR CYGWIN OR MINGW)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libpng.pc
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/libpng-config
+            DESTINATION bin)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PNGLIB_NAME}.pc
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${PNGLIB_NAME}-config
+            DESTINATION bin)
+  endif(NOT CMAKE_HOST_WIN32 OR CYGWIN OR MINGW)
+endif()
+
+# On versions of CMake that support it, create an export file CMake
+# users can include() to import our targets
+if(PNG_EXPORT_RULE AND NOT SKIP_INSTALL_EXPORT AND NOT SKIP_INSTALL_ALL )
+  install(EXPORT libpng DESTINATION lib/libpng FILE lib${PNG_LIB_NAME}.cmake)
+endif()
+
+# what's with libpng-manual.txt and all the extra files?
+
+# UNINSTALL
+# do we need this?
+
+# DIST
+# do we need this?
+
+# to create msvc import lib for mingw compiled shared lib
+# pexports libpng.dll > libpng.def
+# lib /def:libpng.def /machine:x86
