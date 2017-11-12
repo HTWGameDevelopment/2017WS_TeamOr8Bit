@@ -17,27 +17,48 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef QE_MAIN_HPP
-#define QE_MAIN_HPP
-#undef near
-#undef far
+#ifndef _FONT_HPP
+#define _FONT_HPP
 
-#define GLM_ENABLE_EXPERIMENTAL
-#include<glm/glm.hpp>
-#include<glm/gtx/transform.hpp>
+#include<string>
+#include<stdexcept>
+#include<assert.h>
 
-#include<engine/constants.hpp>
-#include<engine/context.hpp>
-#include<engine/paths.hpp>
-#include<engine/programs.hpp>
-#include<engine/buffer.hpp>
-#include<engine/loader.hpp>
-#include<engine/mesh.hpp>
-#include<engine/camera.hpp>
-#include<engine/textures.hpp>
-#include<engine/screenshot.hpp>
-#include<engine/glyphmap.hpp>
-#include<engine/cache.hpp>
-#include<engine/text.hpp>
+#include<ft2build.h>
+#include FT_FREETYPE_H
+
+namespace font {
+
+    /**
+     * \brief Freetype font
+     */
+    class Font {
+    private:
+        static Font *_instance; //!< Font instance
+        FT_Library _library; //!< FT_Library handle
+        FT_Face _face; //!< FT_Face handle
+        Font(std::string font);
+    public:
+        ~Font();
+        static Font *get();
+        static Font *get(std::string font);
+        FT_Face face() {return _face;}
+    };
+
+    /**
+    * \brief Exception from Font
+    */
+    struct font_error: public std::runtime_error {
+        /**
+        * \brief Constructs a new font_error
+        *
+        * \param s Message
+        * \param file File path
+        * \param line Source line
+        */
+        font_error(std::string s, const char* file, int line): runtime_error(std::string(file) + ":" + std::to_string(line) + ": Failed " + s) {}
+    };
+
+}
 
 #endif

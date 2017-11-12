@@ -21,6 +21,7 @@
 #define QE_CONTEXT_HPP
 
 #include<engine/constants.hpp>
+#include<engine/cache.hpp>
 
 #include<logger.h>
 
@@ -70,7 +71,7 @@ private:
     unsigned int _w, _h; //!< Width and height of framebuffer
     std::string _title; //!< Window title
     GLFWwindow *_window; //!< GLFW handle
-    enum _context_t {NONE,MESH} context = NONE; //!< Current glEnable configuration
+    enum _context_t {NONE,MESH,TEXT} context = NONE; //!< Current glEnable configuration
     double _lasttime; //!< Timestamp of last frame
     double _deltat; //!< Time difference between last two frames
     unsigned int _fps; //!< Normalized FPS
@@ -110,6 +111,9 @@ public:
 
         gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
 
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glCullFace(GL_BACK);
+
         int nw, nh;
         glfwGetFramebufferSize(_window, &nw, &nh);
         _w = w;
@@ -117,6 +121,7 @@ public:
     }
     Context(const Context &other) = delete;
     ~Context() {
+        qe::Cache::deleteAll();
         glfwTerminate();
     }
     Context &operator=(const Context &other) = delete;
@@ -184,8 +189,20 @@ public:
             return;
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
+        glDisable(GL_BLEND);
         context = MESH;
+        GLERRORCHECK;
+    }
+    /**
+     * \brief Set glEnable config to TEXT rendering
+     */
+    void textcontext() {
+        if(context == TEXT)
+            return;
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        glEnable(GL_BLEND);
+        context = TEXT;
         GLERRORCHECK;
     }
     /**

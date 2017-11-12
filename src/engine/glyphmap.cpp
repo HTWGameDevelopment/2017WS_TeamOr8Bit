@@ -21,4 +21,46 @@
 
 using namespace qe;
 
-Glyphmap::Glyphmap(): _glyphmap(1024) {}
+GlyphmapLatin::GlyphmapLatin(FT_Face face, size_t height, glm::ivec2 res): _res(res) {
+    initialize(face, height);
+}
+
+void GlyphmapLatin::initialize(FT_Face face, size_t height) {
+    Loader<TEXTG> loader(texlength);
+
+    FT_Set_Pixel_Sizes(face, 0, height);
+    size_t x = 0, y = 0;
+    size_t max_y = 0;
+
+    for(size_t i = 0; i < capacity; ++i) {
+        FT_UInt glyph_index = FT_Get_Char_Index(face, i);
+        if(FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT)) continue;
+        if(FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL)) continue;
+
+        if(x + face->glyph->bitmap.width > texlength) { // new line
+            x = 0;
+            y += max_y;
+            max_y = 0;
+            if(y > texlength) throw loader_error(std::string("glyphmap too small for ") + std::to_string(capacity) + " glyphs at size "  + std::to_string(height), __FILE__, __LINE__);
+        }
+
+        _metrics[i] = fontmetrics {
+            x,
+            y,
+            face->glyph->bitmap.rows,
+            face->glyph->bitmap.width,
+            face->glyph->bitmap_left,
+            face->glyph->bitmap_top,
+            (int)(face->glyph->advance.x >> 6),
+            (int)(face->glyph->advance.y >> 6)
+        };
+
+        loader.setRect(x, y, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer);
+
+        x += face->glyph->bitmap.width;
+        if(max_y < face->glyph->bitmap.rows) max_y = face->glyph->bitmap.rows;
+    }
+
+    _glyphmap.reset(new Texture<TEXTG, FONTMAPBIND_GL>(std::move(loader)));
+    _glyphmap->bindTo();
+}

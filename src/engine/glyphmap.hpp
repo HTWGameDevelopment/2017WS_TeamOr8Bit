@@ -21,14 +21,23 @@
 #define QE_GLYPHMAP_HPP
 
 #include<engine/textures.hpp>
+#include<engine/mesh.hpp>
+
+#include<glm/vec4.hpp>
+
+#include<ft2build.h>
+#include FT_FREETYPE_H
 
 namespace qe {
 
+    /**
+     * \brief Loader (data container) for glyphmap data
+     */
     template<> class Loader<TEXTG> {
     private:
-        std::unique_ptr<unsigned char[]> _pixels;
         size_t _size;
         size_t _length;
+        std::unique_ptr<unsigned char[]> _pixels;
     public:
         Loader(size_t l): _size(l * l), _length(l), _pixels(new unsigned char[_size]) {}
         unsigned char* parse() {return _pixels.get();}
@@ -36,18 +45,164 @@ namespace qe {
         size_t width() {return _length;}
         size_t height() {return _length;}
         unsigned int elementSize() {return 1;}
+        void setRect(size_t x, size_t y, size_t w, size_t h, unsigned char *data) {
+            for(size_t i = 0; i < h; ++i) {
+                memcpy(_pixels.get() + (y + h - i) * _length + x, data + i * w, w);
+            }
+        }
     };
 
-    class Glyphmap {
-    private:
-        Texture<TEXTG> _glyphmap;
-    public:
-        Glyphmap();
-        Glyphmap(const Glyphmap &other) = delete;
-        Glyphmap(Glyphmap &&other) = delete;
-        Glyphmap &operator=(const Glyphmap &other) = delete;
-        Glyphmap &operator=(Glyphmap &&other) = delete;
+    /**
+     * \brief Structure for glyph metrics
+     */
+    struct fontmetrics {
+        size_t x; //!< x coordinate in texture
+        size_t y; //!< y coordinate in texture
+        size_t h; //!< height in texture
+        size_t w; //!< width in texture
+        ssize_t off_x; //!< left bearing
+        ssize_t off_y; //!< top bearing
+        ssize_t adv_x; //!< x advance
+        ssize_t adv_y; //!< y advance
     };
+
+    /**
+     * \brief Glyphmap for latin (ASCII) characters
+     */
+    class GlyphmapLatin {
+    public:
+        static const size_t texlength = 1024; //!< texture width and height
+        static const size_t capacity = 256; //!< character count to store in texture
+    private:
+        std::unique_ptr<Texture<TEXTG, FONTMAPBIND_GL>> _glyphmap; //!< Texture
+        std::array<fontmetrics, capacity> _metrics; //!< Metrics
+        glm::ivec2 _res; //!< screen resolution
+        /**
+         * \brief Initialize glyphmap.
+         */
+        void initialize(FT_Face face, size_t height);
+    public:
+        /**
+         * \brief Constructor
+         */
+        GlyphmapLatin(FT_Face face, size_t height, glm::ivec2 res);
+        GlyphmapLatin(const GlyphmapLatin &other) = delete;
+        GlyphmapLatin(GlyphmapLatin &&other) = delete;
+        GlyphmapLatin &operator=(const GlyphmapLatin &other) = delete;
+        GlyphmapLatin &operator=(GlyphmapLatin &&other) = delete;
+        glm::ivec2 getResolution() {return _res;}
+        /**
+         * \brief Return pixel height of highest glyph
+         */
+        size_t highestGlyph() {
+            size_t mh = 0;
+            for(size_t i = 0; i < capacity; ++i) {
+                mh = std::max(mh, _metrics[i].h);
+            }
+            return mh;
+        }
+        fontmetrics getMetrics(char c) {
+            return _metrics[c <= 255 ? c : 0];
+        }
+        /**
+         * \brief Return position and scaling vector in screen coordinates
+         */
+        glm::vec4 scalePosition(glm::ivec2 pos, fontmetrics metrics) {
+            return (glm::vec4(
+                (1.0f * pos.x + metrics.off_x),
+                (1.0f * pos.y - (metrics.h - metrics.off_y)),
+                1.0f * metrics.w,
+                1.0f * metrics.h)
+                - glm::vec4(_res.x >> 1, _res.y >> 1, 1, 1))
+                / glm::vec4(_res.x >> 1, _res.y >> 1, _res.x >> 1, _res.y >> 1);
+        }
+        /**
+         * \brief Return UV position of glyph in glyphmap
+         */
+        glm::vec2 scaleOrigin(fontmetrics m) {return glm::vec2(1.0f * m.x / texlength, 1.0f * m.y / texlength);}
+        /**
+         * \brief Return UV scaling of glyph in glyphmap
+         */
+        glm::vec2 scaleUVScale(fontmetrics m) {return glm::vec2(1.0f * m.w / texlength, 1.0f * (1 + m.h) / texlength);}
+    };
+
+/**
+ * \brief Mesh for rendering a glyph
+ */
+template<> class Mesh<TEXTG> {
+private:
+    Buffer<GL_ARRAY_BUFFER> _buffer; //!< OpenGL buffer
+    GLuint _vao; //!< OpenGL VAO handle
+    const size_t _size = 4; //!< Vertex count
+    const float rectangle[16] = {
+        0, 1,
+        0, 0,
+        1, 1,
+        1, 0,
+        0, 1,
+        0, 0,
+        1, 1,
+        1, 0
+    }; //!< Vertex data
+    /**
+     * \brief Initialize VAO
+     */
+    void initVAO() {
+        glGenVertexArrays(1, &_vao);
+        GLSERRORCHECK;
+        glBindVertexArray(_vao);
+        GLSERRORCHECK;
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        GLSERRORCHECK;
+        _buffer.bind();
+        glVertexAttribPointer(
+            (GLuint)0, // vertex
+            2,
+            GL_FLOAT,
+            GL_FALSE,
+            0,
+            (void*)0
+        );
+        glVertexAttribPointer(
+            (GLuint)1, // uv
+            2,
+            GL_FLOAT,
+            GL_FALSE,
+            0,
+            (void*)32 // 4 * 2 * float
+        );
+        GLSERRORCHECK;
+        glBindVertexArray(0);
+    }
+public:
+    /**
+     * \brief Construct rectangle for text rendering
+     */
+    Mesh() {
+        _buffer.data<GL_DYNAMIC_DRAW>((void*)rectangle, sizeof(rectangle));
+        initVAO();
+    }
+    Mesh(const Mesh<TEXTG> &other) = delete;
+    Mesh(Mesh<TEXTG> &&other) = delete;
+    /**
+     * \brief Destroy VAO and buffer data
+     */
+    ~Mesh() {
+        glDeleteVertexArrays(1, &_vao);
+    }
+    Mesh<TEXTG> &operator=(const Mesh<TEXTG> &other) = delete;
+    Mesh<TEXTG> &operator=(Mesh<TEXTG> &&other) = delete;
+    /**
+     * \brief Bind VAO and make render call
+     */
+    void render() {
+        glBindVertexArray(_vao);
+        GLSERRORCHECK;
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, _size);
+        GLSERRORCHECK;
+    }
+};
 
 }
 

@@ -17,27 +17,12 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef QE_MAIN_HPP
-#define QE_MAIN_HPP
-#undef near
-#undef far
+#include "cache.hpp"
 
-#define GLM_ENABLE_EXPERIMENTAL
-#include<glm/glm.hpp>
-#include<glm/gtx/transform.hpp>
+using namespace qe;
 
-#include<engine/constants.hpp>
-#include<engine/context.hpp>
-#include<engine/paths.hpp>
-#include<engine/programs.hpp>
-#include<engine/buffer.hpp>
-#include<engine/loader.hpp>
-#include<engine/mesh.hpp>
-#include<engine/camera.hpp>
-#include<engine/textures.hpp>
-#include<engine/screenshot.hpp>
-#include<engine/glyphmap.hpp>
-#include<engine/cache.hpp>
-#include<engine/text.hpp>
-
-#endif
+GlyphmapLatin *Cache::glyphlatin;
+qe::Program *Cache::objv1;
+qe::Program *Cache::objv2;
+qe::Program *Cache::texts;
+qe::Mesh<TEXTG> *Cache::meshm;

@@ -1,4 +1,5 @@
 #include<engine/qe.hpp>
+#include<font/font.hpp>
 
 #include "board.hpp"
 
@@ -6,44 +7,52 @@
 
 #include<string.h>
 
+#define FONTPATH "/usr/share/fonts/dejavu/DejaVuSans.ttf"
+
 /**
  * \brief Main game class
  */
 class Game {
 private:
     qe::Context *_ctxt;
+    std::unique_ptr<font::Font> _font;
     std::unique_ptr<qe::Mesh<qe::OBJV1>> _cube;
     std::unique_ptr<qe::Mesh<qe::OBJV2>> _tile;
     struct CameraData {
         std::unique_ptr<qe::Camera> camera;
     } _cam;
-    struct Shaders {
-        qe::Program objv1;
-        qe::Program objv2;
-    } _shaders;
     struct Textures {
-        std::unique_ptr<qe::Texture<qe::PNGRGBA>> hextile_grass;
+        std::unique_ptr<qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>> hextile_grass;
     } _textures;
+    struct Text {
+        qe::Text<qe::GlyphmapLatin> gamename;
+    } _strings;
     gamespace::GameBoard _board;
 public:
-    Game(qe::Context *ctxt): _ctxt(ctxt), _board(10, 5) {
+    Game(qe::Context *ctxt): _ctxt(ctxt), _font(font::Font::get(FONTPATH)), _board(10, 5) {
         assert(ctxt);
+        qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->face(), 32, _ctxt->getResolution());
+        _strings.gamename = qe::Text<qe::GlyphmapLatin>(qe::Cache::glyphlatin, glm::ivec2(200, 100), qe::PositionMode::TOP);
+        _strings.gamename.text() = "NONAMEGAME - Team Or8Bit";
     }
     void initializeAssets() {
         // MODELS
         _cube.reset(new qe::Mesh<qe::OBJV1>(qe::Loader<qe::OBJV1>("assets/models/cube.objv1")));
         _tile.reset(new qe::Mesh<qe::OBJV2>(qe::Loader<qe::OBJV2>("assets/models/hextile.objv2")));
+        qe::Cache::meshm = new qe::Mesh<qe::TEXTG>();
         // TEXTURES
-        _textures.hextile_grass.reset(new qe::Texture<qe::PNGRGBA>(qe::Loader<qe::PNGRGBA>("assets/textures/hextile-grass.png")));
+        _textures.hextile_grass.reset(new qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>(qe::Loader<qe::PNGRGBA>("assets/textures/hextile-grass.png")));
         // SHADERS
-        _shaders.objv1 = qe::mkProgram("assets/shaders/objv1.vsh", "assets/shaders/objv1.fsh");
-        _shaders.objv2 = qe::mkProgram("assets/shaders/objv2.vsh", "assets/shaders/objv2.fsh");
-        _shaders.objv2.use();
+        qe::Cache::objv1 = qe::mkProgram("assets/shaders/objv1.vsh", "assets/shaders/objv1.fsh");
+        qe::Cache::objv2 = qe::mkProgram("assets/shaders/objv2.vsh", "assets/shaders/objv2.fsh");
+        qe::Cache::texts = qe::mkProgram("assets/shaders/texts.vsh", "assets/shaders/texts.fsh");
         // SETUP
-        _shaders.objv2.setUniform<qe::UNIDIFFTEX>(qe::DIFFTEXBIND);
-        _shaders.objv2.setUniform<qe::UNIL>(glm::vec3(0, -1, 0));
+        qe::Cache::objv2->use();
+        qe::Cache::objv2->setUniform<qe::UNIDIFFTEX>(qe::DIFFTEXBIND);
+        qe::Cache::objv2->setUniform<qe::UNIL>(glm::vec3(0, -1, 0));
 
-        _textures.hextile_grass->bindTo<GL_TEXTURE0>();
+        qe::Cache::texts->use();
+        qe::Cache::texts->setUniform<qe::UNICOLOR>(qe::FONTMAPBIND);
 
         _cam.camera.reset(new qe::Camera(
             glm::vec3(4, 4, 4),
@@ -56,15 +65,15 @@ public:
         ));
     }
     void run() {
-        _shaders.objv2.use();
         unsigned int fps = 0;
         glm::mat4 m = glm::translate(glm::vec3(0, 0, 0));
         glClearColor(0.3, 0.3, 0.3, 1);
         while(!_ctxt->shouldClose()) {
             glm::mat4 mvp = _cam.camera->matrices().pv * m;
-            _shaders.objv2.setUniform<qe::UNIMVP>(mvp);
-            _shaders.objv2.setUniform<qe::UNIM>(m);
-            _shaders.objv2.setUniform<qe::UNIV>(_cam.camera->matrices().v);
+            qe::Cache::objv2->use();
+            qe::Cache::objv2->setUniform<qe::UNIMVP>(mvp);
+            qe::Cache::objv2->setUniform<qe::UNIM>(m);
+            qe::Cache::objv2->setUniform<qe::UNIV>(_cam.camera->matrices().v);
             _ctxt->start();
             render();
             _ctxt->swap();
@@ -82,10 +91,14 @@ public:
             glm::vec2 p = b->centerPos();
             glm::mat4 m = glm::translate(glm::vec3(p.x, 0, p.y));
             glm::mat4 mvp = _cam.camera->matrices().pv * m;
-            _shaders.objv2.setUniform<qe::UNIMVP>(mvp);
-            _shaders.objv2.setUniform<qe::UNIM>(m);
+            qe::Cache::objv2->use();
+            qe::Cache::objv2->setUniform<qe::UNIMVP>(mvp);
+            qe::Cache::objv2->setUniform<qe::UNIM>(m);
             _tile->render();
         }
+        _ctxt->textcontext();
+        _strings.gamename.render();
+        _ctxt->meshcontext();
     }
     qe::Camera *camera() {return _cam.camera.get();}
     qe::Context *context() {return _ctxt;}
