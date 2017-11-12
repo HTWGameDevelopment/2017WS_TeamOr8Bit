@@ -25,6 +25,8 @@
 #include<glm/gtc/matrix_transform.hpp>
 
 #include<logger.h>
+#undef near
+#undef far
 
 namespace qe {
 
