@@ -31,13 +31,13 @@ public:
     }
     void initializeAssets() {
         // MODELS
-        _cube.reset(new qe::Mesh<qe::OBJV1>(qe::Loader<qe::OBJV1>("assets/models/cube.objv1")));
-        _tile.reset(new qe::Mesh<qe::OBJV2>(qe::Loader<qe::OBJV2>("assets/models/hextile.objv2")));
+        _cube.reset(new qe::Mesh<qe::OBJV1>(qe::Loader<qe::OBJV1>("assets/models/cube.objv1"_p)));
+        _tile.reset(new qe::Mesh<qe::OBJV2>(qe::Loader<qe::OBJV2>("assets/models/hextile.objv2"_p)));
         // TEXTURES
-        _textures.hextile_grass.reset(new qe::Texture<qe::PNGRGBA>(qe::Loader<qe::PNGRGBA>("assets/textures/hextile-grass.png")));
+        _textures.hextile_grass.reset(new qe::Texture<qe::PNGRGBA>(qe::Loader<qe::PNGRGBA>("assets/textures/hextile-grass.png"_p)));
         // SHADERS
-        _shaders.objv1 = qe::mkProgram("assets/shaders/objv1.vsh", "assets/shaders/objv1.fsh");
-        _shaders.objv2 = qe::mkProgram("assets/shaders/objv2.vsh", "assets/shaders/objv2.fsh");
+        _shaders.objv1 = qe::mkProgram("assets/shaders/objv1.vsh"_p, "assets/shaders/objv1.fsh"_p);
+        _shaders.objv2 = qe::mkProgram("assets/shaders/objv2.vsh"_p, "assets/shaders/objv2.fsh"_p);
         _shaders.objv2.use();
         // SETUP
         _shaders.objv2.setUniform<qe::UNIDIFFTEX>(qe::DIFFTEXBIND);

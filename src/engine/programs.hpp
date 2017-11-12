@@ -155,8 +155,7 @@ shader_t compileShader(std::string c) {
  */
 template<flag_t type>
 shader_t mkShader(std::string file) {
-    std::string path = getPath(file);
-    std::string contents = getFileContents(path);
+    std::string contents = getFileContents(file);
     return compileShader<type>(contents);
 }
 
