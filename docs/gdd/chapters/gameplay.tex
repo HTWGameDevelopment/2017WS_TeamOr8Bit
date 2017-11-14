@@ -3,10 +3,10 @@
 The most basic premise is this:
 
 \begin{itemize}
-\item Two players (A.I., local or network) play in a hexagonal map.
+\item Two players (A.I., local or network) play on a hexagonal map.
 \item Each player has a set of units and buildings.
 \item Symmetry depends on the map being played.
-\item The goal of each player is to destroy or conquer every enemy base.
+\item The goal of each player is to destroy or conquer every enemy base. Campaign goals may vary.
 \item During the match, each player takes turns where they can move their units, start attacks, take over buildings or build new ones.
 \end{itemize}
 \section{Mechanics}
@@ -34,29 +34,29 @@ of an encounter is also easy to learn but hard to master.
     adj &= a_{att} - (\begin{Vmatrix}p_{att} - p_{def}\end{Vmatrix} - \sum_{t=p_{att}}^{p_{def}} A_{att}(t))) \\
     d &= d_{def} - adj \\
     h_{def} &= h_{def} + d \\
-    l_{def} &= l_{def} - d \\ % TODO stupid right now, fix later
+    l_{def} &= l_{def} + adj
     l_{att} &= l_{att} + d
 \end{align}
 
-%TODO graphs
-\subsection{Defending} %TODO ref
+$a$ is static but may change during balancing. $l$ is unused in the current algorithm.
+\subsection{Defending}
 A unit can go into defense mode which boosts the defensive metric $d$ by $1.5$ but renders the unit unable to move.
 Going into and out of DM takes up one turn.
-\subsection{Building units} %TODO ref
+\subsection{Building units}
 Units can be built in static and indestructable (but not invincible) bases.
 A base can be tasked to continuously produce units for the owning player. Each base can only build one unit
 at a time. The type of unit is determined by the player but not all bases can build all unit types. The length and cooldown
 of each production also varies between unit types.
-\subsection{Buildings} %TODO ref
+\subsection{Buildings}
 \subsubsection{Trench}
 Infantry units have a special action for building trenches. A trench is a terrain modifier which boosts the
 defensive metric $d$ of infantry units by $2$ and increases the travel distance for infantry units along the trench.
 
+\subsection{Tower}
 Additionally some unit types can be ,,upgraded'' into a building with a significantly higher $d$. The original unit is replaced by the
 building and that building cannot be ,,downgraded'' back.
 \subsection{Special buildings} %TODO ref
-Some buildings have special features that can be triggered under certain conditions. See level for details
-,,levolution''
+Some buildings have special features that can be triggered under certain conditions. See~\ref{level} for details.
 \section{Screen Flow} %TODO
 There are four screens:
 
@@ -70,13 +70,13 @@ There are four screens:
 The match can be modified with the following settings:
 
 \begin{description}
-    \item[difficulty] changes the difficulty when playing against an AI.
-    \item[map size] changes the map size.
+    \item[difficulty] changes the difficulty when playing against an AI (if we have time to make one).
+    \item[map] changes the map.
     \item[Various toggles] for enabling/disabling/breaking selected gameplay elements.
     \item[Max Moves Per Turn] optional. Only allow a fixed number of actions per turn.
 \end{description}
-\section{Saving} %TODO
-Each match can be saved into a custom file format, loaded into the game and played.
-\section{Cheats and Easter Eggs} %TODO
-It wouldn't be much of an easter egg if we told you.
+\section{Saving}
+Each match can be saved into a custom file format and loaded back into the game.
+\section{Cheats and Easter Eggs}
+There might be cheats.
 % anno cheat RUAMZUZLA
