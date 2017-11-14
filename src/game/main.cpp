@@ -29,7 +29,7 @@ private:
     } _strings;
     gamespace::GameBoard _board;
 public:
-    Game(qe::Context *ctxt): _ctxt(ctxt), _font(font::Font::get(FONTPATH)), _board(10, 5) {
+    Game(qe::Context *ctxt): _ctxt(ctxt), _font(font::Font::get(FONTPATH)), _board(40, 20) {
         assert(ctxt);
         qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->face(), 32, _ctxt->getResolution());
         _strings.gamename = qe::Text<qe::GlyphmapLatin>(qe::Cache::glyphlatin, glm::ivec2(200, 100), qe::PositionMode::TOP);
@@ -135,7 +135,7 @@ namespace qe {
     }
 
     void mousecallback(GLFWwindow*, double x, double y) {
-        game->camera()->mouseMoved(game->context()->deltaT() * 30, x, y);
+        game->camera()->mouseMoved(game->context()->deltaT(), x, y);
         game->context()->resetMouse();
     }
 
