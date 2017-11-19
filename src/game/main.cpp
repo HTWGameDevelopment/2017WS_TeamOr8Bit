@@ -6,6 +6,8 @@
 
 #include<string.h>
 
+#include <stdio.h>
+
 /**
  * \brief Main game class
  */
@@ -137,7 +139,21 @@ namespace qe {
 
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+    int i;
+
+    for(i=0; i < argc; i++) {
+        if (strcmp( argv[i],"-vsync")==0 ) {
+          //Set vsync
+        }
+        if(strcmp(argv[i],"-screenshot")==0) {
+          //screenshot
+        }
+        if (strcmp(argv[i],"-version")==0) {
+          //show version
+        }
+    }
+
     qe::Context context("Team Or8Bit - Unnamed Game", 800, 600);
     context.meshcontext();
     {
