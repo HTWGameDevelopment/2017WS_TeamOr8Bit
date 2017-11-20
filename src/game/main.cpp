@@ -4,6 +4,8 @@
 
 #include<logger.h>
 
+#include<config.h>
+
 #include<string.h>
 
 #include <stdio.h>
@@ -50,7 +52,6 @@ public:
         _cam.camera.reset(new qe::Camera(
             glm::vec3(4, 4, 4),
             glm::vec2(-45, -45),
-            _ctxt->getResolution(),
             0.1,
             30,
             _ctxt->getAR(),
@@ -109,8 +110,10 @@ namespace qe {
         if(action == GLFW_REPEAT) return;
         if(key == GLFW_KEY_Q)
             game->context()->close();
-        if(key == GLFW_KEY_P)
+        if(key == GLFW_KEY_P && action == GLFW_PRESS)
             qe::screenshot("screenshot.png", game->context()->width(), game->context()->height());
+        if(key == GLFW_KEY_V && action == GLFW_PRESS)
+            qe::VSYNC() = qe::VSYNC() == 0 ? 1 : 0;
         else if(key == GLFW_KEY_A) movementmask[MOVELEFT] = action == GLFW_PRESS;
         else if(key == GLFW_KEY_D) movementmask[MOVERIGHT] = action == GLFW_PRESS;
         else if(key == GLFW_KEY_W) movementmask[MOVEFORWARD] = action == GLFW_PRESS;
@@ -124,7 +127,7 @@ namespace qe {
     }
 
     void mousecallback(GLFWwindow*, double x, double y) {
-        game->camera()->mouseMoved(game->context()->deltaT() * 30, x, y);
+        game->camera()->mouseMoved(game->context()->deltaT(), x, y);
         game->context()->resetMouse();
     }
 
@@ -140,21 +143,16 @@ namespace qe {
 }
 
 int main(int argc, char *argv[]) {
-    int i;
-
-    for(i=0; i < argc; i++) {
-        if (strcmp( argv[i],"-vsync")==0 ) {
-          //Set vsync
-        }
-        if(strcmp(argv[i],"-screenshot")==0) {
-          //screenshot
-        }
-        if (strcmp(argv[i],"-version")==0) {
-          //show version
+    for(int i=1; i < argc; i++) {
+        if(strcmp(argv[i],"--vsync") == 0) {
+            qe::VSYNC() = 1;
+        } else if(strcmp(argv[i],"--version") == 0) {
+            std::cout << TONAME << " " << TOVERSION_STRING << " - (C) " << TOTNAME << ", 2017 All rights reserved." << std::endl;
+            exit(0);
         }
     }
 
-    qe::Context context("Team Or8Bit - Unnamed Game", 800, 600);
+    qe::Context context(std::string(TOTNAME) + " - " + TONAME + " " + TOVERSION_STRING, 1920, 1080);
     context.meshcontext();
     {
         Game g(&context);

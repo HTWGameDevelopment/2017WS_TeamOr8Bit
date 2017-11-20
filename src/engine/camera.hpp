@@ -49,8 +49,7 @@ private:
     glm::vec3 _dir; //!< lookAt direction
     glm::vec3 _right; //!< Right vector
     glm::vec3 _up; //!< Up vector
-    glm::dvec2 _angles; //!< View angles
-    glm::vec2 _resolution; //!< Screen resolution
+    glm::vec2 _angles; //!< View angles
 public:
     /**
      * Constructs a new camera object
@@ -63,8 +62,8 @@ public:
      * \param ar Aspect ratio
      * \param fov Field of view
      */
-    Camera(glm::vec3 pos, glm::dvec2 angles, glm::vec2 resolution, float near, float far, float ar, float fov)
-        : _pos(pos), _angles(angles), _resolution(resolution) {
+    Camera(glm::vec3 pos, glm::vec2 angles, float near, float far, float ar, float fov)
+        : _pos(pos), _angles(angles) {
         _p = glm::perspective<float>(2 * fov * M_PI / 360.0, ar, near, far);
         regenerate();
     }
@@ -75,12 +74,9 @@ public:
      * \param x X coord of pointer
      * \param y Y coord of pointer
      */
-    void mouseMoved(double deltaT, double x, double y) {
-        double dx = _resolution.x / 2.0 - x;
-        double dy = _resolution.y / 2.0 - y;
-
-        _angles.x += deltaT * dx;
-        _angles.y += deltaT * dy;
+    void mouseMoved(float deltaT, float dx, float dy) {
+        _angles.x -= deltaT * dx;
+        _angles.y -= deltaT * dy;
         if(_angles.y >= M_PI / 2.0) _angles.y = M_PI / 2.0;
         else if(_angles.y <= -M_PI / 2.0) _angles.y = -M_PI / 2.0;
         regenerate();

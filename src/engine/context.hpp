@@ -101,12 +101,13 @@ public:
         }
 
         glfwMakeContextCurrent(_window);
-        glfwSwapInterval(0);
+        glfwSwapInterval(qe::VSYNC());
+        qe::VSYNC() << [this](int old, int upd){glfwSwapInterval(upd);};
         glfwSetErrorCallback(errorcallback);
         glfwSetKeyCallback(_window, keycallback);
         glfwSetCursorPosCallback(_window, mousecallback);
-        glfwSetCursorPos(_window, _w/2, _h/2);
-        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        glfwSetCursorPos(_window, 0, 0);
+        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
 
@@ -124,7 +125,7 @@ public:
      * \brief Center mouse
      */
     void resetMouse() {
-        glfwSetCursorPos(_window, _w/2, _h/2);
+        glfwSetCursorPos(_window, 0, 0);
     }
     /**
      * \brief true if close() call or window was closed by user
