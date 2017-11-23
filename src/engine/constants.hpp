@@ -20,13 +20,22 @@
 #ifndef QE_CONSTANTS_HPP
 #define QE_CONSTANTS_HPP
 
+#include<algorithm>
+#include<functional>
 #include<type_traits>
+#include<vector>
 
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 
 namespace qe {
 typedef unsigned int flag_t;
+
+template<typename T>
+struct option_t {
+    typedef T type;
+    T val;
+};
 
 const char* const backend_error_glfw = "could not initialize glfw";
 const char* const backend_error_window = "could not create window";
@@ -47,6 +56,32 @@ const flag_t UNIDIFFTEX = 4;
 
 // TEXTURE BINDING POINTS
 const flag_t DIFFTEXBIND = 0;
+
+// OPTIONS
+template<typename T>
+class option__t {
+private:
+    T _val;
+    std::vector<std::function<void(T,T)>> _cbs;
+public:
+    option__t(T val): _val(val) {}
+    option__t<T> &operator=(T val) {
+        std::for_each(_cbs.begin(), _cbs.end(), [this,val](auto &f){f(_val,val);});
+        _val = val;
+        return *this;
+    }
+    option__t<T> &operator<<(std::function<void(T,T)> cb) {
+        _cbs.push_back(cb);
+    }
+    operator T() {return _val;}
+};
+
+template<flag_t f, typename T, T V> option__t<T> &_() {
+    static option__t<T> val(V);
+    return val;
+}
+
+constexpr auto VSYNC = _<0, bool, false>;
 
 }
 
