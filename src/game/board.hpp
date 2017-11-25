@@ -33,6 +33,7 @@ namespace gamespace {
     };
 
     typedef hextile::HexTile<BoardTile> GameBoard;
+    typedef hextile::hexpoint_t hexpoint_t;
 
 }
 
