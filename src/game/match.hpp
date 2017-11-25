@@ -7,12 +7,12 @@
 
 namespace gamespace {
     class Match {
-        private:
+    private:
         hextile::HexTile<BoardTile> _board; //!< pointer to board
         std::vector<Move> _move;
         gamespace::Player _player1;
         gamespace::Player _player2;
-        public:
+    public:
         GameBoard &getBoard();
         Move &getMove();
         Player &getPlayer1();

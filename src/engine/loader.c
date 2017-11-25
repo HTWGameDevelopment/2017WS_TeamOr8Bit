@@ -30,17 +30,22 @@ unsigned char *_qe_read_png(FILE *fd, size_t *size, size_t *_width, size_t *_hei
     assert(fd);
     assert(size);
     png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+
     if(!png_ptr) {
         _qe_read_png_error = READ_STRUCT;
         return NULL;
     }
+
     png_infop info_ptr = png_create_info_struct(png_ptr);
+
     if(!info_ptr) {
         _qe_read_png_error = INFO_STRUCT;
         png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
         return NULL;
     }
+
     png_infop end_info = png_create_info_struct(png_ptr);
+
     if(!end_info) {
         _qe_read_png_error = INFO_STRUCT;
         png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
@@ -57,9 +62,19 @@ unsigned char *_qe_read_png(FILE *fd, size_t *size, size_t *_width, size_t *_hei
     png_byte depth = png_get_bit_depth(png_ptr, info_ptr);
 
     switch(color) {
-        case PNG_COLOR_TYPE_PALETTE: png_set_palette_to_rgb(png_ptr); break;
-        case PNG_COLOR_TYPE_GRAY: if(depth < 8) png_set_expand_gray_1_2_4_to_8(png_ptr); png_set_gray_to_rgb(png_ptr); break;
-        case PNG_COLOR_TYPE_RGB: png_set_add_alpha(png_ptr, 0xff, PNG_FILLER_AFTER); break;
+    case PNG_COLOR_TYPE_PALETTE:
+        png_set_palette_to_rgb(png_ptr);
+        break;
+
+    case PNG_COLOR_TYPE_GRAY:
+        if(depth < 8) png_set_expand_gray_1_2_4_to_8(png_ptr);
+
+        png_set_gray_to_rgb(png_ptr);
+        break;
+
+    case PNG_COLOR_TYPE_RGB:
+        png_set_add_alpha(png_ptr, 0xff, PNG_FILLER_AFTER);
+        break;
     }
 
     if(depth == 16) png_set_strip_16(png_ptr);
@@ -73,25 +88,29 @@ unsigned char *_qe_read_png(FILE *fd, size_t *size, size_t *_width, size_t *_hei
         for(int i = 0; i < height; ++i) {
             free(rows[i]);
         }
+
         free(rows);
         png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
         _qe_read_png_error = READ_IMAGE;
         return NULL;
     }
 
-    rows = (png_bytep*) malloc(sizeof(png_bytep) * height);
+    rows = (png_bytep *) malloc(sizeof(png_bytep) * height);
+
     for(int i = 0; i < height; ++i)
-        rows[i] = (png_byte*) malloc(width * 4);
+        rows[i] = (png_byte *) malloc(width * 4);
 
     png_read_image(png_ptr, rows);
 
-    unsigned char* buffer = (unsigned char*) malloc(width * height * 4);
+    unsigned char *buffer = (unsigned char *) malloc(width * height * 4);
+
     for(int i = 0; i < height; ++i)
         memcpy(buffer + i * width * 4, rows[i], width * 4);
 
     for(int i = 0; i < height; ++i) {
         free(rows[i]);
     }
+
     free(rows);
     png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
     *size = width * height;

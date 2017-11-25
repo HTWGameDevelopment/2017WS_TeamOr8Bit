@@ -27,16 +27,16 @@
 
 namespace qe {
 
-inline std::string getPath(std::string i) {
+    inline std::string getPath(std::string i) {
 #ifndef __linux__
-    std::replace(i.begin(), i.end(), '/', '\\');
+        std::replace(i.begin(), i.end(), '/', '\\');
 #endif
-    return i;
-}
+        return i;
+    }
 
 }
 
-std::string operator "" _p(const char* s, size_t len) {
+std::string operator "" _p(const char *s, size_t len) {
     return qe::getPath(std::string(s, len));
 }
 

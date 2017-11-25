@@ -26,40 +26,40 @@
 
 namespace qe {
 
-/**
- * \brief Generic OpenGL buffer implementation
- */
-template<GLenum target>
-class Buffer {
-private:
-    GLuint _buffer;
-    size_t _size;
-public:
-    Buffer(): _size(0) {
-        glGenBuffers(1, &_buffer);
-    }
-    Buffer(const Buffer &other) = delete;
-    Buffer(Buffer &&other) = default;
-    ~Buffer() {
-        glDeleteBuffers(1, &_buffer);
-    }
-    Buffer &operator=(const Buffer &other) = delete;
-    Buffer &operator=(Buffer &&other) = default;
-    operator GLuint() {
-        return _buffer;
-    }
-    void bind() {
-        glBindBuffer(target, _buffer);
-        GLSERRORCHECK;
-    }
-    template<GLenum usage>
-    void data(void *data, size_t size) {
-        bind();
-        glBufferData(target, size, data, usage);
-        GLERRORCHECK;
-        _size = size;
-    }
-};
+    /**
+     * \brief Generic OpenGL buffer implementation
+     */
+    template<GLenum target>
+    class Buffer {
+    private:
+        GLuint _buffer;
+        size_t _size;
+    public:
+        Buffer(): _size(0) {
+            glGenBuffers(1, &_buffer);
+        }
+        Buffer(const Buffer &other) = delete;
+        Buffer(Buffer &&other) = default;
+        ~Buffer() {
+            glDeleteBuffers(1, &_buffer);
+        }
+        Buffer &operator=(const Buffer &other) = delete;
+        Buffer &operator=(Buffer &&other) = default;
+        operator GLuint() {
+            return _buffer;
+        }
+        void bind() {
+            glBindBuffer(target, _buffer);
+            GLSERRORCHECK;
+        }
+        template<GLenum usage>
+        void data(void *data, size_t size) {
+            bind();
+            glBufferData(target, size, data, usage);
+            GLERRORCHECK;
+            _size = size;
+        }
+    };
 
 }
 

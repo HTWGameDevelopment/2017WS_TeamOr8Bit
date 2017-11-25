@@ -41,14 +41,16 @@ namespace qe {
      */
     const GLFlagSet getGLFlagSet(flag_t flag) {
         switch(flag) {
-            case qe::PNGRGBA: return qe::GLFlagSet {GL_TEXTURE_2D, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
-            default: assert(false);
+        case qe::PNGRGBA:
+            return qe::GLFlagSet {GL_TEXTURE_2D, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
+        default:
+            assert(false);
         }
     }
 
-/**
- * \brief An OpenGL texture class
- */
+    /**
+     * \brief An OpenGL texture class
+     */
     template<flag_t T> class Texture {
     private:
         Loader<T> _source; //!< Loader with data in memory/on-disk
@@ -59,6 +61,7 @@ namespace qe {
          */
         void initTexture() {
             if(T == PNGRGBA) return initTextureAsRGBA();
+
             assert(false);
         }
         /**
@@ -67,17 +70,19 @@ namespace qe {
          * \todo necessary?
          */
         void initTextureAsRGBA() {
-            glGenTextures(1, &_texture); GLSERRORCHECK;
-            glBindTexture(_gl.target, _texture); GLSERRORCHECK;
+            glGenTextures(1, &_texture);
+            GLSERRORCHECK;
+            glBindTexture(_gl.target, _texture);
+            GLSERRORCHECK;
             glTexImage2D(_gl.target,
-                0,
-                _gl.internalFormat,
-                _source.width(),
-                _source.height(),
-                0,
-                _gl.format,
-                _gl.type,
-                _source.parse());
+                         0,
+                         _gl.internalFormat,
+                         _source.width(),
+                         _source.height(),
+                         0,
+                         _gl.format,
+                         _gl.type,
+                         _source.parse());
             glTexParameteri(_gl.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(_gl.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(_gl.target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -107,14 +112,16 @@ namespace qe {
          * \brief Bind texture to target
          */
         void bind() {
-            glBindTexture(_gl.target, _texture); GLERRORCHECK;
+            glBindTexture(_gl.target, _texture);
+            GLERRORCHECK;
         }
         /**
          * \brief Bind texture to active texture target
          */
         template<GLenum target>
         void bindTo() {
-            glActiveTexture(target); GLERRORCHECK;
+            glActiveTexture(target);
+            GLERRORCHECK;
             bind();
         }
     };

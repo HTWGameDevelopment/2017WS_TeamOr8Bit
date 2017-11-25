@@ -30,9 +30,9 @@ namespace hextile {
         size_t y;
     };
 
-/**
- * \brief A 2D board of hexagonal tiles of type T
- */
+    /**
+     * \brief A 2D board of hexagonal tiles of type T
+     */
     template<typename T>
     class HexTile {
     public:
@@ -43,7 +43,9 @@ namespace hextile {
         struct col_type {
             std::vector<tile_type> rows;
             col_type(size_t i): rows(i, tile_type()) {}
-            tile_type &operator[](size_t i) {return rows[i];}
+            tile_type &operator[](size_t i) {
+                return rows[i];
+            }
         };
     private:
         size_t _x;
@@ -57,9 +59,15 @@ namespace hextile {
                     _data[i][j] = hexpoint_t {i, j};
                 }
         }
-        size_t x() {return _x;}
-        size_t y() {return _y;}
-        col_type &operator[](size_t i) {return _data[i];}
+        size_t x() {
+            return _x;
+        }
+        size_t y() {
+            return _y;
+        }
+        col_type &operator[](size_t i) {
+            return _data[i];
+        }
         /**
          * \brief Iterator over all tiles
          */
@@ -75,18 +83,26 @@ namespace hextile {
             hexiterator(HexTile<T> &cont): _bigiter(cont._data.begin()), _smalliter(_bigiter->rows.begin()), _bigend(cont._data.end()), _smallend(_bigiter->rows.end()) {}
             bool operator==(hexiterator &other) {
                 if(_bigend != other._bigend) return false; // wrong iterator pair
+
                 if(other._bigiter == _bigiter && _bigiter == _bigend) return true; // iter == end()?
+
                 return (other._bigiter == _bigiter) && (other._smalliter == _smalliter);
             }
-            bool operator!=(hexiterator &other) {return !(*this == other);}
+            bool operator!=(hexiterator &other) {
+                return !(*this == other);
+            }
             hexiterator &operator++() {
                 ++_smalliter;
+
                 if(_smalliter == _smallend) {
                     ++_bigiter;
+
                     if(_bigiter == _bigend) return *this;
+
                     _smalliter = _bigiter->rows.begin();
                     _smallend = _bigiter->rows.end();
                 }
+
                 return *this;
             }
             T *operator->() {
@@ -100,8 +116,12 @@ namespace hextile {
                 return *this;
             }
         };
-        hexiterator begin() {return hexiterator(*this);}
-        hexiterator end() {return hexiterator(*this).end();}
+        hexiterator begin() {
+            return hexiterator(*this);
+        }
+        hexiterator end() {
+            return hexiterator(*this).end();
+        }
     };
 
 }

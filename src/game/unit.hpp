@@ -16,10 +16,10 @@ namespace gamespace {
         unsigned int ar; //!< Attack range
         unsigned int vr; //!< Visibility range
         unsigned int dpt; //!< travel distance per turn
-        std::function<unsigned int(Terrain&)> _a; //!< attack range relation
-        std::function<unsigned int(Terrain&)> _d; //!< attack damage relation
-        std::function<unsigned int(Terrain&)> _t; //!< travel distance relation
-        std::function<unsigned int(Terrain&)> _v; //!< visibility relation
+        std::function<unsigned int(Terrain &)> _a; //!< attack range relation
+        std::function<unsigned int(Terrain &)> _d; //!< attack damage relation
+        std::function<unsigned int(Terrain &)> _t; //!< travel distance relation
+        std::function<unsigned int(Terrain &)> _v; //!< visibility relation
     public:
     };
 
