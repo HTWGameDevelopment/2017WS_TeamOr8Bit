@@ -1,0 +1,41 @@
+* Using Lua in Or8Bit
+** Abstraction
+   In short, lua will determine everything you see on screen while C/C++ will
+   implement whatever lua needs. This means that the engine and optimized data
+   structures will be implemented in C/C++ but the gameplay (especially the
+   unit types) will be implemented in Lua.
+** Uses and Interfaces
+*** Map
+    The map is a userdata type in a global variable _map.
+**** :lowest_sum(from, to, unit, relation)
+     Traverse every way from =from= to =to= and return the lowest sum of
+     relation(unit, tile) calls along the way. Bail early if a call returns
+     a =value < 0=.
+*** Units
+    Units reside in =static/units=. Each unit is a module implementing
+    methods for querying common stats.
+**** Types
+***** enemy
+      A userdata type for a unit
+***** tile
+      A userdata type for a tile
+**** Common Stats
+***** module.unitname
+      Name of the unit (internally)
+***** module.is
+      Base module (see prototypes below)
+***** module.is_name
+      Name of a prototype
+***** module:get_hp(): number
+      Health points of a unit. Drops to 0 = destroyed.
+***** module:attack(enemy)
+      Attacks an enemy and updates the data structures. A check for =HP > 0=
+      is performed internally.
+***** module:is_visible(tile)
+      Return =true= if unit is visible from =tile='s perspective.
+***** module:is_walking_distance(tile)
+      Retrun =true= if =tile= is withing walking distance from unit.
+**** Prototypes
+***** default_unit
+      A unit prototype for implementing the attacking system as defined in
+      in GDD 8.4 Attacking.

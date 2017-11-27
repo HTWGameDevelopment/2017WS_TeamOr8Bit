@@ -10,3 +10,6 @@
 	path = extern/zlib
 	url = https://github.com/madler/zlib
 	ignore = all
+[submodule "extern/lua"]
+	path = extern/lua
+	url = https://github.com/LuaDist/lua

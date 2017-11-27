@@ -1,6 +1,7 @@
 #include<engine/qe.hpp>
 
 #include "board.hpp"
+#include "scripting.hpp"
 
 #include<logger.h>
 
@@ -29,8 +30,9 @@ private:
         std::unique_ptr<qe::Texture<qe::PNGRGBA>> hextile_grass;
     } _textures;
     gamespace::GameBoard _board;
+    gamespace::Scripting _scripting;
 public:
-    Game(qe::Context *ctxt): _ctxt(ctxt), _board(10, 5) {
+    Game(qe::Context *ctxt): _ctxt(ctxt), _board(10, 5), _scripting(&_board) {
         assert(ctxt);
     }
     void initializeAssets() {
@@ -57,6 +59,7 @@ public:
                               _ctxt->getAR(),
                               90
                           ));
+        _scripting.loadScript("static/units/tank");
     }
     void run() {
         _shaders.objv2.use();
