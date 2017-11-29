@@ -40,11 +40,21 @@ namespace qe {
         std::unique_ptr<unsigned char[]> _pixels;
     public:
         Loader(size_t l): _size(l * l), _length(l), _pixels(new unsigned char[_size]) {}
-        unsigned char* parse() {return _pixels.get();}
-        size_t size() {return _size;}
-        size_t width() {return _length;}
-        size_t height() {return _length;}
-        unsigned int elementSize() {return 1;}
+        unsigned char *parse() {
+            return _pixels.get();
+        }
+        size_t size() {
+            return _size;
+        }
+        size_t width() {
+            return _length;
+        }
+        size_t height() {
+            return _length;
+        }
+        unsigned int elementSize() {
+            return 1;
+        }
         void setRect(size_t x, size_t y, size_t w, size_t h, unsigned char *data) {
             for(size_t i = 0; i < h; ++i) {
                 memcpy(_pixels.get() + (y + h - i) * _length + x, data + i * w, w);
@@ -90,15 +100,19 @@ namespace qe {
         GlyphmapLatin(GlyphmapLatin &&other) = delete;
         GlyphmapLatin &operator=(const GlyphmapLatin &other) = delete;
         GlyphmapLatin &operator=(GlyphmapLatin &&other) = delete;
-        glm::ivec2 getResolution() {return _res;}
+        glm::ivec2 getResolution() {
+            return _res;
+        }
         /**
          * \brief Return pixel height of highest glyph
          */
         size_t highestGlyph() {
             size_t mh = 0;
+
             for(size_t i = 0; i < capacity; ++i) {
                 mh = std::max(mh, _metrics[i].h);
             }
+
             return mh;
         }
         fontmetrics getMetrics(char c) {
@@ -109,100 +123,104 @@ namespace qe {
          */
         glm::vec4 scalePosition(glm::ivec2 pos, fontmetrics metrics) {
             return (glm::vec4(
-                (1.0f * pos.x + metrics.off_x),
-                (1.0f * pos.y - (metrics.h - metrics.off_y)),
-                1.0f * metrics.w,
-                1.0f * metrics.h)
-                - glm::vec4(_res.x >> 1, _res.y >> 1, 1, 1))
-                / glm::vec4(_res.x >> 1, _res.y >> 1, _res.x >> 1, _res.y >> 1);
+                        (1.0f * pos.x + metrics.off_x),
+                        (1.0f * pos.y - (metrics.h - metrics.off_y)),
+                        1.0f * metrics.w,
+                        1.0f * metrics.h)
+                    - glm::vec4(_res.x >> 1, _res.y >> 1, 1, 1))
+                   / glm::vec4(_res.x >> 1, _res.y >> 1, _res.x >> 1, _res.y >> 1);
         }
         /**
          * \brief Return UV position of glyph in glyphmap
          */
-        glm::vec2 scaleOrigin(fontmetrics m) {return glm::vec2(1.0f * m.x / texlength, 1.0f * m.y / texlength);}
+        glm::vec2 scaleOrigin(fontmetrics m) {
+            return glm::vec2(1.0f * m.x / texlength, 1.0f * m.y / texlength);
+        }
         /**
          * \brief Return UV scaling of glyph in glyphmap
          */
-        glm::vec2 scaleUVScale(fontmetrics m) {return glm::vec2(1.0f * m.w / texlength, 1.0f * (1 + m.h) / texlength);}
+        glm::vec2 scaleUVScale(fontmetrics m) {
+            return glm::vec2(1.0f * m.w / texlength, 1.0f * (1 + m.h) / texlength);
+        }
     };
 
-/**
- * \brief Mesh for rendering a glyph
- */
-template<> class Mesh<TEXTG> {
-private:
-    Buffer<GL_ARRAY_BUFFER> _buffer; //!< OpenGL buffer
-    GLuint _vao; //!< OpenGL VAO handle
-    const size_t _size = 4; //!< Vertex count
-    const float rectangle[16] = {
-        0, 1,
-        0, 0,
-        1, 1,
-        1, 0,
-        0, 1,
-        0, 0,
-        1, 1,
-        1, 0
-    }; //!< Vertex data
     /**
-     * \brief Initialize VAO
+     * \brief Mesh for rendering a glyph
      */
-    void initVAO() {
-        glGenVertexArrays(1, &_vao);
-        GLSERRORCHECK;
-        glBindVertexArray(_vao);
-        GLSERRORCHECK;
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-        GLSERRORCHECK;
-        _buffer.bind();
-        glVertexAttribPointer(
-            (GLuint)0, // vertex
-            2,
-            GL_FLOAT,
-            GL_FALSE,
-            0,
-            (void*)0
-        );
-        glVertexAttribPointer(
-            (GLuint)1, // uv
-            2,
-            GL_FLOAT,
-            GL_FALSE,
-            0,
-            (void*)32 // 4 * 2 * float
-        );
-        GLSERRORCHECK;
-        glBindVertexArray(0);
-    }
-public:
-    /**
-     * \brief Construct rectangle for text rendering
-     */
-    Mesh() {
-        _buffer.data<GL_DYNAMIC_DRAW>((void*)rectangle, sizeof(rectangle));
-        initVAO();
-    }
-    Mesh(const Mesh<TEXTG> &other) = delete;
-    Mesh(Mesh<TEXTG> &&other) = delete;
-    /**
-     * \brief Destroy VAO and buffer data
-     */
-    ~Mesh() {
-        glDeleteVertexArrays(1, &_vao);
-    }
-    Mesh<TEXTG> &operator=(const Mesh<TEXTG> &other) = delete;
-    Mesh<TEXTG> &operator=(Mesh<TEXTG> &&other) = delete;
-    /**
-     * \brief Bind VAO and make render call
-     */
-    void render() {
-        glBindVertexArray(_vao);
-        GLSERRORCHECK;
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, _size);
-        GLSERRORCHECK;
-    }
-};
+    template<> class Mesh<TEXTG> {
+    private:
+        Buffer<GL_ARRAY_BUFFER> _buffer; //!< OpenGL buffer
+        GLuint _vao; //!< OpenGL VAO handle
+        const size_t _size = 4; //!< Vertex count
+        const float rectangle[16] = {
+            0, 1,
+            0, 0,
+            1, 1,
+            1, 0,
+            0, 1,
+            0, 0,
+            1, 1,
+            1, 0
+        }; //!< Vertex data
+        /**
+         * \brief Initialize VAO
+         */
+        void initVAO() {
+            glGenVertexArrays(1, &_vao);
+            GLSERRORCHECK;
+            glBindVertexArray(_vao);
+            GLSERRORCHECK;
+            glEnableVertexAttribArray(0);
+            glEnableVertexAttribArray(1);
+            GLSERRORCHECK;
+            _buffer.bind();
+            glVertexAttribPointer(
+                (GLuint)0, // vertex
+                2,
+                GL_FLOAT,
+                GL_FALSE,
+                0,
+                (void *)0
+            );
+            glVertexAttribPointer(
+                (GLuint)1, // uv
+                2,
+                GL_FLOAT,
+                GL_FALSE,
+                0,
+                (void *)32 // 4 * 2 * float
+            );
+            GLSERRORCHECK;
+            glBindVertexArray(0);
+        }
+    public:
+        /**
+         * \brief Construct rectangle for text rendering
+         */
+        Mesh() {
+            _buffer.data<GL_DYNAMIC_DRAW>((void *)rectangle, sizeof(rectangle));
+            initVAO();
+        }
+        Mesh(const Mesh<TEXTG> &other) = delete;
+        Mesh(Mesh<TEXTG> &&other) = delete;
+        /**
+         * \brief Destroy VAO and buffer data
+         */
+        ~Mesh() {
+            glDeleteVertexArrays(1, &_vao);
+        }
+        Mesh<TEXTG> &operator=(const Mesh<TEXTG> &other) = delete;
+        Mesh<TEXTG> &operator=(Mesh<TEXTG> &&other) = delete;
+        /**
+         * \brief Bind VAO and make render call
+         */
+        void render() {
+            glBindVertexArray(_vao);
+            GLSERRORCHECK;
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, _size);
+            GLSERRORCHECK;
+        }
+    };
 
 }
 

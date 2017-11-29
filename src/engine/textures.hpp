@@ -41,14 +41,16 @@ namespace qe {
      */
     constexpr GLFlagSet getGLFlagSet(flag_t flag) {
         switch(flag) {
-            case qe::TEXTG: return qe::GLFlagSet {GL_TEXTURE_2D, GL_R8, GL_RED, GL_UNSIGNED_BYTE};
+        case qe::TEXTG:
+            return qe::GLFlagSet {GL_TEXTURE_2D, GL_R8, GL_RED, GL_UNSIGNED_BYTE};
         }
+
         return qe::GLFlagSet {GL_TEXTURE_2D, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
     }
 
-/**
- * \brief An OpenGL texture class
- */
+    /**
+     * \brief An OpenGL texture class
+     */
     template<flag_t T, GLenum U> class Texture {
     private:
         Loader<T> _source; //!< Loader with data in memory/on-disk
@@ -60,6 +62,7 @@ namespace qe {
         void initTexture() {
             if(T == PNGRGBA) return initTextureAsRGBA();
             else if(T == TEXTG) return initTextureAsGlyphmap();
+
             assert(false);
         }
         /**
@@ -68,7 +71,8 @@ namespace qe {
          * \todo necessary?
          */
         void initTextureAsRGBA() {
-            glGenTextures(1, &_texture); GLSERRORCHECK;
+            glGenTextures(1, &_texture);
+            GLSERRORCHECK;
             bindTo();
             glTexImage2D(_gl.target, 0, _gl.internalFormat, _source.width(), _source.height(), 0, _gl.format, _gl.type, _source.parse());
             glTexParameteri(_gl.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -83,7 +87,8 @@ namespace qe {
          * \todo necessary?
          */
         void initTextureAsGlyphmap() {
-            glGenTextures(1, &_texture); GLSERRORCHECK;
+            glGenTextures(1, &_texture);
+            GLSERRORCHECK;
             bindTo();
             glTexImage2D(_gl.target, 0, _gl.internalFormat, _source.width(), _source.height(), 0, _gl.format, _gl.type, _source.parse());
             glTexParameteri(_gl.target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -101,27 +106,29 @@ namespace qe {
         Texture(Loader<T> &&l): _source(std::move(l)) {
             initTexture();
         }
-        Texture(const Texture<T,U> &other) = delete;
-        Texture(Texture<T,U> &&other) = delete;
+        Texture(const Texture<T, U> &other) = delete;
+        Texture(Texture<T, U> &&other) = delete;
         /**
          * \brief Destroy OpenGL texture handle and data
          */
         ~Texture() {
             glDeleteTextures(1, &_texture);
         }
-        Texture<T,U> &operator=(const Texture<T,U> &other) = delete;
-        Texture<T,U> &operator=(Texture<T,U> &&other) = delete;
+        Texture<T, U> &operator=(const Texture<T, U> &other) = delete;
+        Texture<T, U> &operator=(Texture<T, U> &&other) = delete;
         /**
          * \brief Bind texture to target
          */
         void bind() {
-            glBindTexture(_gl.target, _texture); GLERRORCHECK;
+            glBindTexture(_gl.target, _texture);
+            GLERRORCHECK;
         }
         /**
          * \brief Bind texture to active texture target
          */
         void bindTo() {
-            glActiveTexture(U); GLERRORCHECK;
+            glActiveTexture(U);
+            GLERRORCHECK;
             bind();
         }
     };

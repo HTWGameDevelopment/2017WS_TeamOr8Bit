@@ -26,9 +26,9 @@
 
 namespace qe {
 
-inline std::string getPath(std::string i) {
-    return i;
-}
+    inline std::string getPath(std::string i) {
+        return i;
+    }
 
 }
 

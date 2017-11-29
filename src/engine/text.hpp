@@ -45,14 +45,15 @@ namespace qe {
         Text() {}
         Text(glyphmap *g, glm::ivec2 baseline, PositionMode mode = BOTTOM): _glyphmap(g), _baseline(baseline) {
             switch(mode) {
-                case TOP:
-                    _baseline.y = _glyphmap->getResolution().y - _glyphmap->highestGlyph() - _baseline.y;
-                    break;
+            case TOP:
+                _baseline.y = _glyphmap->getResolution().y - _glyphmap->highestGlyph() - _baseline.y;
+                break;
             }
         }
         void render() {
             qe::Cache::texts->use();
             glm::ivec2 pos = _baseline;
+
             for(size_t i = 0; i < _text.length(); ++i) { // TODO Unicode support?
                 fontmetrics metrics = _glyphmap->getMetrics(_text[i]);
                 qe::Cache::texts->setUniform<UNIM>(_glyphmap->scalePosition(pos, metrics));
@@ -62,7 +63,9 @@ namespace qe {
                 pos.x += metrics.adv_x;
             }
         }
-        std::string &text() {return _text;}
+        std::string &text() {
+            return _text;
+        }
     };
 
 }

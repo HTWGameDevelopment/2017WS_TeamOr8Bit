@@ -55,19 +55,20 @@ public:
         qe::Cache::texts->setUniform<qe::UNICOLOR>(qe::FONTMAPBIND);
 
         _cam.camera.reset(new qe::Camera(
-            glm::vec3(4, 4, 4),
-            glm::vec2(-45, -45),
-            _ctxt->getResolution(),
-            0.1,
-            30,
-            _ctxt->getAR(),
-            90
-        ));
+                              glm::vec3(4, 4, 4),
+                              glm::vec2(-45, -45),
+                              _ctxt->getResolution(),
+                              0.1,
+                              30,
+                              _ctxt->getAR(),
+                              90
+                          ));
     }
     void run() {
         unsigned int fps = 0;
         glm::mat4 m = glm::translate(glm::vec3(0, 0, 0));
         glClearColor(0.3, 0.3, 0.3, 1);
+
         while(!_ctxt->shouldClose()) {
             glm::mat4 mvp = _cam.camera->matrices().pv * m;
             qe::Cache::objv2->use();
@@ -77,16 +78,19 @@ public:
             _ctxt->start();
             render();
             _ctxt->swap();
+
             if(fps != _ctxt->fps()) {
                 fps = _ctxt->fps();
                 GINFO("FPS " << std::to_string(fps));
             }
+
             _ctxt->events();
         }
     }
     void render() {
         auto b = _board.begin();
         auto e = _board.end();
+
         for(; b != e; ++b) {
             glm::vec2 p = b->centerPos();
             glm::mat4 m = glm::translate(glm::vec3(p.x, 0, p.y));
@@ -96,12 +100,17 @@ public:
             qe::Cache::objv2->setUniform<qe::UNIM>(m);
             _tile->render();
         }
+
         _ctxt->textcontext();
         _strings.gamename.render();
         _ctxt->meshcontext();
     }
-    qe::Camera *camera() {return _cam.camera.get();}
-    qe::Context *context() {return _ctxt;}
+    qe::Camera *camera() {
+        return _cam.camera.get();
+    }
+    qe::Context *context() {
+        return _ctxt;
+    }
 };
 
 Game *game;
@@ -116,10 +125,12 @@ const unsigned int MOVEBACKWARD = 5;
 bool movementmask[6];
 
 namespace qe {
-    void keycallback(GLFWwindow*, int key, int, int action, int) {
+    void keycallback(GLFWwindow *, int key, int, int action, int) {
         if(action == GLFW_REPEAT) return;
+
         if(key == GLFW_KEY_Q)
             game->context()->close();
+
         if(key == GLFW_KEY_P)
             qe::screenshot("screenshot.png", game->context()->width(), game->context()->height());
         else if(key == GLFW_KEY_A) movementmask[MOVELEFT] = action == GLFW_PRESS;
@@ -130,21 +141,26 @@ namespace qe {
         else if(key == GLFW_KEY_LEFT_SHIFT) movementmask[MOVEDOWN] = action == GLFW_PRESS;
     }
 
-    void errorcallback(int, const char* desc) {
+    void errorcallback(int, const char *desc) {
         GERR(desc);
     }
 
-    void mousecallback(GLFWwindow*, double x, double y) {
+    void mousecallback(GLFWwindow *, double x, double y) {
         game->camera()->mouseMoved(game->context()->deltaT(), x, y);
         game->context()->resetMouse();
     }
 
     void idlecallback() {
         if(movementmask[MOVEUP]) game->camera()->moveUp(10 * game->context()->deltaT());
+
         if(movementmask[MOVEDOWN]) game->camera()->moveDown(10 * game->context()->deltaT());
+
         if(movementmask[MOVELEFT]) game->camera()->moveLeft(10 * game->context()->deltaT());
+
         if(movementmask[MOVERIGHT]) game->camera()->moveRight(10 * game->context()->deltaT());
+
         if(movementmask[MOVEFORWARD]) game->camera()->moveForward(10 * game->context()->deltaT());
+
         if(movementmask[MOVEBACKWARD]) game->camera()->moveBackward(10 * game->context()->deltaT());
     }
 
