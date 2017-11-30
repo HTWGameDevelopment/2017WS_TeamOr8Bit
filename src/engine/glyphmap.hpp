@@ -25,8 +25,12 @@
 
 #include<glm/vec4.hpp>
 
+#include<config.h>
+
+#ifdef HAS_FREETYPE
 #include<ft2build.h>
 #include FT_FREETYPE_H
+#endif
 
 namespace qe {
 
@@ -87,15 +91,20 @@ namespace qe {
         std::unique_ptr<Texture<TEXTG, FONTMAPBIND_GL>> _glyphmap; //!< Texture
         std::array<fontmetrics, capacity> _metrics; //!< Metrics
         glm::ivec2 _res; //!< screen resolution
+#ifdef HAS_FREETYPE
         /**
          * \brief Initialize glyphmap.
          */
         void initialize(FT_Face face, size_t height);
+#endif
     public:
         /**
          * \brief Constructor
          */
+#ifdef HAS_FREETYPE
         GlyphmapLatin(FT_Face face, size_t height, glm::ivec2 res);
+#endif
+        GlyphmapLatin(const char* path, glm::ivec2 res);
         GlyphmapLatin(const GlyphmapLatin &other) = delete;
         GlyphmapLatin(GlyphmapLatin &&other) = delete;
         GlyphmapLatin &operator=(const GlyphmapLatin &other) = delete;

@@ -1,5 +1,9 @@
 cmake_minimum_required (VERSION 2.6)
-project (TeamOr8Bit)
+project (Or8Bit)
+# variables
+set(TOVERSION_MAJOR 0)
+set(TOVERSION_MINOR 0)
+set(TEAM_NAME "Team Or8Bit")
 set(CMAKE_CXX_STANDARD 14)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -12,14 +16,8 @@ set(PNG_HARDWARE_OPTIMIZATIONS OFF CACHE BOOL "" FORCE)
 set(PNG_BUILD_ZLIB "extern/zlib" CACHE PATH "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
-find_package(Freetype REQUIRED)
-
-add_subdirectory(extern/zlib)
-add_subdirectory(extern/libpng-1.6.32)
-add_subdirectory(extern/GLFW)
-add_definitions(${PNG_DEFINITIONS})
-include_directories(src extern/glad/include extern/glm extern/GLFW/include extern/libpng-1.6.32 ${FREETYPE_INCLUDE_DIRS})
-add_executable(TeamOr8Bit
+# program
+add_executable(Or8Bit
     src/game/main.cpp
     extern/glad/src/glad.c
     src/engine/loader.c
@@ -29,4 +27,22 @@ add_executable(TeamOr8Bit
     src/font/font.cpp
     src/engine/cache.cpp
     src/engine/programs.cpp)
-target_link_libraries(TeamOr8Bit png_static zlibstatic glfw ${FREETYPE_LIBRARIES})
+
+# dependencies
+find_package(Freetype)
+if(Freetype_FOUND)
+include_directories(${FREETYPE_INCLUDE_DIRS})
+target_link_libraries(Or8Bit ${FREETYPE_LIBRARIES})
+endif()
+
+add_subdirectory(extern/zlib)
+add_subdirectory(extern/libpng-1.6.32)
+add_subdirectory(extern/GLFW)
+add_definitions(${PNG_DEFINITIONS})
+include_directories(${CMAKE_BINARY_DIR} src extern/glad/include extern/glm extern/GLFW/include extern/libpng-1.6.32)
+
+# config header
+configure_file(src/config.h.in config.h)
+
+# link program
+target_link_libraries(Or8Bit png_static zlibstatic glfw)

@@ -21,6 +21,7 @@
 
 using namespace qe;
 
+#ifdef HAS_FREETYPE
 GlyphmapLatin::GlyphmapLatin(FT_Face face, size_t height, glm::ivec2 res): _res(res) {
     initialize(face, height);
 }
@@ -63,4 +64,11 @@ void GlyphmapLatin::initialize(FT_Face face, size_t height) {
 
     _glyphmap.reset(new Texture<TEXTG, FONTMAPBIND_GL>(std::move(loader)));
     _glyphmap->bindTo();
+}
+#endif
+
+GlyphmapLatin::GlyphmapLatin(const char* path, glm::ivec2 res): _res(res) {
+    // load file
+    // fill _metrics
+    // create texture
 }
