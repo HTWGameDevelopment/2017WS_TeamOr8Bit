@@ -19,6 +19,8 @@
 // SOFTWARE.
 #include "glyphmap.hpp"
 
+#include<savegame/savegame.hpp>
+
 using namespace qe;
 
 #ifdef HAS_FREETYPE
@@ -69,6 +71,12 @@ void GlyphmapLatin::initialize(FT_Face face, size_t height) {
 
 GlyphmapLatin::GlyphmapLatin(const char* path, glm::ivec2 res): _res(res) {
     // load file
+    auto sg = savegame::load<1, 0>(std::string(path), "GlyphmapLatin");
     // fill _metrics
+    auto metrics = sg.getDataBlock("metrics");
+    memcpy(_metrics.data(), metrics.data.get(), sizeof(fontmetrics) * capacity);
     // create texture
+    auto texture = sg.getDataBlock("texture");
+    _glyphmap.reset(new Texture<TEXTG, FONTMAPBIND_GL>(Loader<TEXTG>(texture)));
+    _glyphmap->bindTo();
 }

@@ -26,7 +26,7 @@ SaveGame::SaveGame(std::string p, std::string m, unsigned int v): _path(p), _mag
 }
 
 SaveGame::~SaveGame() {
-    save();
+    if(_modified) save();
 }
 
 bool SaveGame::hasDataBlock(std::string b) {
@@ -43,7 +43,6 @@ SaveGame::DataBlock SaveGame::getDataBlock(std::string b) {
     auto e = _blocks.end();
     for(; i != e; ++i) {
         if(i->name == b) {
-            if(i->data == nullptr) read(*i);
             return SaveGame::DataBlock(b, i->size, i->data);
         }
     }
@@ -62,6 +61,7 @@ void SaveGame::storeDataBlock(std::string n, uint32_t size, unsigned char *data)
         }
     }
     _blocks.emplace_back(n, size, data);
+    _modified = true;
 }
 
 void _write(std::ofstream &o, std::string s) {
@@ -94,6 +94,7 @@ void SaveGame::save() {
         i->saved = true;
         start = out.tellp();
     }
+    _modified = false;
 }
 
 void SaveGame::generateIndex() {

@@ -26,7 +26,8 @@ add_executable(Or8Bit
     src/engine/glyphmap.cpp
     src/font/font.cpp
     src/engine/cache.cpp
-    src/engine/programs.cpp)
+    src/engine/programs.cpp
+    src/savegame/savegame.cpp)
 
 # dependencies
 find_package(Freetype)

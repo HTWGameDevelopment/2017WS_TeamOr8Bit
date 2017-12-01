@@ -45,7 +45,6 @@ private:
     };
     std::vector<DataBlockInt> _blocks;
     void generateIndex();
-    void read(DataBlockInt &b);
 public:
     struct DataBlock {
         std::string name;
@@ -79,13 +78,15 @@ struct magic_error: public std::runtime_error {
     magic_error(std::string exp, std::string got): runtime_error(std::string("SaveGame invalid magic value. expected: " + exp + ", got: " + got)) {}
 };
 
-template<unsigned int VERSION> SaveGame &migrate(SaveGame &s);
+template<unsigned int TYPE, unsigned int VERSION> SaveGame &migrate(SaveGame &s) {
+    return s;
+}
 
-template<unsigned int VERSION>
+template<unsigned int TYPE, unsigned int VERSION>
 SaveGame load(std::string p, std::string magic) {
     SaveGame s(p, magic, VERSION);
     if(s == VERSION) return s; // same version
-    else if(s < VERSION) return migrate<VERSION - 1>(s); // migrate upwards
+    else if(s < VERSION) return migrate<TYPE, VERSION - 1>(s); // migrate upwards
     else throw upper_barrier_error();
 }
 

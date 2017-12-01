@@ -22,6 +22,7 @@
 
 #include<engine/textures.hpp>
 #include<engine/mesh.hpp>
+#include<savegame/savegame.hpp>
 
 #include<glm/vec4.hpp>
 
@@ -31,6 +32,8 @@
 #include<ft2build.h>
 #include FT_FREETYPE_H
 #endif
+
+#include<cmath>
 
 namespace qe {
 
@@ -43,6 +46,9 @@ namespace qe {
         size_t _length;
         std::unique_ptr<unsigned char[]> _pixels;
     public:
+        Loader(savegame::SaveGame::DataBlock &b): _size(b.size), _length(sqrt(b.size)), _pixels(new unsigned char[_size]) {
+            memcpy(_pixels.get(), b.data.get(), _size);
+        }
         Loader(size_t l): _size(l * l), _length(l), _pixels(new unsigned char[_size]) {}
         unsigned char *parse() {
             return _pixels.get();
