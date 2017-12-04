@@ -23,6 +23,7 @@
 #include<glm/glm.hpp>
 #include<glm/gtc/quaternion.hpp>
 #include<glm/gtc/matrix_transform.hpp>
+#include<engine/camerabounds.hpp>
 
 #include<logger.h>
 #undef near
@@ -51,6 +52,7 @@ namespace qe {
         glm::vec3 _up; //!< Up vector
         glm::vec2 _angles; //!< View angles
 		glm::vec3 _planecoord; //!<viewed plane
+	    CameraBounds _bounds; //!<Extern Camera Bounds
     public:
         /**
          * Constructs a new camera object
@@ -79,15 +81,15 @@ namespace qe {
             _angles.x -= deltaT * dx;
             _angles.y -= deltaT * dy;
 
-            if(_angles.y >= M_PI / 2.0) _angles.y = M_PI / 2.0;
-            else if(_angles.y <= -M_PI / 2.0) _angles.y = -M_PI / 2.0;
-
             regenerate();
         }
         /**
          * \brief Regenerate matrices
          */
         inline void regenerate() {
+		    if(_angles.y >= M_PI / 2.0) _angles.y = M_PI / 2.0;
+            else if(_angles.y <= -M_PI / 2.0) _angles.y = -M_PI / 2.0;
+			if(_pos.y < _bounds.minHeight) _pos.y = 0,
             _dir = generateDirection();
             _right = glm::vec3(sin(_angles.x - M_PI / 2.0),
                                0,
