@@ -7,7 +7,7 @@
 
 #include<string.h>
 
-#define FONTPATH "/usr/share/fonts/dejavu/DejaVuSans.ttf"
+#define FONTPATH "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 
 /**
  * \brief Main game class
