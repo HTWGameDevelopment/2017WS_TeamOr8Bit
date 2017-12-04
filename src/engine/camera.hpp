@@ -50,6 +50,7 @@ namespace qe {
         glm::vec3 _right; //!< Right vector
         glm::vec3 _up; //!< Up vector
         glm::vec2 _angles; //!< View angles
+		glm::vec3 _planecoord; //!<viewed plane
     public:
         /**
          * Constructs a new camera object
@@ -96,6 +97,8 @@ namespace qe {
             _up = glm::normalize(_up);
             _matrices.v = glm::lookAt(_pos, _pos + _dir, _up);
             _matrices.pv = _p * _matrices.v;
+			_planecoord = getPlaneCoord();
+			printf("Looking at x:%f y:%f z:%f \n",_planecoord.x,_planecoord.y,_planecoord.z);
         }
         inline glm::vec3 generateDirection() {
             return glm::vec3(cos(_angles.y) * sin(_angles.x),
@@ -112,6 +115,16 @@ namespace qe {
         glm::vec3 pos() {
             return _pos;
         }
+		glm::vec3 getPlaneCoord() {
+			float delta;
+			if (_dir.y != 0) {
+			  delta = - _pos.y / _dir.y;
+			} else delta = 0;	
+				
+			return glm::vec3(_pos.x + delta * _dir.x,
+			                 0,
+							 _pos.z + delta * _dir.z);
+		}	
         Matrices &matrices() {
             return _matrices;
         }
@@ -139,6 +152,7 @@ namespace qe {
             _pos -= (float)deltaT * _up;
             regenerate();
         }
+		
     };
 
 }
