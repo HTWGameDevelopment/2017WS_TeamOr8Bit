@@ -39,7 +39,8 @@ private:
         uint32_t start;
         uint32_t size;
         bool saved;
-        std::shared_ptr<unsigned char> data;
+        std::unique_ptr<unsigned char> data;
+        DataBlockInt(const DataBlockInt &o) = delete;
         DataBlockInt(std::string n, uint32_t s, unsigned char *d): name(n), start(0), size(s), saved(false), data(d) {}
         DataBlockInt(std::string n, uint32_t st, uint32_t s, unsigned char *d): name(n), start(st), size(s), saved(true), data(d) {}
     };
@@ -49,8 +50,8 @@ public:
     struct DataBlock {
         std::string name;
         uint32_t size;
-        std::shared_ptr<unsigned char> data;
-        DataBlock(std::string n, uint32_t s, std::shared_ptr<unsigned char> &p): name(n), size(s), data(p) {}
+        unsigned char *data;
+        DataBlock(std::string n, uint32_t s, unsigned char *p): name(n), size(s), data(p) {}
     };
     SaveGame(std::string p, std::string m, unsigned int v);
     ~SaveGame();

@@ -47,7 +47,7 @@ namespace qe {
         std::unique_ptr<unsigned char[]> _pixels;
     public:
         Loader(savegame::SaveGame::DataBlock &b): _size(b.size), _length(sqrt(b.size)), _pixels(new unsigned char[_size]) {
-            memcpy(_pixels.get(), b.data.get(), _size);
+            memcpy(_pixels.get(), b.data, _size);
         }
         Loader(size_t l): _size(l * l), _length(l), _pixels(new unsigned char[_size]) {}
         unsigned char *parse() {
@@ -157,6 +157,10 @@ namespace qe {
         glm::vec2 scaleUVScale(fontmetrics m) {
             return glm::vec2(1.0f * m.w / texlength, 1.0f * (1 + m.h) / texlength);
         }
+        Texture<TEXTG, FONTMAPBIND_GL> *getTexture() {
+            return _glyphmap.get();
+        }
+        void bakeTo(const char* path);
     };
 
     /**

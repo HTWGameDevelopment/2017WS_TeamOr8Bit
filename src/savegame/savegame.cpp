@@ -30,8 +30,8 @@ SaveGame::~SaveGame() {
 }
 
 bool SaveGame::hasDataBlock(std::string b) {
-    auto i = _blocks.begin();
-    auto e = _blocks.end();
+    auto &i = _blocks.begin();
+    auto &e = _blocks.end();
     for(; i != e; ++i) {
         if(i->name == b) return true;
     }
@@ -39,19 +39,19 @@ bool SaveGame::hasDataBlock(std::string b) {
 }
 
 SaveGame::DataBlock SaveGame::getDataBlock(std::string b) {
-    auto i = _blocks.begin();
-    auto e = _blocks.end();
+    auto &i = _blocks.begin();
+    auto &e = _blocks.end();
     for(; i != e; ++i) {
         if(i->name == b) {
-            return SaveGame::DataBlock(b, i->size, i->data);
+            return SaveGame::DataBlock(b, i->size, i->data.get());
         }
     }
     throw datablock_doesnt_exist_error(b);
 }
 
 void SaveGame::storeDataBlock(std::string n, uint32_t size, unsigned char *data) {
-    auto i = _blocks.begin();
-    auto e = _blocks.end();
+    auto &i = _blocks.begin();
+    auto &e = _blocks.end();
     for(; i != e; ++i) {
         if(i->name == n) {
             i->size = size;
@@ -83,8 +83,8 @@ void SaveGame::save() {
     out.exceptions(std::ios::badbit);
     _write(out, _magic);
     out.write((char*)&_version, sizeof(_version));
-    auto i = _blocks.begin();
-    auto e = _blocks.end();
+    auto &i = _blocks.begin();
+    auto &e = _blocks.end();
     uint32_t start = 0;
     for(; i != e; ++i) {
         i->start = start;
@@ -111,9 +111,9 @@ void SaveGame::generateIndex() {
         std::string name = _read(inp);
         uint32_t size;
         inp.read((char*)&size, sizeof(size));
-        DataBlockInt block(name, start, size, new unsigned char[size]);
-        inp.read((char*)block.data.get(), size);
-        _blocks.push_back(block);
+        std::unique_ptr<unsigned char> ptr(new unsigned[size]);
+        inp.read((char*)ptr.get(), size);
+        _blocks.emplace_back(name, start, size, std::move(ptr));
         start += size;
     }
 }

@@ -64,6 +64,9 @@ public:
                               90
                           ));
     }
+    void bakeAssets() {
+        qe::Cache::glyphlatin->bakeTo("assets/fonts/dejavu.baked");
+    }
     void run() {
         unsigned int fps = 0;
         glm::mat4 m = glm::translate(glm::vec3(0, 0, 0));
@@ -168,6 +171,7 @@ namespace qe {
 
 int main(int argc, char *argv[]) {
     int i;
+    bool bake = false;
 
     for(i=0; i < argc; i++) {
         if (strcmp( argv[i],"-vsync")==0 ) {
@@ -179,6 +183,10 @@ int main(int argc, char *argv[]) {
         if (strcmp(argv[i],"-version")==0) {
           //show version
         }
+        if (strcmp(argv[i],"-bake")==0) {
+          // bake glyphmap
+          bake = true;
+        }
     }
 
     qe::Context context("Team Or8Bit - Unnamed Game", 800, 600);
@@ -187,6 +195,7 @@ int main(int argc, char *argv[]) {
         Game g(&context);
         game = &g;
         g.initializeAssets();
+        if(bake) g.bakeAssets();
         g.run();
     }
     return 0;

@@ -131,6 +131,9 @@ namespace qe {
             GLERRORCHECK;
             bind();
         }
+        Loader<T> &getLoader() {
+            return _source;
+        }
     };
 
 }

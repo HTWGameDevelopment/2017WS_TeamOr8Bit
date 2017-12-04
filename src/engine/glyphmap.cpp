@@ -74,9 +74,20 @@ GlyphmapLatin::GlyphmapLatin(const char* path, glm::ivec2 res): _res(res) {
     auto sg = savegame::load<1, 0>(std::string(path), "GlyphmapLatin");
     // fill _metrics
     auto metrics = sg.getDataBlock("metrics");
-    memcpy(_metrics.data(), metrics.data.get(), sizeof(fontmetrics) * capacity);
+    memcpy(_metrics.data(), metrics.data, sizeof(fontmetrics) * capacity);
     // create texture
     auto texture = sg.getDataBlock("texture");
     _glyphmap.reset(new Texture<TEXTG, FONTMAPBIND_GL>(Loader<TEXTG>(texture)));
     _glyphmap->bindTo();
+}
+
+void GlyphmapLatin::bakeTo(const char* path) {
+    // load file
+    auto sg = savegame::load<1, 0>(std::string(path), "GlyphmapLatin");
+    // fill _metrics
+    sg.storeDataBlock("metrics", sizeof(fontmetrics) * capacity, (unsigned char*)_metrics.data());
+    // fill texture
+    auto &l = _glyphmap->getLoader();
+    sg.storeDataBlock("texture", l.size(), l.parse());
+    sg.save();
 }
