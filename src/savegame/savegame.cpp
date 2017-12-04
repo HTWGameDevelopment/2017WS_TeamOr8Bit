@@ -19,6 +19,8 @@
 // SOFTWARE.
 #include "savegame.hpp"
 
+#include<string.h>
+
 using namespace savegame;
 
 SaveGame::SaveGame(std::string p, std::string m, unsigned int v): _path(p), _magic(m), _version(v), _modified(false) {
@@ -30,37 +32,33 @@ SaveGame::~SaveGame() {
 }
 
 bool SaveGame::hasDataBlock(std::string b) {
-    auto &i = _blocks.begin();
-    auto &e = _blocks.end();
-    for(; i != e; ++i) {
-        if(i->name == b) return true;
+    for(auto &&i : _blocks) {
+        if(i.name == b) return true;
     }
     return false;
 }
 
 SaveGame::DataBlock SaveGame::getDataBlock(std::string b) {
-    auto &i = _blocks.begin();
-    auto &e = _blocks.end();
-    for(; i != e; ++i) {
-        if(i->name == b) {
-            return SaveGame::DataBlock(b, i->size, i->data.get());
+    for(auto &&i : _blocks) {
+        if(i.name == b) {
+            return SaveGame::DataBlock(b, i.size, i.data.get());
         }
     }
     throw datablock_doesnt_exist_error(b);
 }
 
 void SaveGame::storeDataBlock(std::string n, uint32_t size, unsigned char *data) {
-    auto &i = _blocks.begin();
-    auto &e = _blocks.end();
-    for(; i != e; ++i) {
-        if(i->name == n) {
-            i->size = size;
-            i->data.reset(data);
+    for(auto &&i : _blocks) {
+        if(i.name == n) {
+            i.size = size;
+            i.data.reset(data);
             _modified = true;
             return;
         }
     }
-    _blocks.emplace_back(n, size, data);
+    std::unique_ptr<unsigned char> ptr(new unsigned char[size]);
+    memcpy(ptr.get(), data, size);
+    _blocks.emplace_back(n, size, std::move(ptr));
     _modified = true;
 }
 
@@ -80,18 +78,16 @@ std::string _read(std::ifstream &i) {
 
 void SaveGame::save() {
     std::ofstream out(_path);
-    out.exceptions(std::ios::badbit);
+    out.exceptions(std::ios::badbit|std::ios::failbit);
     _write(out, _magic);
     out.write((char*)&_version, sizeof(_version));
-    auto &i = _blocks.begin();
-    auto &e = _blocks.end();
     uint32_t start = 0;
-    for(; i != e; ++i) {
-        i->start = start;
-        _write(out, i->name);
-        out.write((char*)&i->size, sizeof(i->size));
-        out.write((char*)i->data.get(), i->size);
-        i->saved = true;
+    for(auto &&i : _blocks) {
+        i.start = start;
+        _write(out, i.name);
+        out.write((char*)&i.size, sizeof(i.size));
+        out.write((char*)i.data.get(), i.size);
+        i.saved = true;
         start = out.tellp();
     }
     _modified = false;
@@ -111,7 +107,7 @@ void SaveGame::generateIndex() {
         std::string name = _read(inp);
         uint32_t size;
         inp.read((char*)&size, sizeof(size));
-        std::unique_ptr<unsigned char> ptr(new unsigned[size]);
+        std::unique_ptr<unsigned char> ptr(new unsigned char[size]);
         inp.read((char*)ptr.get(), size);
         _blocks.emplace_back(name, start, size, std::move(ptr));
         start += size;

@@ -48,6 +48,7 @@ namespace qe {
             case TOP:
                 _baseline.y = _glyphmap->getResolution().y - _glyphmap->highestGlyph() - _baseline.y;
                 break;
+            case BOTTOM: break; // ignore
             }
         }
         void render() {

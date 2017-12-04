@@ -130,7 +130,7 @@ namespace qe {
 
             return mh;
         }
-        fontmetrics getMetrics(char c) {
+        fontmetrics getMetrics(unsigned char c) {
             return _metrics[c <= 255 ? c : 0];
         }
         /**

@@ -40,9 +40,8 @@ private:
         uint32_t size;
         bool saved;
         std::unique_ptr<unsigned char> data;
-        DataBlockInt(const DataBlockInt &o) = delete;
-        DataBlockInt(std::string n, uint32_t s, unsigned char *d): name(n), start(0), size(s), saved(false), data(d) {}
-        DataBlockInt(std::string n, uint32_t st, uint32_t s, unsigned char *d): name(n), start(st), size(s), saved(true), data(d) {}
+        DataBlockInt(std::string n, uint32_t s, std::unique_ptr<unsigned char> &&d): name(n), start(0), size(s), saved(false), data(std::move(d)) {}
+        DataBlockInt(std::string n, uint32_t st, uint32_t s, std::unique_ptr<unsigned char> &&d): name(n), start(st), size(s), saved(true), data(std::move(d)) {}
     };
     std::vector<DataBlockInt> _blocks;
     void generateIndex();
@@ -54,6 +53,9 @@ public:
         DataBlock(std::string n, uint32_t s, unsigned char *p): name(n), size(s), data(p) {}
     };
     SaveGame(std::string p, std::string m, unsigned int v);
+    SaveGame(SaveGame &&o): _path(std::move(o._path)), _magic(std::move(o._magic)), _version(o._version), _modified(o._modified), _blocks(std::move(o._blocks)) {
+        o._modified = false;
+    }
     ~SaveGame();
     inline bool operator==(unsigned int version) {return _version == version;}
     inline bool operator!=(unsigned int version) {return _version != version;}
@@ -79,15 +81,15 @@ struct magic_error: public std::runtime_error {
     magic_error(std::string exp, std::string got): runtime_error(std::string("SaveGame invalid magic value. expected: " + exp + ", got: " + got)) {}
 };
 
-template<unsigned int TYPE, unsigned int VERSION> SaveGame &migrate(SaveGame &s) {
-    return s;
+template<unsigned int TYPE, unsigned int VERSION> SaveGame &&migrate(SaveGame &&s) {
+    return std::move(s);
 }
 
 template<unsigned int TYPE, unsigned int VERSION>
 SaveGame load(std::string p, std::string magic) {
     SaveGame s(p, magic, VERSION);
     if(s == VERSION) return s; // same version
-    else if(s < VERSION) return migrate<TYPE, VERSION - 1>(s); // migrate upwards
+    else if(s < VERSION) return migrate<TYPE, VERSION - 1>(std::move(s)); // migrate upwards
     else throw upper_barrier_error();
 }
 
