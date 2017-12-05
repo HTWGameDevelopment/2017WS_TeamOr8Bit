@@ -7,8 +7,6 @@
 
 #include<string.h>
 
-#define FONTPATH "/usr/share/fonts/dejavu/DejaVuSans.ttf"
-
 /**
  * \brief Main game class
  */
@@ -29,7 +27,7 @@ private:
     } _strings;
     gamespace::GameBoard _board;
 public:
-    Game(qe::Context *ctxt): _ctxt(ctxt), _font(font::Font::get(FONTPATH)), _board(40, 20) {
+    Game(qe::Context *ctxt): _ctxt(ctxt), _font(font::Font::get("assets/fonts/DejaVuSans.ttf")), _board(40, 20) {
         assert(ctxt);
         qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->face(), 32, _ctxt->getResolution());
         _strings.gamename = qe::Text<qe::GlyphmapLatin>(qe::Cache::glyphlatin, glm::ivec2(200, 100), qe::PositionMode::TOP);
