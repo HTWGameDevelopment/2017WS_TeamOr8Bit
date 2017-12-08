@@ -68,6 +68,26 @@ namespace hextile {
         col_type &operator[](size_t i) {
             return _data[i];
         }
+        class edgeiterator {
+        private:
+            HexTile<T> _board;
+            hexpoint_t _coord;
+            unsigned int _step;
+        public:
+            edgeiterator(HexTile<T> board, hexpoint_t coord): _board(board), _coord(coord), _step(0) {}
+            T *next() {
+                auto step = _step++;
+                switch(step) {
+                    case 0: return (*_board)[_coord.x, _coord.y - 1];
+                    case 1: return (*_board)[_coord.x, _coord.y + 1];
+                    case 2: return (*_board)[_coord.x - 1, _coord.y];
+                    case 3: return (*_board)[_coord.x + 1, _coord.y];
+                    case 4: return (*_board)[_coord.x + 1 - ((_coord.y % 2) * 2), _coord.y + 1];
+                    case 5: return (*_board)[_coord.x + 1 - ((_coord.y % 2) * 2), _coord.y - 1];
+                    default: return nullptr;
+                }
+            }
+        };
         /**
          * \brief Iterator over all tiles
          */
