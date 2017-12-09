@@ -27,8 +27,8 @@ struct glerror: public std::runtime_error {
 struct glshadererror: public std::runtime_error {
     glshadererror(std::string s): runtime_error(s) {}
 };
-const char* getErrorString(GLenum error);
-void throw_glerror(GLenum error, const char* file, int line);
+const char *getErrorString(GLenum error);
+void throw_glerror(GLenum error, const char *file, int line);
 #else
 #ifndef NDEBUG
 #define GERR(x)  fprintf(stderr, "GERROR %s (%s:%s)\n", x, __FILE__, __LINE__);

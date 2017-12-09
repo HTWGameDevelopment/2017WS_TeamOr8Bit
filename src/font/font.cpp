@@ -32,13 +32,16 @@ Font *Font::get() {
 
 Font *Font::get(std::string font) {
     if(_instance) delete _instance;
+
     _instance = new Font(font);
     return get();
 }
 
 Font::Font(std::string font) {
     if(FT_Init_FreeType(&_library)) throw font_error("FT_Init_FreeType", __FILE__, __LINE__);
+
     auto error = FT_New_Face(_library, font.c_str(), 0, &_face);
+
     if(error == FT_Err_Unknown_File_Format) throw font_error("FT Unknown file format", __FILE__, __LINE__);
     else if(error != 0) throw font_error(std::string("FT_New_Face ") + std::to_string(error), __FILE__, __LINE__);
 }

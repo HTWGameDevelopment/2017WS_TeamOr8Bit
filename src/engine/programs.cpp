@@ -23,6 +23,7 @@ Program *qe::mkProgram(std::string vsh, std::string fsh) {
         std::string s(m.get());
         throw glshadererror(s);
     }
+
     return p;
 }
 
@@ -31,6 +32,8 @@ std::string qe::getFileContents(std::string p) {
     std::ifstream f(p);
     f.exceptions(std::ifstream::badbit);
     f.get(buf, '\0');
+
     if(f.bad()) throw loader_error(p, __FILE__, __LINE__);
+
     return buf.str();
 }

@@ -42,7 +42,9 @@ namespace font {
         ~Font();
         static Font *get();
         static Font *get(std::string font);
-        FT_Face face() {return _face;}
+        FT_Face face() {
+            return _face;
+        }
     };
 
     /**
@@ -56,7 +58,7 @@ namespace font {
         * \param file File path
         * \param line Source line
         */
-        font_error(std::string s, const char* file, int line): runtime_error(std::string(file) + ":" + std::to_string(line) + ": Failed " + s) {}
+        font_error(std::string s, const char *file, int line): runtime_error(std::string(file) + ":" + std::to_string(line) + ": Failed " + s) {}
     };
 
 }

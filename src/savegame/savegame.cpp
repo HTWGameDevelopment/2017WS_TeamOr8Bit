@@ -35,6 +35,7 @@ bool SaveGame::hasDataBlock(std::string b) {
     for(auto &&i : _blocks) {
         if(i.name == b) return true;
     }
+
     return false;
 }
 
@@ -44,6 +45,7 @@ SaveGame::DataBlock SaveGame::getDataBlock(std::string b) {
             return SaveGame::DataBlock(b, i.size, i.data.get());
         }
     }
+
     throw datablock_doesnt_exist_error(b);
 }
 
@@ -56,6 +58,7 @@ void SaveGame::storeDataBlock(std::string n, uint32_t size, unsigned char *data)
             return;
         }
     }
+
     std::unique_ptr<unsigned char> ptr(new unsigned char[size]);
     memcpy(ptr.get(), data, size);
     _blocks.emplace_back(n, size, std::move(ptr));
@@ -64,13 +67,13 @@ void SaveGame::storeDataBlock(std::string n, uint32_t size, unsigned char *data)
 
 void _write(std::ofstream &o, std::string s) {
     uint32_t st = s.size();
-    o.write((char*)&st, sizeof(st));
+    o.write((char *)&st, sizeof(st));
     o.write(s.c_str(), s.size());
 }
 
 std::string _read(std::ifstream &i) {
     uint32_t st;
-    i.read((char*)&st, sizeof(st));
+    i.read((char *)&st, sizeof(st));
     std::unique_ptr<char[]> p(new char[st]);
     i.read(p.get(), st);
     return std::string(p.get(), st);
@@ -78,37 +81,44 @@ std::string _read(std::ifstream &i) {
 
 void SaveGame::save() {
     std::ofstream out(_path);
-    out.exceptions(std::ios::badbit|std::ios::failbit);
+    out.exceptions(std::ios::badbit | std::ios::failbit);
     _write(out, _magic);
-    out.write((char*)&_version, sizeof(_version));
+    out.write((char *)&_version, sizeof(_version));
     uint32_t start = 0;
+
     for(auto &&i : _blocks) {
         i.start = start;
         _write(out, i.name);
-        out.write((char*)&i.size, sizeof(i.size));
-        out.write((char*)i.data.get(), i.size);
+        out.write((char *)&i.size, sizeof(i.size));
+        out.write((char *)i.data.get(), i.size);
         i.saved = true;
         start = out.tellp();
     }
+
     _modified = false;
 }
 
 void SaveGame::generateIndex() {
     std::ifstream inp(_path);
+
     if(inp.fail()) // file doesnt exist
         return;
+
     inp.exceptions(std::ios::badbit);
     std::string m = _read(inp);
+
     if(m != _magic) throw magic_error(_magic, m);
-    inp.read((char*)&_version, sizeof(_version));
+
+    inp.read((char *)&_version, sizeof(_version));
 
     uint32_t start = 0;
+
     while(!inp.eof()) {
         std::string name = _read(inp);
         uint32_t size;
-        inp.read((char*)&size, sizeof(size));
+        inp.read((char *)&size, sizeof(size));
         std::unique_ptr<unsigned char> ptr(new unsigned char[size]);
-        inp.read((char*)ptr.get(), size);
+        inp.read((char *)ptr.get(), size);
         _blocks.emplace_back(name, start, size, std::move(ptr));
         start += size;
     }

@@ -195,7 +195,9 @@ int main(int argc, char *argv[]) {
         Game g(&context);
         game = &g;
         g.initializeAssets();
+
         if(bake) g.bakeAssets();
+
         g.run();
     }
     return 0;

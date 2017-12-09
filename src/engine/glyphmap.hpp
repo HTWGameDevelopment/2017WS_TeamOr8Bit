@@ -110,7 +110,7 @@ namespace qe {
 #ifdef HAS_FREETYPE
         GlyphmapLatin(FT_Face face, size_t height, glm::ivec2 res);
 #endif
-        GlyphmapLatin(const char* path, glm::ivec2 res);
+        GlyphmapLatin(const char *path, glm::ivec2 res);
         GlyphmapLatin(const GlyphmapLatin &other) = delete;
         GlyphmapLatin(GlyphmapLatin &&other) = delete;
         GlyphmapLatin &operator=(const GlyphmapLatin &other) = delete;
@@ -160,7 +160,7 @@ namespace qe {
         Texture<TEXTG, FONTMAPBIND_GL> *getTexture() {
             return _glyphmap.get();
         }
-        void bakeTo(const char* path);
+        void bakeTo(const char *path);
     };
 
     /**

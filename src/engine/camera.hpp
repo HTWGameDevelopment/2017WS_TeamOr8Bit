@@ -51,8 +51,8 @@ namespace qe {
         glm::vec3 _right; //!< Right vector
         glm::vec3 _up; //!< Up vector
         glm::vec2 _angles; //!< View angles
-		glm::vec3 _planecoord; //!<viewed plane
-	    CameraBounds _bounds; //!<Extern Camera Bounds
+        glm::vec3 _planecoord; //!<viewed plane
+        CameraBounds _bounds; //!<Extern Camera Bounds
     public:
         /**
          * Constructs a new camera object
@@ -93,9 +93,11 @@ namespace qe {
          * \brief Regenerate matrices
          */
         inline void regenerate() {
-		    if(_angles.y >= M_PI / 2.0) _angles.y = M_PI / 2.0;
+            if(_angles.y >= M_PI / 2.0) _angles.y = M_PI / 2.0;
             else if(_angles.y <= -M_PI / 2.0) _angles.y = -M_PI / 2.0;
-			if(_pos.y < _bounds.minHeight) _pos.y = 0,
+
+            if(_pos.y < _bounds.minHeight) _pos.y = 0;
+
             _dir = generateDirection();
             _right = glm::vec3(sin(_angles.x - M_PI / 2.0),
                                0,
@@ -105,8 +107,8 @@ namespace qe {
             _up = glm::normalize(_up);
             _matrices.v = glm::lookAt(_pos, _pos + _dir, _up);
             _matrices.pv = _p * _matrices.v;
-			_planecoord = getPlaneCoord();
-			printf("Looking at x:%f y:%f z:%f \n",_planecoord.x,_planecoord.y,_planecoord.z);
+            _planecoord = getPlaneCoord();
+            printf("Looking at x:%f y:%f z:%f \n", _planecoord.x, _planecoord.y, _planecoord.z);
         }
         inline glm::vec3 generateDirection() {
             return glm::vec3(cos(_angles.y) * sin(_angles.x),
@@ -123,16 +125,17 @@ namespace qe {
         glm::vec3 pos() {
             return _pos;
         }
-		glm::vec3 getPlaneCoord() {
-			float delta;
-			if (_dir.y != 0) {
-			  delta = - _pos.y / _dir.y;
-			} else delta = 0;
+        glm::vec3 getPlaneCoord() {
+            float delta;
 
-			return glm::vec3(_pos.x + delta * _dir.x,
-			                 0,
-							 _pos.z + delta * _dir.z);
-		}
+            if(_dir.y != 0) {
+                delta = - _pos.y / _dir.y;
+            } else delta = 0;
+
+            return glm::vec3(_pos.x + delta * _dir.x,
+                             0,
+                             _pos.z + delta * _dir.z);
+        }
         Matrices &matrices() {
             return _matrices;
         }

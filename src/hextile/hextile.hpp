@@ -77,14 +77,28 @@ namespace hextile {
             edgeiterator(HexTile<T> board, hexpoint_t coord): _board(board), _coord(coord), _step(0) {}
             T *next() {
                 auto step = _step++;
+
                 switch(step) {
-                    case 0: return (*_board)[_coord.x, _coord.y - 1];
-                    case 1: return (*_board)[_coord.x, _coord.y + 1];
-                    case 2: return (*_board)[_coord.x - 1, _coord.y];
-                    case 3: return (*_board)[_coord.x + 1, _coord.y];
-                    case 4: return (*_board)[_coord.x + 1 - ((_coord.y % 2) * 2), _coord.y + 1];
-                    case 5: return (*_board)[_coord.x + 1 - ((_coord.y % 2) * 2), _coord.y - 1];
-                    default: return nullptr;
+                case 0:
+                    return (*_board)[_coord.x, _coord.y - 1];
+
+                case 1:
+                    return (*_board)[_coord.x, _coord.y + 1];
+
+                case 2:
+                    return (*_board)[_coord.x - 1, _coord.y];
+
+                case 3:
+                    return (*_board)[_coord.x + 1, _coord.y];
+
+                case 4:
+                    return (*_board)[_coord.x + 1 - ((_coord.y % 2) * 2), _coord.y + 1];
+
+                case 5:
+                    return (*_board)[_coord.x + 1 - ((_coord.y % 2) * 2), _coord.y - 1];
+
+                default:
+                    return nullptr;
                 }
             }
         };

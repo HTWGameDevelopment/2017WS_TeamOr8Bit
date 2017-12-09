@@ -37,13 +37,16 @@ void GlyphmapLatin::initialize(FT_Face face, size_t height) {
 
     for(size_t i = 0; i < capacity; ++i) {
         FT_UInt glyph_index = FT_Get_Char_Index(face, i);
+
         if(FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT)) continue;
+
         if(FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL)) continue;
 
         if(x + face->glyph->bitmap.width > texlength) { // new line
             x = 0;
             y += max_y;
             max_y = 0;
+
             if(y > texlength) throw loader_error(std::string("glyphmap too small for ") + std::to_string(capacity) + " glyphs at size "  + std::to_string(height), __FILE__, __LINE__);
         }
 
@@ -61,6 +64,7 @@ void GlyphmapLatin::initialize(FT_Face face, size_t height) {
         loader.setRect(x, y, face->glyph->bitmap.width, face->glyph->bitmap.rows, face->glyph->bitmap.buffer);
 
         x += face->glyph->bitmap.width;
+
         if(max_y < face->glyph->bitmap.rows) max_y = face->glyph->bitmap.rows;
     }
 
@@ -69,7 +73,7 @@ void GlyphmapLatin::initialize(FT_Face face, size_t height) {
 }
 #endif
 
-GlyphmapLatin::GlyphmapLatin(const char* path, glm::ivec2 res): _res(res) {
+GlyphmapLatin::GlyphmapLatin(const char *path, glm::ivec2 res): _res(res) {
     // load file
     auto sg = savegame::load<1, 0>(std::string(path), "GlyphmapLatin");
     // fill _metrics
@@ -81,11 +85,11 @@ GlyphmapLatin::GlyphmapLatin(const char* path, glm::ivec2 res): _res(res) {
     _glyphmap->bindTo();
 }
 
-void GlyphmapLatin::bakeTo(const char* path) {
+void GlyphmapLatin::bakeTo(const char *path) {
     // load file
     auto sg = savegame::load<1, 0>(std::string(path), "GlyphmapLatin");
     // fill _metrics
-    sg.storeDataBlock("metrics", sizeof(fontmetrics) * capacity, (unsigned char*)_metrics.data());
+    sg.storeDataBlock("metrics", sizeof(fontmetrics) * capacity, (unsigned char *)_metrics.data());
     // fill texture
     auto &l = _glyphmap->getLoader();
     sg.storeDataBlock("texture", l.size(), l.parse());

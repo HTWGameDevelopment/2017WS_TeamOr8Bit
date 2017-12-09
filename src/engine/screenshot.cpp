@@ -27,36 +27,43 @@ void qe::screenshot(std::string path, unsigned int w, unsigned int h) {
     assert(w != 0);
     assert(h != 0);
     std::unique_ptr<std::FILE, decltype(&std::fclose)> fd(fopen(path.c_str(), "w"), &std::fclose);
+
     if(!fd) throw writer_error(std::string(path), __FILE__, __LINE__);
 
     png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+
     if(!png_ptr)
         throw writer_error(std::string(path) + " (png write struct)", __FILE__, __LINE__);
+
     png_infop info_ptr = png_create_info_struct(png_ptr);
+
     if(!info_ptr) {
         png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
         throw writer_error(std::string(path) + " (png info struct)", __FILE__, __LINE__);
     }
 
     png_init_io(png_ptr, fd.get());
+
     if(setjmp(png_jmpbuf(png_ptr))) {
         png_destroy_write_struct(&png_ptr, &info_ptr);
         throw writer_error(std::string(path) + " (png write image)", __FILE__, __LINE__);
     }
 
     png_set_IHDR(png_ptr,
-        info_ptr,
-        w, h, 8,
-        PNG_COLOR_TYPE_RGB,
-        PNG_INTERLACE_NONE,
-        PNG_COMPRESSION_TYPE_BASE,
-        PNG_FILTER_TYPE_BASE);
+                 info_ptr,
+                 w, h, 8,
+                 PNG_COLOR_TYPE_RGB,
+                 PNG_INTERLACE_NONE,
+                 PNG_COMPRESSION_TYPE_BASE,
+                 PNG_FILTER_TYPE_BASE);
     png_write_info(png_ptr, info_ptr);
 
     std::unique_ptr<unsigned char[]> pixels(new unsigned char[w * h * 3]);
-    glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pixels.get()); GLERRORCHECK;
+    glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pixels.get());
+    GLERRORCHECK;
 
     std::unique_ptr<png_bytep[]> rows(new png_bytep[h]);
+
     for(unsigned int i = 0; i < h; ++i)
         rows[i] = pixels.get() + (h - 1 - i) * w * 3;
 
