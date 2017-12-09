@@ -114,6 +114,7 @@ namespace qe {
             glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
             gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glCullFace(GL_BACK);
 
             int nw, nh;

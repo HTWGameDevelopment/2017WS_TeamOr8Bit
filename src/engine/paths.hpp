@@ -36,7 +36,7 @@ namespace qe {
 
 }
 
-std::string operator "" _p(const char *s, size_t len) {
+inline std::string operator "" _p(const char *s, size_t len) {
     return qe::getPath(std::string(s, len));
 }
 

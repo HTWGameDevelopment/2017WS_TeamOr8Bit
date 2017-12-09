@@ -115,12 +115,6 @@ public:
     qe::Context *context() {
         return _ctxt;
     }
-    qe::Camera *camera() {
-        return _cam.camera.get();
-    }
-    qe::Context *context() {
-        return _ctxt;
-    }
 };
 
 Game *game;
@@ -186,6 +180,8 @@ int main(int argc, char *argv[]) {
         } else if(strcmp(argv[i], "--version") == 0) {
             std::cout << TONAME << " " << TOVERSION_STRING << " - (C) " << TOTNAME << ", 2017 All rights reserved." << std::endl;
             exit(0);
+        } else if(strcmp(argv[i], "--bake") == 0) {
+            qe::BAKEFONTS() = true;
         }
     }
 
@@ -196,7 +192,7 @@ int main(int argc, char *argv[]) {
         game = &g;
         g.initializeAssets();
 
-        if(bake) g.bakeAssets();
+        if(qe::BAKEFONTS()) g.bakeAssets();
 
         g.run();
     }

@@ -76,6 +76,7 @@ namespace qe {
         }
         option__t<T> &operator<<(std::function<void(T, T)> cb) {
             _cbs.push_back(cb);
+            return *this;
         }
         operator T() {
             return _val;
@@ -88,6 +89,7 @@ namespace qe {
     }
 
     constexpr auto VSYNC = _<0, bool, false>;
+    constexpr auto BAKEFONTS = _<1, bool, false>;
 }
 
 #endif

@@ -78,11 +78,8 @@ namespace qe {
          * \param y Y coord of pointer
          */
         void mouseMoved(double deltaT, double x, double y) {
-            double dx = _resolution.x / 2.0 - x;
-            double dy = _resolution.y / 2.0 - y;
-
-            _angles.x += deltaT * dx;
-            _angles.y += deltaT * dy;
+            _angles.x -= deltaT * x;
+            _angles.y -= deltaT * y;
 
             if(_angles.y >= M_PI / 2.0) _angles.y = M_PI / 2.0;
             else if(_angles.y <= -M_PI / 2.0) _angles.y = -M_PI / 2.0;

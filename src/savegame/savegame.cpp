@@ -53,7 +53,8 @@ void SaveGame::storeDataBlock(std::string n, uint32_t size, unsigned char *data)
     for(auto &&i : _blocks) {
         if(i.name == n) {
             i.size = size;
-            i.data.reset(data);
+            i.data.reset(new unsigned char[size]);
+            memcpy(i.data.get(), data, size);
             _modified = true;
             return;
         }
