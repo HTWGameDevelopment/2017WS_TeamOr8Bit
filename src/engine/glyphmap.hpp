@@ -97,6 +97,7 @@ namespace qe {
         std::unique_ptr<Texture<TEXTG, FONTMAPBIND_GL>> _glyphmap; //!< Texture
         std::array<fontmetrics, capacity> _metrics; //!< Metrics
         glm::ivec2 _res; //!< screen resolution
+        std::string _path; //!< font path
 #ifdef HAS_FREETYPE
         /**
          * \brief Initialize glyphmap.
@@ -108,9 +109,9 @@ namespace qe {
          * \brief Constructor
          */
 #ifdef HAS_FREETYPE
-        GlyphmapLatin(FT_Face face, size_t height, glm::ivec2 res);
+        GlyphmapLatin(std::string bakepath, FT_Face face, size_t height, glm::ivec2 res);
 #endif
-        GlyphmapLatin(const char *path, glm::ivec2 res);
+        GlyphmapLatin(std::string path, glm::ivec2 res);
         GlyphmapLatin(const GlyphmapLatin &other) = delete;
         GlyphmapLatin(GlyphmapLatin &&other) = delete;
         GlyphmapLatin &operator=(const GlyphmapLatin &other) = delete;
@@ -160,7 +161,7 @@ namespace qe {
         Texture<TEXTG, FONTMAPBIND_GL> *getTexture() {
             return _glyphmap.get();
         }
-        void bakeTo(const char *path);
+        void bake();
     };
 
     /**

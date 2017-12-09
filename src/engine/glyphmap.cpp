@@ -24,7 +24,7 @@
 using namespace qe;
 
 #ifdef HAS_FREETYPE
-GlyphmapLatin::GlyphmapLatin(FT_Face face, size_t height, glm::ivec2 res): _res(res) {
+GlyphmapLatin::GlyphmapLatin(std::string bakepath, FT_Face face, size_t height, glm::ivec2 res): _res(res), _path(bakepath) {
     initialize(face, height);
 }
 
@@ -73,9 +73,9 @@ void GlyphmapLatin::initialize(FT_Face face, size_t height) {
 }
 #endif
 
-GlyphmapLatin::GlyphmapLatin(const char *path, glm::ivec2 res): _res(res) {
+GlyphmapLatin::GlyphmapLatin(std::string path, glm::ivec2 res): _res(res) {
     // load file
-    auto sg = savegame::load<1, 0>(std::string(path), "GlyphmapLatin");
+    auto sg = savegame::load<1, 0>(path, "GlyphmapLatin");
     // fill _metrics
     auto metrics = sg.getDataBlock("metrics");
     memcpy(_metrics.data(), metrics.data, sizeof(fontmetrics) * capacity);
@@ -85,9 +85,9 @@ GlyphmapLatin::GlyphmapLatin(const char *path, glm::ivec2 res): _res(res) {
     _glyphmap->bindTo();
 }
 
-void GlyphmapLatin::bakeTo(const char *path) {
+void GlyphmapLatin::bake() {
     // load file
-    auto sg = savegame::load<1, 0>(std::string(path), "GlyphmapLatin");
+    auto sg = savegame::load<1, 0>(std::string(_path), "GlyphmapLatin");
     // fill _metrics
     sg.storeDataBlock("metrics", sizeof(fontmetrics) * capacity, (unsigned char *)_metrics.data());
     // fill texture

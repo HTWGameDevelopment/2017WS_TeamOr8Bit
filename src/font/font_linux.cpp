@@ -19,7 +19,7 @@
 // SOFTWARE.
 #include<config.h>
 #ifdef HAS_FREETYPE
-#include "font.hpp"
+#include "font_linux.hpp"
 
 using namespace font;
 
@@ -37,7 +37,7 @@ Font *Font::get(std::string font) {
     return get();
 }
 
-Font::Font(std::string font) {
+Font::Font(std::string font): _bpath(font + ".bkf") {
     if(FT_Init_FreeType(&_library)) throw font_error("FT_Init_FreeType", __FILE__, __LINE__);
 
     auto error = FT_New_Face(_library, font.c_str(), 0, &_face);

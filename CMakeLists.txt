@@ -24,7 +24,8 @@ add_executable(Or8Bit
     src/engine/screenshot.cpp
     src/logger.cpp
     src/engine/glyphmap.cpp
-    src/font/font.cpp
+    src/font/font_linux.cpp
+    src/font/font_win.cpp
     src/engine/cache.cpp
     src/engine/programs.cpp
     src/savegame/savegame.cpp)

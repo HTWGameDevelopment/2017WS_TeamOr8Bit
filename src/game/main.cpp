@@ -33,7 +33,11 @@ private:
 public:
     Game(qe::Context *ctxt): _ctxt(ctxt), _font(font::Font::get("assets/fonts/DejaVuSans.ttf")), _board(40, 20) {
         assert(ctxt);
-        qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->face(), 32, _ctxt->getResolution());
+#ifdef HAS_FREETYPE
+        qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _font->face(), 32, _ctxt->getResolution());
+#else
+        qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _ctxt->getResolution());
+#endif
         _strings.gamename = qe::Text<qe::GlyphmapLatin>(qe::Cache::glyphlatin, glm::ivec2(200, 100), qe::PositionMode::TOP);
         _strings.gamename.text() = "NONAMEGAME - Team Or8Bit";
     }
@@ -66,7 +70,7 @@ public:
                           ));
     }
     void bakeAssets() {
-        qe::Cache::glyphlatin->bakeTo("assets/fonts/dejavu.baked");
+        qe::Cache::glyphlatin->bake();
     }
     void run() {
         unsigned int fps = 0;
