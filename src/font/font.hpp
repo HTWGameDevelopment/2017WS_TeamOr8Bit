@@ -6,7 +6,7 @@
 #ifdef HAS_FREETYPE
 #include<font/font_linux.hpp>
 #else
-#include<font/font_windows.hpp>
+#include<font/font_win.hpp>
 #endif
 
 #endif

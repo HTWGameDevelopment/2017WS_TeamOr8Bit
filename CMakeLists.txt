@@ -16,6 +16,8 @@ set(PNG_HARDWARE_OPTIMIZATIONS OFF CACHE BOOL "" FORCE)
 set(PNG_BUILD_ZLIB "extern/zlib" CACHE PATH "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
+set(DISABLE_FREETYPE OFF CACHE BOOL "Disable freetype rendering and use baked font versions")
+
 # program
 add_executable(Or8Bit
     src/game/main.cpp
@@ -32,7 +34,9 @@ add_executable(Or8Bit
 
 # dependencies
 find_package(Freetype)
-if(Freetype_FOUND)
+set(USES_FREETYPE FALSE)
+if(Freetype_FOUND AND NOT DISABLE_FREETYPE)
+set(USES_FREETYPE TRUE)
 include_directories(${FREETYPE_INCLUDE_DIRS})
 target_link_libraries(Or8Bit ${FREETYPE_LIBRARIES})
 endif()

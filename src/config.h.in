@@ -9,6 +9,10 @@
 #define TOVERSION_STRING "${TOVERSION_MAJOR}.${TOVERSION_MINOR}"
 #define TONAME "${CMAKE_PROJECT_NAME}"
 #define TOTNAME "${TEAM_NAME}"
-#define HAS_FREETYPE ${Freetype_FOUND}
+#if ${USES_FREETYPE} == TRUE
+#define HAS_FREETYPE
+#else
+#undef HAS_FREETYPE
+#endif
 
 #endif
