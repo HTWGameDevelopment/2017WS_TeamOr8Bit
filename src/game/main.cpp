@@ -31,7 +31,7 @@ private:
     } _strings;
     gamespace::GameBoard _board;
 public:
-    Game(qe::Context *ctxt): _ctxt(ctxt), _font(font::Font::get("assets/fonts/DejaVuSans.ttf")), _board(40, 20) {
+    Game(qe::Context *ctxt): _ctxt(ctxt), _font(font::Font::get("assets/fonts/DejaVuSans.ttf"_p)), _board(40, 20) {
         assert(ctxt);
 #ifdef HAS_FREETYPE
         qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _font->face(), 32, _ctxt->getResolution());
@@ -43,15 +43,15 @@ public:
     }
     void initializeAssets() {
         // MODELS
-        _cube.reset(new qe::Mesh<qe::OBJV1>(qe::Loader<qe::OBJV1>("assets/models/cube.objv1")));
-        _tile.reset(new qe::Mesh<qe::OBJV2>(qe::Loader<qe::OBJV2>("assets/models/hextile.objv2")));
+        _cube.reset(new qe::Mesh<qe::OBJV1>(qe::Loader<qe::OBJV1>("assets/models/cube.objv1"_p)));
+        _tile.reset(new qe::Mesh<qe::OBJV2>(qe::Loader<qe::OBJV2>("assets/models/hextile.objv2"_p)));
         qe::Cache::meshm = new qe::Mesh<qe::TEXTG>();
         // TEXTURES
-        _textures.hextile_grass.reset(new qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>(qe::Loader<qe::PNGRGBA>("assets/textures/hextile-grass.png")));
+        _textures.hextile_grass.reset(new qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>(qe::Loader<qe::PNGRGBA>("assets/textures/hextile-grass.png"_p)));
         // SHADERS
-        qe::Cache::objv1 = qe::mkProgram("assets/shaders/objv1.vsh", "assets/shaders/objv1.fsh");
-        qe::Cache::objv2 = qe::mkProgram("assets/shaders/objv2.vsh", "assets/shaders/objv2.fsh");
-        qe::Cache::texts = qe::mkProgram("assets/shaders/texts.vsh", "assets/shaders/texts.fsh");
+        qe::Cache::objv1 = qe::mkProgram("assets/shaders/objv1.vsh"_p, "assets/shaders/objv1.fsh"_p);
+        qe::Cache::objv2 = qe::mkProgram("assets/shaders/objv2.vsh"_p, "assets/shaders/objv2.fsh"_p);
+        qe::Cache::texts = qe::mkProgram("assets/shaders/texts.vsh"_p, "assets/shaders/texts.fsh"_p);
         // SETUP
         qe::Cache::objv2->use();
         qe::Cache::objv2->setUniform<qe::UNIDIFFTEX>(qe::DIFFTEXBIND);
