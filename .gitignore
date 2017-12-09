@@ -21,7 +21,7 @@ cmake-build-debug/
 *.cson
 *~
 screenshot.png
-*.blend
+*.blend*
 *.kra
 docs/doxygen
 extern/glew/

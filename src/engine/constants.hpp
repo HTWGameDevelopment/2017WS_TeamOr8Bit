@@ -31,12 +31,6 @@
 namespace qe {
     typedef unsigned int flag_t;
 
-    template<typename T>
-    struct option_t {
-        typedef T type;
-        T val;
-    };
-
     const char *const backend_error_glfw = "could not initialize glfw";
     const char *const backend_error_window = "could not create window";
     const char *const backend_error_glew = "could not initialize glew";
@@ -46,6 +40,8 @@ namespace qe {
     const flag_t OBJV1 = 2;
     const flag_t OBJV2 = 3;
     const flag_t PNGRGBA = 4;
+    const flag_t TEXTG = 5; //!< Glyphmap/Glyph mesh
+    const flag_t LATIN = 6; //!< Latin (ASCII) character set
 
 // UNIFORMS
     const flag_t UNIMVP = 0;
@@ -53,9 +49,15 @@ namespace qe {
     const flag_t UNIV = 2;
     const flag_t UNIL = 3;
     const flag_t UNIDIFFTEX = 4;
+    const flag_t UNICOLOR = 5; //!< color uniform
+    const flag_t UNITEXTUVP = 6; //!< text uv position uniform
+    const flag_t UNITEXTUVS = 7; //!< text uv scale uniform
 
 // TEXTURE BINDING POINTS
     const flag_t DIFFTEXBIND = 0;
+    const GLenum DIFFTEXBIND_GL = GL_TEXTURE0; //!< diffuse texture bind
+    const flag_t FONTMAPBIND = 1; //!< glyphmap bind
+    const GLenum FONTMAPBIND_GL = GL_TEXTURE1; //!< glyphmap bind
 
 // OPTIONS
     template<typename T>
@@ -86,7 +88,6 @@ namespace qe {
     }
 
     constexpr auto VSYNC = _<0, bool, false>;
-
 }
 
 #endif

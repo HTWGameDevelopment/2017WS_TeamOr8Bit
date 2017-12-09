@@ -1,10 +1,14 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
+#define TRUE 1
+#define FALSE 0
+
 #define TOVERSION_MAJOR ${TOVERSION_MAJOR}
 #define TOVERSION_MINOR ${TOVERSION_MINOR}
 #define TOVERSION_STRING "${TOVERSION_MAJOR}.${TOVERSION_MINOR}"
 #define TONAME "${CMAKE_PROJECT_NAME}"
 #define TOTNAME "${TEAM_NAME}"
+#define HAS_FREETYPE ${Freetype_FOUND}
 
 #endif

@@ -77,9 +77,15 @@ namespace qe {
          * \param x X coord of pointer
          * \param y Y coord of pointer
          */
-        void mouseMoved(float deltaT, float dx, float dy) {
-            _angles.x -= deltaT * dx;
-            _angles.y -= deltaT * dy;
+        void mouseMoved(double deltaT, double x, double y) {
+            double dx = _resolution.x / 2.0 - x;
+            double dy = _resolution.y / 2.0 - y;
+
+            _angles.x += deltaT * dx;
+            _angles.y += deltaT * dy;
+
+            if(_angles.y >= M_PI / 2.0) _angles.y = M_PI / 2.0;
+            else if(_angles.y <= -M_PI / 2.0) _angles.y = -M_PI / 2.0;
 
             regenerate();
         }
@@ -121,12 +127,12 @@ namespace qe {
 			float delta;
 			if (_dir.y != 0) {
 			  delta = - _pos.y / _dir.y;
-			} else delta = 0;	
-				
+			} else delta = 0;
+
 			return glm::vec3(_pos.x + delta * _dir.x,
 			                 0,
 							 _pos.z + delta * _dir.z);
-		}	
+		}
         Matrices &matrices() {
             return _matrices;
         }
@@ -154,7 +160,6 @@ namespace qe {
             _pos -= (float)deltaT * _up;
             regenerate();
         }
-		
     };
 
 }

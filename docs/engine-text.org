@@ -1,0 +1,17 @@
+* Text rendering in our engine
+** Static Text
+   For rendering static text, generate a grey-scaled bitmap of the entire text
+   and upload it as a texture. Then render with a default text rectangle.
+** Dynamic Text
+*** Glyphmap
+    Everytime a dynamic text wants to render a previously unused glyph:
+    1. Create a bitmap of the glyph.
+    2. Add the bitmap to a large glyph texture.
+    =GL_MAX_RECTANGLE_TEXTURE_SIZE= is =16384= which means 512*512 32px glyphs
+    can be stored; more than enough for every language.
+*** Render
+    Render each glyph individually and update UV for glyphmap access.
+** Components
+*** Font (see freetype2)
+*** Glyphmap (in engine)
+*** HUD for managing coordinates

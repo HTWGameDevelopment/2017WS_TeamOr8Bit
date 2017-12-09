@@ -23,6 +23,7 @@
 #include<engine/constants.hpp>
 #include<engine/paths.hpp>
 #include<engine/loader.hpp>
+#include<engine/glyphmap.hpp>
 
 #include<logger.h>
 
@@ -109,21 +110,20 @@ namespace qe {
             glUniform3fv(binding, 1, (float *)&v);
             GLSERRORCHECK;
         }
+        template<flag_t binding> void setUniform(glm::vec2 pos) {
+            glUniform2fv(binding, 1, (float *)&pos);
+            GLSERRORCHECK;
+        }
+        template<flag_t binding> void setUniform(glm::vec4 pos) {
+            glUniform4fv(binding, 1, (float *)&pos);
+            GLSERRORCHECK;
+        }
     };
 
     /**
      * \brief Get file contents from path
      */
-    std::string getFileContents(std::string p) {
-        std::stringbuf buf;
-        std::ifstream f(p);
-        f.exceptions(std::ifstream::badbit);
-        f.get(buf, '\0');
-
-        if(f.bad()) throw loader_error(p, __FILE__, __LINE__);
-
-        return buf.str();
-    }
+    std::string getFileContents(std::string p);
 
     template<flag_t type> constexpr GLenum _createshadercall();
 
@@ -168,38 +168,15 @@ namespace qe {
      */
     template<flag_t type>
     shader_t mkShader(std::string file) {
-        std::string contents = getFileContents(file);
+        std::string path = getPath(file);
+        std::string contents = getFileContents(path);
         return compileShader<type>(contents);
     }
 
     /**
      * \brief Compile program from vertex and fragment shader file paths
      */
-    Program mkProgram(std::string vsh, std::string fsh) {
-        Program p(glCreateProgram());
-        GLSERRORCHECK;
-        glAttachShader(p, mkShader<VERTEX>(vsh));
-        GLSERRORCHECK;
-        glAttachShader(p, mkShader<FRAGMENT>(fsh));
-        GLSERRORCHECK;
-        glLinkProgram(p);
-        GLSERRORCHECK;
-
-        GLint status;
-        glGetProgramiv(p, GL_LINK_STATUS, &status);
-
-        if(status == GL_FALSE) {
-            glGetProgramiv(p, GL_INFO_LOG_LENGTH, &status);
-            assert(status > 0);
-            std::unique_ptr<char[]> m(new char[status]);
-            glGetProgramInfoLog(p, status, NULL, m.get());
-            std::string s(m.get());
-            throw glshadererror(s);
-        }
-
-        return p;
-    }
-
+    Program *mkProgram(std::string vsh, std::string fsh);
 }
 
 #endif
