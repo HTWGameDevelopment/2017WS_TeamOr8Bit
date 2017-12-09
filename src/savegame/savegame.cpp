@@ -81,7 +81,7 @@ std::string _read(std::ifstream &i) {
 }
 
 void SaveGame::save() {
-    std::ofstream out(_path);
+    std::ofstream out(_path, std::ios_base::binary);
     out.exceptions(std::ios::badbit | std::ios::failbit);
     _write(out, _magic);
     out.write((char *)&_version, sizeof(_version));
@@ -100,7 +100,7 @@ void SaveGame::save() {
 }
 
 void SaveGame::generateIndex() {
-    std::ifstream inp(_path);
+    std::ifstream inp(_path, std::ios_base::binary);
 
     if(inp.fail()) // file doesnt exist
         return;
