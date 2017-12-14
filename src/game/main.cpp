@@ -101,7 +101,7 @@ public:
 
         for(; b != e; ++b) {
             glm::vec2 p = b->centerPos();
-            glm::mat4 m = glm::translate(glm::vec3(p.x, 0, p.y));
+            glm::mat4 m = glm::translate(glm::vec3(p.x, -0.25, p.y));
             glm::mat4 mvp = _cam.camera->matrices().pv * m;
             qe::Cache::objv2->use();
             qe::Cache::objv2->setUniform<qe::UNIMVP>(mvp);
