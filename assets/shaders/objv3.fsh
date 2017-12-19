@@ -15,5 +15,5 @@ void main() {
     vec3 n = normalize(normal_camera);
     vec3 l = normalize(light_camera);
     float cosTheta = clamp(dot(n,l),0,1);
-    color = cosTheta * uni_color;
+    color = 0.1 * uni_color + cosTheta * uni_color;
 }

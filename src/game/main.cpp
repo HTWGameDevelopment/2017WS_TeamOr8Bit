@@ -39,8 +39,8 @@ public:
 #else
         qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _ctxt->getResolution());
 #endif
-        _strings.gamename = qe::Text<qe::GlyphmapLatin>(qe::Cache::glyphlatin, glm::ivec2(200, 100), qe::PositionMode::TOP);
-        _strings.gamename.text() = "NONAMEGAME - Team Or8Bit";
+        _strings.gamename = qe::Text<qe::GlyphmapLatin>(qe::Cache::glyphlatin, glm::ivec2(500, 100), qe::PositionMode::TOP);
+        _strings.gamename.text() = "Or8Bit - (c) 2017 Team Or8Bit";
     }
     void initializeAssets() {
         // MODELS
@@ -58,10 +58,10 @@ public:
         // SETUP
         qe::Cache::objv2->use();
         qe::Cache::objv2->setUniform<qe::UNIDIFFTEX>(qe::DIFFTEXBIND);
-        qe::Cache::objv2->setUniform<qe::UNIL>(glm::vec3(0, -1, 0));
+        qe::Cache::objv2->setUniform<qe::UNIL>(glm::vec3(0.1, -1, 0.1));
 
         qe::Cache::objv3->use();
-        qe::Cache::objv3->setUniform<qe::UNIL>(glm::vec3(0, -1, 0));
+        qe::Cache::objv3->setUniform<qe::UNIL>(glm::vec3(0.1, -1, 0.1));
 
         qe::Cache::texts->use();
         qe::Cache::texts->setUniform<qe::UNICOLOR>(qe::FONTMAPBIND);
@@ -82,6 +82,23 @@ public:
         for(; b != e; ++b) {
             b->setUnit(nullptr);
         }
+
+        auto *u = new gamespace::Unit(_tank.get(),
+            100,
+            50,
+            50,
+            3,
+            3,
+            2,
+            gamespace::defaultFalloff,
+            gamespace::defaultFalloff,
+            gamespace::defaultFalloff,
+            gamespace::defaultFalloff);
+        // TESTING PURPOSES. UNITS NEED TO BE DEEP COPIES IN GAME
+        _board[0][0].setUnit(u);
+        _board[1][0].setUnit(u);
+        _board[2][0].setUnit(u);
+        _board[3][0].setUnit(u);
     }
     void bakeAssets() {
         qe::Cache::glyphlatin->bake();
@@ -97,6 +114,8 @@ public:
             qe::Cache::objv2->setUniform<qe::UNIMVP>(mvp);
             qe::Cache::objv2->setUniform<qe::UNIM>(m);
             qe::Cache::objv2->setUniform<qe::UNIV>(_cam.camera->matrices().v);
+            qe::Cache::objv3->use();
+            qe::Cache::objv3->setUniform<qe::UNIV>(_cam.camera->matrices().v);
             _ctxt->start();
             render();
             _ctxt->swap();
@@ -124,6 +143,8 @@ public:
             _tile->render();
             // render unit
             if(b->unit() != nullptr) {
+                m = glm::translate(glm::vec3(p.x, 0, p.y));
+                mvp = _cam.camera->matrices().pv * m;
                 b->unit()->render(*b, mvp, m);
             }
         }
