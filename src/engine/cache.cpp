@@ -24,5 +24,6 @@ using namespace qe;
 GlyphmapLatin *Cache::glyphlatin;
 qe::Program *Cache::objv1;
 qe::Program *Cache::objv2;
+qe::Program *Cache::objv3;
 qe::Program *Cache::texts;
 qe::Mesh<TEXTG> *Cache::meshm;

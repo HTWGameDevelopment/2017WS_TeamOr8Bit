@@ -7,11 +7,14 @@
 
 namespace gamespace {
 
+    class Unit;
+
     /**
      * \brief Our tile type for HexTile elements
      */
     class BoardTile {
     private:
+        Unit *_unit;
         hextile::HexTile<BoardTile> *_board; // pointer to board
         hextile::hexpoint_t _p; // coordinate
         const float dim_x = 0.866; // dimension in X direction
@@ -30,11 +33,19 @@ namespace gamespace {
             else
                 return glm::vec2(2 * dim_x * (_p.x / 2) - dim_x, 3 * dim_y * (_p.y + 1) + 1.5 * dim_y);
         }
+        void setUnit(Unit *unit) {
+            _unit = unit;
+        }
+        Unit *unit() {
+            return _unit;
+        }
     };
 
     typedef hextile::HexTile<BoardTile> GameBoard;
     typedef hextile::hexpoint_t hexpoint_t;
 
 }
+
+#include<game/unit.hpp>
 
 #endif

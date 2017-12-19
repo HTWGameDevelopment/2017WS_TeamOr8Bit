@@ -45,6 +45,7 @@ namespace qe {
         void initVAO() {
             if(T == OBJV1) return initVAOAsOBJV1();
             else if(T == OBJV2) return initVAOAsOBJV2();
+            else if(T == OBJV3) return initVAOAsOBJV3();
 
             assert(false);
         }
@@ -106,6 +107,37 @@ namespace qe {
                 GL_FALSE,
                 _elementsize,
                 (void *)20 // 5 * float
+            );
+            GLSERRORCHECK;
+            glBindVertexArray(0);
+        }
+        /**
+         * \brief Initialize VAO for an OBJV3 mesh
+         */
+        void initVAOAsOBJV3() {
+            glGenVertexArrays(1, &_vao);
+            GLSERRORCHECK;
+            glBindVertexArray(_vao);
+            GLSERRORCHECK;
+            glEnableVertexAttribArray(0);
+            glEnableVertexAttribArray(2);
+            GLSERRORCHECK;
+            _buffer.bind();
+            glVertexAttribPointer(
+                (GLuint)0, // vertex
+                3,
+                GL_FLOAT,
+                GL_FALSE,
+                _elementsize,
+                (void *)0
+            );
+            glVertexAttribPointer(
+                (GLuint)2, // normal
+                3,
+                GL_FLOAT,
+                GL_FALSE,
+                _elementsize,
+                (void *)12 // 3 * float
             );
             GLSERRORCHECK;
             glBindVertexArray(0);

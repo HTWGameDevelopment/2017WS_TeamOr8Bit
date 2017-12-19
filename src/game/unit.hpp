@@ -5,11 +5,15 @@
 #include<game/board.hpp>
 #include<game/terrain.hpp>
 
+#include<engine/cache.hpp>
+
+#include<glm/mat4x4.hpp>
+
 namespace gamespace {
 
     class Unit {
     private:
-        hexpoint_t _pos; //!< Position
+        qe::Mesh<qe::OBJV3> *_mesh;
         unsigned int hp; //!< Health points
         unsigned int dp; //!< Defense points
         unsigned int ap; //!< Attack points
@@ -21,6 +25,13 @@ namespace gamespace {
         std::function<unsigned int(Terrain &)> _t; //!< travel distance relation
         std::function<unsigned int(Terrain &)> _v; //!< visibility relation
     public:
+        void render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m) {
+            qe::Cache::objv3->use();
+            qe::Cache::objv3->setUniform<qe::UNIMVP>(mvp);
+            qe::Cache::objv3->setUniform<qe::UNIM>(m);
+            qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.7, 0.7, 0.7));
+            _mesh->render();
+        }
     };
 
 }

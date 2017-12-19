@@ -68,6 +68,18 @@ namespace qe {
     /**
      * \brief Data about one vertex in OBJV2 meshes
      */
+    struct objv3_point_t {
+        glm::vec3 vertex; //!< vertex location
+        glm::vec3 normal; //!< Normal
+        /**
+         * \brief Constructor
+         */
+        objv3_point_t(glm::vec3 v, glm::vec3 n): vertex(v), normal(n) {}
+    };
+
+    /**
+     * \brief Data about one vertex in OBJV2 meshes
+     */
     struct objv2_point_t {
         glm::vec3 vertex; //!< vertex location
         glm::vec2 uv; //!< UV coordinate
@@ -163,6 +175,105 @@ namespace qe {
          */
         unsigned int elementSize() {
             return sizeof(unsigned char[4]);
+        }
+    };
+
+    /**
+     * \brief Loader for .objv3 meshes
+     */
+    template<> class Loader<OBJV3> {
+    private:
+        std::vector<objv3_point_t> _points;
+        std::string _path;
+        /**
+         * \brief Load data from file
+         */
+        void load() {
+            std::ifstream file(_path);
+            file.exceptions(std::ifstream::badbit);
+            std::vector<glm::vec3> tvertices;
+            std::vector<glm::vec3> tnormals;
+            std::vector<glm::ivec2> indices;
+
+            for(std::string line; std::getline(file, line, '\n');) {
+                if(startswith(line, "v ")) {
+                    glm::vec3 v;
+
+                    switch(sscanf(line.c_str(), "v %f %f %f", &v.x, &v.y, &v.z)) {
+                    case 0:
+                    case EOF:
+                        throw loader_error(std::string(_path) + "(" + line + ")", __FILE__, __LINE__);
+                    }
+
+                    tvertices.push_back(v);
+                } else if(startswith(line, "vn ")) {
+                    glm::vec3 v;
+
+                    switch(sscanf(line.c_str(), "vn %f %f %f", &v.x, &v.y, &v.z)) {
+                    case 0:
+                    case EOF:
+                        throw loader_error(std::string(_path) + "(" + line + ")", __FILE__, __LINE__);
+                    }
+
+                    tnormals.push_back(v);
+                } else if(startswith(line, "f ")) {
+                    std::array<glm::ivec2, 3> points;
+
+                    switch(sscanf(line.c_str(), "f %u//%u %u//%u %u//%u",
+                                  &points[0].x, &points[0].y,
+                                  &points[1].x, &points[1].y,
+                                  &points[2].x, &points[2].y)) {
+                    case 0:
+                    case EOF:
+                        throw loader_error(std::string(_path) + " (" + line + ")", __FILE__, __LINE__);
+                    }
+
+                    indices.push_back(points[0]);
+                    indices.push_back(points[1]);
+                    indices.push_back(points[2]);
+                }
+            }
+
+            if(file.bad()) throw loader_error(_path, __FILE__, __LINE__);
+
+            if(indices.size() == 0) throw loader_error(std::string(_path) + " (no indices found)", __FILE__, __LINE__);
+
+            assert(indices.size() % 3 == 0);
+
+            for(unsigned int i = 0; i < indices.size(); ++i) {
+                assert(indices[i].x <= tvertices.size());
+                assert(indices[i].y <= tnormals.size());
+                glm::ivec2 index = indices[i];
+                _points.emplace_back(tvertices[index.x - 1], tnormals[index.y - 1]);
+            }
+        }
+    public:
+        /**
+         * \brief Construct loader from file path
+         */
+        Loader(std::string path): _path(path) {}
+        /**
+         * \brief Parse file and return data vector
+         */
+        std::vector<objv3_point_t> &parse() {
+            if(_points.size() != 0) return _points;
+
+            load();
+            return _points;
+        }
+        /**
+         * \brief Return size of pixel array
+         */
+        unsigned int size() {
+            if(_points.size() == 0) load();
+
+            return _points.size();
+        }
+        /**
+         * \brief Return element size of vertex in bytes
+         */
+        unsigned int elementSize() {
+            return sizeof(objv3_point_t);
         }
     };
 

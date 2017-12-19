@@ -33,6 +33,7 @@ namespace qe {
         static qe::GlyphmapLatin *glyphlatin; //!< Latin Glyphmap
         static qe::Program *objv1; //!< OBJv1 shader
         static qe::Program *objv2; //!< OBJv2 shader
+        static qe::Program *objv3; //!< OBJv3 shader
         static qe::Program *texts; //!< text shader
         static qe::Mesh<TEXTG> *meshm; //!< glyph rendering mesh
         /**
@@ -42,6 +43,7 @@ namespace qe {
             delete glyphlatin;
             delete objv1;
             delete objv2;
+            delete objv3;
             delete texts;
             delete meshm;
         }

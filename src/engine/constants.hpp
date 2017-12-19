@@ -39,6 +39,7 @@ namespace qe {
     const flag_t FRAGMENT = 1;
     const flag_t OBJV1 = 2;
     const flag_t OBJV2 = 3;
+    const flag_t OBJV3 = 7;
     const flag_t PNGRGBA = 4;
     const flag_t TEXTG = 5; //!< Glyphmap/Glyph mesh
     const flag_t LATIN = 6; //!< Latin (ASCII) character set

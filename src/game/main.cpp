@@ -20,6 +20,7 @@ private:
     std::unique_ptr<font::Font> _font;
     std::unique_ptr<qe::Mesh<qe::OBJV1>> _cube;
     std::unique_ptr<qe::Mesh<qe::OBJV2>> _tile;
+    std::unique_ptr<qe::Mesh<qe::OBJV3>> _tank;
     struct CameraData {
         std::unique_ptr<qe::Camera> camera;
     } _cam;
@@ -45,17 +46,22 @@ public:
         // MODELS
         _cube.reset(new qe::Mesh<qe::OBJV1>(qe::Loader<qe::OBJV1>("assets/models/cube.objv1"_p)));
         _tile.reset(new qe::Mesh<qe::OBJV2>(qe::Loader<qe::OBJV2>("assets/models/hextile.objv2"_p)));
+        _tank.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/tank.objv3"_p)));
         qe::Cache::meshm = new qe::Mesh<qe::TEXTG>();
         // TEXTURES
         _textures.hextile_grass.reset(new qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>(qe::Loader<qe::PNGRGBA>("assets/textures/hextile-grass.png"_p)));
         // SHADERS
         qe::Cache::objv1 = qe::mkProgram("assets/shaders/objv1.vsh"_p, "assets/shaders/objv1.fsh"_p);
         qe::Cache::objv2 = qe::mkProgram("assets/shaders/objv2.vsh"_p, "assets/shaders/objv2.fsh"_p);
+        qe::Cache::objv3 = qe::mkProgram("assets/shaders/objv3.vsh"_p, "assets/shaders/objv3.fsh"_p);
         qe::Cache::texts = qe::mkProgram("assets/shaders/texts.vsh"_p, "assets/shaders/texts.fsh"_p);
         // SETUP
         qe::Cache::objv2->use();
         qe::Cache::objv2->setUniform<qe::UNIDIFFTEX>(qe::DIFFTEXBIND);
         qe::Cache::objv2->setUniform<qe::UNIL>(glm::vec3(0, -1, 0));
+
+        qe::Cache::objv3->use();
+        qe::Cache::objv3->setUniform<qe::UNIL>(glm::vec3(0, -1, 0));
 
         qe::Cache::texts->use();
         qe::Cache::texts->setUniform<qe::UNICOLOR>(qe::FONTMAPBIND);
@@ -68,6 +74,14 @@ public:
                               _ctxt->getAR(),
                               90
                           ));
+    }
+    void initializeMap() {
+        auto b = _board.begin();
+        auto e = _board.end();
+
+        for(; b != e; ++b) {
+            b->setUnit(nullptr);
+        }
     }
     void bakeAssets() {
         qe::Cache::glyphlatin->bake();
@@ -99,6 +113,7 @@ public:
         auto b = _board.begin();
         auto e = _board.end();
 
+        // render tiles and units
         for(; b != e; ++b) {
             glm::vec2 p = b->centerPos();
             glm::mat4 m = glm::translate(glm::vec3(p.x, -0.25, p.y));
@@ -107,8 +122,13 @@ public:
             qe::Cache::objv2->setUniform<qe::UNIMVP>(mvp);
             qe::Cache::objv2->setUniform<qe::UNIM>(m);
             _tile->render();
+            // render unit
+            if(b->unit() != nullptr) {
+                b->unit()->render(*b, mvp, m);
+            }
         }
 
+        // render text
         _ctxt->textcontext();
         _strings.gamename.render();
         _ctxt->meshcontext();
@@ -195,6 +215,7 @@ int main(int argc, char *argv[]) {
         Game g(&context);
         game = &g;
         g.initializeAssets();
+        g.initializeMap();
 
         if(qe::BAKEFONTS()) g.bakeAssets();
 
