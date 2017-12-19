@@ -105,7 +105,6 @@ namespace qe {
             _matrices.v = glm::lookAt(_pos, _pos + _dir, _up);
             _matrices.pv = _p * _matrices.v;
             _planecoord = getPlaneCoord();
-            printf("Looking at x:%f y:%f z:%f \n", _planecoord.x, _planecoord.y, _planecoord.z);
         }
         inline glm::vec3 generateDirection() {
             return glm::vec3(cos(_angles.y) * sin(_angles.x),

@@ -23,11 +23,18 @@
 #include<memory>
 #include<vector>
 
+#include<stdio.h>
+
 namespace hextile {
 
     struct hexpoint_t {
-        size_t x;
-        size_t y;
+        int x;
+        int y;
+    };
+
+    struct marker_t {
+        unsigned int id;
+        unsigned int val;
     };
 
     /**
@@ -51,57 +58,74 @@ namespace hextile {
         size_t _x;
         size_t _y;
         std::vector<col_type> _data;
-    public:
-        HexTile(size_t x, size_t y): _x(x), _y(y), _data(_x, col_type(y)) {
-            for(size_t i = 0; i < _data.size(); ++i)
-                for(size_t j = 0; j < _data[i].rows.size(); ++j) {
-                    _data[i][j].board(this);
-                    _data[i][j] = hexpoint_t {i, j};
-                }
-        }
-        size_t x() {
-            return _x;
-        }
-        size_t y() {
-            return _y;
-        }
-        col_type &operator[](size_t i) {
-            return _data[i];
-        }
+        unsigned int _marker_id;
         class edgeiterator {
         private:
-            HexTile<T> _board;
+            HexTile<T> *_board;
             hexpoint_t _coord;
             unsigned int _step;
         public:
-            edgeiterator(HexTile<T> board, hexpoint_t coord): _board(board), _coord(coord), _step(0) {}
+            edgeiterator(HexTile<T> *board, hexpoint_t coord): _board(board), _coord(coord), _step(0) {}
             T *next() {
                 auto step = _step++;
 
                 switch(step) {
                 case 0:
-                    return (*_board)[_coord.x, _coord.y - 1];
+                    if(inbounds(_coord.x, _coord.y - 1)) return &(*_board)[_coord.x][_coord.y - 1];
 
                 case 1:
-                    return (*_board)[_coord.x, _coord.y + 1];
+                    if(inbounds(_coord.x, _coord.y + 1)) return &(*_board)[_coord.x][_coord.y + 1];
 
                 case 2:
-                    return (*_board)[_coord.x - 1, _coord.y];
+                    if(inbounds(_coord.x - 1, _coord.y)) return &(*_board)[_coord.x - 1][_coord.y];
 
                 case 3:
-                    return (*_board)[_coord.x + 1, _coord.y];
+                    if(inbounds(_coord.x + 1, _coord.y)) return &(*_board)[_coord.x + 1][_coord.y];
 
                 case 4:
-                    return (*_board)[_coord.x + 1 - ((_coord.y % 2) * 2), _coord.y + 1];
+                    if(inbounds(_coord.x + 1 - ((_coord.y % 2) * 2), _coord.y + 1)) return &(*_board)[_coord.x + 1 - ((_coord.y % 2) * 2)][_coord.y + 1];
 
                 case 5:
-                    return (*_board)[_coord.x + 1 - ((_coord.y % 2) * 2), _coord.y - 1];
+                    if(inbounds(_coord.x + 1 - ((_coord.y % 2) * 2), _coord.y - 1)) return &(*_board)[_coord.x + 1 - ((_coord.y % 2) * 2)][_coord.y - 1];
 
                 default:
                     return nullptr;
                 }
             }
+            bool inbounds(ssize_t x, ssize_t y) { // unsigned to signed. just use signed? TODO
+                return (x >= 0 && x < _board->x() - 1)
+                    && (y >= 0 && y < _board->y() - 1);
+            }
         };
+        template<typename P>
+        void markByEdgeIterator(edgeiterator iter, P payload, std::function<bool(T&,P&)> relation) {
+            P save = payload;
+            while(T *n = iter.next()) {
+                if(relation(*n, payload)) {
+                    markByEdgeIterator(edgeiterator(this, n->coord()), payload, relation);
+                }
+                payload = save;
+            }
+        }
+    public:
+        HexTile(size_t x, size_t y): _x(x), _y(y), _data(_x, col_type(y)), _marker_id(0) {
+            for(int i = 0; i < _data.size(); ++i)
+                for(int j = 0; j < _data[i].rows.size(); ++j) {
+                    _data[i][j].board(this);
+                    _data[i][j] = hexpoint_t {i, j};
+                }
+        }
+        HexTile(const HexTile &other) = delete;
+        HexTile(HexTile &&other) = delete;
+        ssize_t x() {
+            return _x;
+        }
+        ssize_t y() {
+            return _y;
+        }
+        col_type &operator[](size_t i) {
+            return _data[i];
+        }
         /**
          * \brief Iterator over all tiles
          */
@@ -155,6 +179,14 @@ namespace hextile {
         }
         hexiterator end() {
             return hexiterator(*this).end();
+        }
+        unsigned int currentMarker() {
+            return _marker_id;
+        }
+        template<typename P>
+        void markByEdge(hexpoint_t start, P init, std::function<bool(T&,P&)> relation) {
+            ++_marker_id;
+            markByEdgeIterator(edgeiterator(this, start), init, relation);
         }
     };
 

@@ -11,11 +11,16 @@
 
 namespace gamespace {
 
-    unsigned int defaultFalloff(Terrain &t) {
+    unsigned int defaultFalloff(BoardTile &t) {
         return 1;
     }
 
-    typedef std::function<unsigned int(Terrain &)> relation;
+    typedef std::function<unsigned int(BoardTile &)> relation;
+
+    std::function<bool(BoardTile&,unsigned int&)> getEdgeRelation(relation _v) {
+        return [_v](BoardTile &b, unsigned int &p) {if(p == 0) return false; return b.mark(p--);};
+    }
+
     class Unit {
     private:
         qe::Mesh<qe::OBJV3> *_mesh;
@@ -38,6 +43,9 @@ namespace gamespace {
             qe::Cache::objv3->setUniform<qe::UNIM>(m);
             qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.448, 0.844, 1));
             _mesh->render();
+        }
+        void markVisibility(BoardTile &tile) {
+            tile.board().markByEdge(tile.coord(), vr, getEdgeRelation(_v));
         }
     };
 

@@ -32,7 +32,7 @@ private:
     } _strings;
     gamespace::GameBoard _board;
 public:
-    Game(qe::Context *ctxt): _ctxt(ctxt), _font(font::Font::get("assets/fonts/DejaVuSans.ttf"_p)), _board(40, 20) {
+    Game(qe::Context *ctxt): _ctxt(ctxt), _font(font::Font::get("assets/fonts/DejaVuSans.ttf"_p)), _board(15, 8) {
         assert(ctxt);
 #ifdef HAS_FREETYPE
         qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _font->face(), 32, _ctxt->getResolution());
@@ -97,8 +97,10 @@ public:
         // TESTING PURPOSES. UNITS NEED TO BE DEEP COPIES IN GAME
         _board[0][0].setUnit(u);
         _board[1][0].setUnit(u);
-        _board[2][0].setUnit(u);
-        _board[3][0].setUnit(u);
+        _board[0][1].setUnit(u);
+        _board[1][1].setUnit(u);
+
+        _board[0][0].unit()->markVisibility(_board[0][0]);
     }
     void bakeAssets() {
         qe::Cache::glyphlatin->bake();
@@ -120,7 +122,7 @@ public:
             render();
             _ctxt->swap();
 
-            if(fps != _ctxt->fps()) {
+            if(fps != _ctxt->fps() && abs(fps - _ctxt->fps()) > 10) {
                 fps = _ctxt->fps();
                 GINFO("FPS " << std::to_string(fps));
             }
@@ -132,10 +134,17 @@ public:
         auto b = _board.begin();
         auto e = _board.end();
 
+        static bool f = false;
+
         // render tiles and units
         for(; b != e; ++b) {
             glm::vec2 p = b->centerPos();
-            glm::mat4 m = glm::translate(glm::vec3(p.x, -0.25, p.y));
+            double ho = 0;
+            if(b->marked()) {
+                if(f == false) std::cout << "marked " << b->coord().x << b->coord().y << " at " << p.x << ";" << p.y << std::endl;
+                ho = 0.25;
+            }
+            glm::mat4 m = glm::translate(glm::vec3(p.x, ho - 0.25, p.y));
             glm::mat4 mvp = _cam.camera->matrices().pv * m;
             qe::Cache::objv2->use();
             qe::Cache::objv2->setUniform<qe::UNIMVP>(mvp);
@@ -143,11 +152,12 @@ public:
             _tile->render();
             // render unit
             if(b->unit() != nullptr) {
-                m = glm::translate(glm::vec3(p.x, 0, p.y));
+                m = glm::translate(glm::vec3(p.x, ho, p.y));
                 mvp = _cam.camera->matrices().pv * m;
                 b->unit()->render(*b, mvp, m);
             }
         }
+        f = true;
 
         // render text
         _ctxt->textcontext();
