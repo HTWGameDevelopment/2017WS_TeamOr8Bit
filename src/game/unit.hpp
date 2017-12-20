@@ -37,6 +37,7 @@ namespace gamespace {
             : _mesh(m), _player(p), hp(h), dp(d), ap(a), ar(r), vr(v), dpt(t), _a(are), _d(dr), _t(tr), _v(vre) {}
         void render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m);
         void markVisibility(BoardTile &tile);
+        void markMovement(BoardTile &tile);
     };
 
 }

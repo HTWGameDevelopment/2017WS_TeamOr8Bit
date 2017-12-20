@@ -192,6 +192,9 @@ namespace hextile {
             ++_marker_id;
             markByEdgeIterator(edgeiterator(this, start), init, relation);
         }
+        void clearMarker() {
+            ++_marker_id;
+        }
     };
 
 }

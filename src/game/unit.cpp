@@ -14,6 +14,10 @@ void Unit::markVisibility(BoardTile &tile) {
     tile.board().markByEdge(tile.coord(), vr, getEdgeRelation(_v));
 }
 
+void Unit::markMovement(BoardTile &tile) {
+    tile.board().markByEdge(tile.coord(), vr, getEdgeRelation(_t));
+}
+
 void Unit::render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m) {
     qe::Cache::objv3->use();
     qe::Cache::objv3->setUniform<qe::UNIMVP>(mvp);

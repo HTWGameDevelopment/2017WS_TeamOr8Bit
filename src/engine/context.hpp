@@ -59,6 +59,10 @@ namespace qe {
      */
     void mousecallback(GLFWwindow *, double, double);
     /**
+     * \brief GLFW mouse button callback
+     */
+    void mousebuttoncallback(GLFWwindow*, int button, int action, int mods);
+    /**
      * \brief Callback right after event handlers after every frame
      */
     void idlecallback();
@@ -109,6 +113,7 @@ namespace qe {
             };
             glfwSetErrorCallback(errorcallback);
             glfwSetKeyCallback(_window, keycallback);
+            glfwSetMouseButtonCallback(_window, mousebuttoncallback);
             glfwSetCursorPosCallback(_window, mousecallback);
             glfwSetCursorPos(_window, 0, 0);
             glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

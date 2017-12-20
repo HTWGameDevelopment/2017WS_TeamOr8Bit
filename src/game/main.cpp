@@ -30,6 +30,12 @@ private:
     struct Text {
         qe::Text<qe::GlyphmapLatin> gamename;
     } _strings;
+    struct SelectionState {
+        enum Type { SEL_TO_MOVE, SEL_TO_ATTACK, SEL_NONE };
+        Type type;
+        gamespace::BoardTile *selected;
+        gamespace::BoardTile *hovering;
+    } _selection;
     gamespace::Match _match;
 public:
     Game(qe::Context *ctxt)
@@ -38,6 +44,9 @@ public:
                 gamespace::Player(glm::vec3(0.448, 0.884, 1)),
                 gamespace::Player(glm::vec3(1, 0.448, 0.448))) {
         assert(ctxt);
+        _selection.selected = nullptr;
+        _selection.hovering = nullptr;
+        _selection.type = SelectionState::Type::SEL_NONE;
 #ifdef HAS_FREETYPE
         std::cout << "Using font " << _font->bpath() << std::endl;
         qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _font->face(), 32, _ctxt->getResolution());
@@ -89,7 +98,18 @@ public:
             b->setUnit(nullptr);
         }
 
-        auto *u = new gamespace::Unit(_tank.get(), &_match.player1(),
+        auto *u1 = new gamespace::Unit(_tank.get(), &_match.player1(),
+            100,
+            50,
+            50,
+            3,
+            3,
+            2,
+            gamespace::defaultFalloff,
+            gamespace::defaultFalloff,
+            gamespace::defaultFalloff,
+            gamespace::defaultFalloff);
+        auto *u2 = new gamespace::Unit(_tank.get(), &_match.player2(),
             100,
             50,
             50,
@@ -101,17 +121,43 @@ public:
             gamespace::defaultFalloff,
             gamespace::defaultFalloff);
         // TESTING PURPOSES. MOVE THIS TO MATCH SOMEHOW
-        _match.board()[0][0].setUnit(new gamespace::Unit(*u));
-        _match.board()[1][0].setUnit(new gamespace::Unit(*u));
-        _match.board()[0][1].setUnit(new gamespace::Unit(*u));
-        _match.board()[1][1].setUnit(new gamespace::Unit(*u));
+        _match.board()[0][0].setUnit(new gamespace::Unit(*u1));
+        _match.board()[1][0].setUnit(new gamespace::Unit(*u1));
+        _match.board()[0][1].setUnit(new gamespace::Unit(*u1));
+        _match.board()[1][1].setUnit(new gamespace::Unit(*u1));
 
-        delete u;
+        _match.board()[0][5].setUnit(new gamespace::Unit(*u2));
+        _match.board()[1][5].setUnit(new gamespace::Unit(*u2));
+        _match.board()[0][6].setUnit(new gamespace::Unit(*u2));
+        _match.board()[1][6].setUnit(new gamespace::Unit(*u2));
 
-        _match.board()[0][0].unit()->markVisibility(_match.board()[0][0]);
+        delete u1;
+        delete u2;
+
+        // _match.board()[0][0].unit()->markVisibility(_match.board()[0][0]);
     }
     void bakeAssets() {
         qe::Cache::glyphlatin->bake();
+    }
+    void enableMoveMask() {
+        if(_selection.hovering == nullptr) return; // no tile to select
+        if(_selection.type == SelectionState::Type::SEL_TO_MOVE) {
+            if(_selection.hovering->marked()) {
+                assert(_selection.selected);
+                if(_selection.hovering->unit() != nullptr) return; // cannot move to an occupied tile
+                _match.board().moveUnit(_selection.selected->coord(), _selection.hovering->coord());
+            }
+            _selection.type = SelectionState::Type::SEL_NONE;
+            _selection.selected = nullptr;
+            _selection.hovering = nullptr;
+        } else {
+            if(_selection.hovering->unit() == nullptr) return; // no unit to select
+            _selection.hovering->unit()->markMovement(*_selection.hovering);
+            _selection.selected = _selection.hovering;
+            _selection.type = SelectionState::Type::SEL_TO_MOVE;
+        }
+    }
+    void enableAttackMask() {
     }
     bool isLookedAtTile(glm::vec2 ori, glm::vec3 planecoord) {
         glm::vec2 pc(planecoord.x, planecoord.z);
@@ -175,7 +221,9 @@ public:
             }
         }
 
+        _selection.hovering = nullptr;
         if(len == 1) { // render one selected
+            _selection.hovering = selected[0];
             renderTile(selected[0], glm::vec3(0.2, 0.2, 0.2));
         } else if(len != 0){
             for(uint8_t i = 0; i < len; ++i) renderTile(selected[i], glm::vec3(0, 0, 0));
@@ -189,7 +237,8 @@ public:
     void renderTile(gamespace::BoardTile *b, glm::vec3 ho) {
         glm::vec2 p = b->centerPos();
         if(b->marked()) {
-            ho = glm::vec3(0.2, 0.2, 0.2);
+            if(_selection.type == SelectionState::Type::SEL_NONE) _match.board().clearMarker();
+            else ho += glm::vec3(0.2, 0.2, 0.2);
         }
         glm::mat4 m = glm::translate(glm::vec3(p.x, -0.25, p.y));
         glm::mat4 mvp = _cam.camera->matrices().pv * m;
@@ -251,6 +300,14 @@ namespace qe {
     void mousecallback(GLFWwindow *, double x, double y) {
         game->camera()->mouseMoved(game->context()->deltaT(), x, y);
         game->context()->resetMouse();
+    }
+
+    void mousebuttoncallback(GLFWwindow *, int button, int action, int mods) {
+        if(action != GLFW_RELEASE) return;
+        if(button == GLFW_MOUSE_BUTTON_LEFT)
+            game->enableMoveMask();
+        else if(button == GLFW_MOUSE_BUTTON_RIGHT)
+            game->enableAttackMask();
     }
 
     void idlecallback() {
