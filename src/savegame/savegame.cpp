@@ -100,7 +100,7 @@ void SaveGame::save() {
 }
 
 void SaveGame::generateIndex() {
-    std::ifstream inp(_path, std::ios_base::binary);
+    std::ifstream inp(_path, std::ios_base::in | std::ios_base::binary);
 
     if(inp.fail()) // file doesnt exist
         return;

@@ -39,8 +39,10 @@ public:
                 gamespace::Player(glm::vec3(1, 0.448, 0.448))) {
         assert(ctxt);
 #ifdef HAS_FREETYPE
+        std::cout << "Using font " << _font->bpath() << std::endl;
         qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _font->face(), 32, _ctxt->getResolution());
 #else
+        std::cout << "Using baked font " << _font->bpath() << std::endl;
         qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _ctxt->getResolution());
 #endif
         _strings.gamename = qe::Text<qe::GlyphmapLatin>(qe::Cache::glyphlatin, glm::ivec2(500, 100), qe::PositionMode::TOP);
