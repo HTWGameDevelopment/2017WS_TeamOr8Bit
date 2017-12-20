@@ -29,6 +29,9 @@ private:
     } _textures;
     struct Text {
         qe::Text<qe::GlyphmapLatin> gamename;
+        qe::Text<qe::GlyphmapLatin> help1;
+        qe::Text<qe::GlyphmapLatin> help2;
+        std::string help2_tmp;
     } _strings;
     struct SelectionState {
         enum Type { SEL_TO_MOVE, SEL_TO_ATTACK, SEL_NONE };
@@ -41,8 +44,8 @@ public:
     Game(qe::Context *ctxt)
     : _ctxt(ctxt), _font(font::Font::get("assets/fonts/DejaVuSans.ttf"_p)),
         _match(glm::ivec2(15, 8),
-                gamespace::Player(glm::vec3(0.448, 0.884, 1)),
-                gamespace::Player(glm::vec3(1, 0.448, 0.448))) {
+                gamespace::Player(glm::vec3(0.448, 0.884, 1), "Blue"),
+                gamespace::Player(glm::vec3(1, 0.448, 0.448), "Red")) {
         assert(ctxt);
         _selection.selected = nullptr;
         _selection.hovering = nullptr;
@@ -55,7 +58,12 @@ public:
         qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _ctxt->getResolution());
 #endif
         _strings.gamename = qe::Text<qe::GlyphmapLatin>(qe::Cache::glyphlatin, glm::ivec2(500, 100), qe::PositionMode::TOP);
+        _strings.help1 = qe::Text<qe::GlyphmapLatin>(qe::Cache::glyphlatin, glm::ivec2(500, 150), qe::PositionMode::TOP);
+        _strings.help2 = qe::Text<qe::GlyphmapLatin>(qe::Cache::glyphlatin, glm::ivec2(500, 200), qe::PositionMode::TOP);
         _strings.gamename.text() = "Or8Bit - (c) 2017 Team Or8Bit";
+        _strings.help1.text() = "LMB to move, RMB to attack";
+        _strings.help2_tmp = "Current player (. for ending a turn): ";
+        _strings.help2.text() = _strings.help2_tmp + _match.currentPlayer().name();
     }
     void initializeAssets() {
         // MODELS
@@ -89,6 +97,9 @@ public:
                               _ctxt->getAR(),
                               90
                           ));
+    }
+    gamespace::Match &match() {
+        return _match;
     }
     void initializeMap() {
         auto b = _match.board().begin();
@@ -142,7 +153,7 @@ public:
     void enableMoveMask() {
         if(_selection.hovering == nullptr) return; // no tile to select
         if(_selection.type == SelectionState::Type::SEL_TO_MOVE) {
-            if(_selection.hovering->marked()) {
+            if(_selection.hovering->marked() && _selection.hovering != _selection.selected) {
                 assert(_selection.selected);
                 if(_selection.hovering->unit() != nullptr) return; // cannot move to an occupied tile
                 _match.board().moveUnit(_selection.selected->coord(), _selection.hovering->coord());
@@ -150,6 +161,7 @@ public:
             _selection.type = SelectionState::Type::SEL_NONE;
             _selection.selected = nullptr;
             _selection.hovering = nullptr;
+            _match.board().clearMarker();
         } else {
             if(_selection.hovering->unit() == nullptr) return; // no unit to select
             if(_selection.hovering->unit()->player() != _match.currentPlayer()) return; // can only select own units
@@ -161,7 +173,7 @@ public:
     void enableAttackMask() {
         if(_selection.hovering == nullptr) return; // no tile to select
         if(_selection.type == SelectionState::Type::SEL_TO_ATTACK) {
-            if(_selection.hovering->marked()) {
+            if(_selection.hovering->marked() && _selection.hovering != _selection.selected) {
                 assert(_selection.selected);
                 if(_selection.hovering->unit() == nullptr) return; // cannot attack empty tile
                 if(_selection.hovering->unit()->player() == _match.currentPlayer()) return; // cannot attack own unit
@@ -170,6 +182,7 @@ public:
             _selection.type = SelectionState::Type::SEL_NONE;
             _selection.selected = nullptr;
             _selection.hovering = nullptr;
+            _match.board().clearMarker();
         } else {
             if(_selection.hovering->unit() == nullptr) return; // no unit to select
             if(_selection.hovering->unit()->player() != _match.currentPlayer()) return; // can only select own units
@@ -251,6 +264,9 @@ public:
         // render text
         _ctxt->textcontext();
         _strings.gamename.render();
+        _strings.help1.render();
+        _strings.help2.text() = _strings.help2_tmp + _match.currentPlayer().name();
+        _strings.help2.render();
         _ctxt->meshcontext();
     }
     void renderTile(gamespace::BoardTile *b, glm::vec3 ho) {
@@ -299,11 +315,12 @@ namespace qe {
         if(key == GLFW_KEY_Q)
             game->context()->close();
 
-        if(key == GLFW_KEY_P && action == GLFW_PRESS)
+        if(key == GLFW_KEY_P && action == GLFW_RELEASE)
             qe::screenshot("screenshot.png", game->context()->width(), game->context()->height());
-
-        if(key == GLFW_KEY_V && action == GLFW_PRESS)
+        else if(key == GLFW_KEY_V && action == GLFW_RELEASE)
             qe::VSYNC() = qe::VSYNC() == 0 ? 1 : 0;
+        else if(key == GLFW_KEY_PERIOD && action == GLFW_RELEASE)
+            game->match().endTurn();
         else if(key == GLFW_KEY_A) movementmask[MOVELEFT] = action == GLFW_PRESS;
         else if(key == GLFW_KEY_D) movementmask[MOVERIGHT] = action == GLFW_PRESS;
         else if(key == GLFW_KEY_W) movementmask[MOVEFORWARD] = action == GLFW_PRESS;

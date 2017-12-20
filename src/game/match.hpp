@@ -21,6 +21,10 @@ namespace gamespace {
         Player &player1() {return _player1;}
         Player &player2() {return _player2;}
         Player &currentPlayer() {return *_currentPlayer;}
+        void endTurn() {
+            if(_currentPlayer == &_player1) _currentPlayer = &_player2;
+            else _currentPlayer = &_player1;
+        }
     };
 }
 
