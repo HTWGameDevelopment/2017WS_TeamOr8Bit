@@ -126,6 +126,9 @@ namespace hextile {
         col_type &operator[](size_t i) {
             return _data[i];
         }
+        T &get(hexpoint_t i) {
+            return _data[i.x][i.y];
+        }
         /**
          * \brief Iterator over all tiles
          */

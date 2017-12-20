@@ -78,8 +78,20 @@ namespace gamespace {
         }
     };
 
-    typedef hextile::HexTile<BoardTile> GameBoard;
     typedef hextile::hexpoint_t hexpoint_t;
+
+    class GameBoard: public hextile::HexTile<BoardTile> {
+    public:
+        GameBoard(int x, int y): hextile::HexTile<BoardTile>(x, y) {}
+        void moveUnit(hexpoint_t from, hexpoint_t to) {
+            auto &ft = get(from);
+            auto &tt = get(to);
+            assert(ft.unit());
+            assert(tt.unit() == nullptr);
+            tt.setUnit(ft.unit());
+            ft.setUnit(nullptr);
+        }
+    };
 
 }
 
