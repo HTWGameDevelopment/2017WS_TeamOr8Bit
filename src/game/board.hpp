@@ -55,18 +55,7 @@ namespace gamespace {
         hextile::HexTile<BoardTile> &board() {
             return *_board;
         }
-        bool mark(unsigned int d) {
-            if(_board->currentMarker() == _mark.id) {
-                if(_mark.val < d) {
-                    _mark.val = d;
-                    return true;
-                } else return false;
-            } else {
-                _mark.id = _board->currentMarker();
-                _mark.val = d;
-                return true;
-            }
-        }
+        bool mark(unsigned int d);
         bool marked() {
             return _mark.id == _board->currentMarker() && _mark.val != 0;
         }
@@ -84,14 +73,7 @@ namespace gamespace {
     class GameBoard: public hextile::HexTile<BoardTile> {
     public:
         GameBoard(int x, int y): hextile::HexTile<BoardTile>(x, y) {}
-        void moveUnit(hexpoint_t from, hexpoint_t to) {
-            auto &ft = get(from);
-            auto &tt = get(to);
-            assert(ft.unit());
-            assert(tt.unit() == nullptr);
-            tt.setUnit(ft.unit());
-            ft.setUnit(nullptr);
-        }
+        void moveUnit(hexpoint_t from, hexpoint_t to);
     };
 
 }

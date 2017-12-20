@@ -98,11 +98,13 @@ public:
             gamespace::defaultFalloff,
             gamespace::defaultFalloff,
             gamespace::defaultFalloff);
-        // TESTING PURPOSES. UNITS NEED TO BE DEEP COPIES IN GAME
-        _match.board()[0][0].setUnit(u);
-        _match.board()[1][0].setUnit(u);
-        _match.board()[0][1].setUnit(u);
-        _match.board()[1][1].setUnit(u);
+        // TESTING PURPOSES. MOVE THIS TO MATCH SOMEHOW
+        _match.board()[0][0].setUnit(new gamespace::Unit(*u));
+        _match.board()[1][0].setUnit(new gamespace::Unit(*u));
+        _match.board()[0][1].setUnit(new gamespace::Unit(*u));
+        _match.board()[1][1].setUnit(new gamespace::Unit(*u));
+
+        delete u;
 
         _match.board()[0][0].unit()->markVisibility(_match.board()[0][0]);
     }

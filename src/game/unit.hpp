@@ -35,14 +35,7 @@ namespace gamespace {
     public:
         Unit(qe::Mesh<qe::OBJV3> *m, Player *p, unsigned int h, unsigned int d, unsigned int a, unsigned int r, unsigned int v, unsigned int t, relation are, relation dr, relation tr, relation vre)
             : _mesh(m), _player(p), hp(h), dp(d), ap(a), ar(r), vr(v), dpt(t), _a(are), _d(dr), _t(tr), _v(vre) {}
-        void render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m) {
-            qe::Cache::objv3->use();
-            qe::Cache::objv3->setUniform<qe::UNIMVP>(mvp);
-            qe::Cache::objv3->setUniform<qe::UNIM>(m);
-            qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.448, 0.844, 1));
-            qe::Cache::objv3->setUniform<qe::UNICOLOR>(_player->color());
-            _mesh->render();
-        }
+        void render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m);
         void markVisibility(BoardTile &tile);
     };
 
