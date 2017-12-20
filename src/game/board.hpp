@@ -19,9 +19,9 @@ namespace gamespace {
         hextile::HexTile<BoardTile> *_board; // pointer to board
         hextile::hexpoint_t _p; // coordinate
         hextile::marker_t _mark;
-        const float dim_x = 2 * 0.866; // dimension in X direction
-        const float dim_y = 2 * 1.0; // dimension in Y direction
     public:
+        static constexpr float dim_x = 2 * 0.866; // dimension in X direction
+        static constexpr float dim_y = 2 * 1.0; // dimension in Y direction
         ~BoardTile();
         void board(hextile::HexTile<BoardTile> *t) {
             _board = t;

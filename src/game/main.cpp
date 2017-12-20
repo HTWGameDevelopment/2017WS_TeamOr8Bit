@@ -113,12 +113,34 @@ public:
     void bakeAssets() {
         qe::Cache::glyphlatin->bake();
     }
+    bool isLookedAtTile(glm::vec2 ori, glm::vec3 planecoord) {
+        glm::vec2 pc(planecoord.x, planecoord.z);
+        auto dx = 0.5 * gamespace::BoardTile::dim_x;
+        auto dy = 0.5 * gamespace::BoardTile::dim_y;
+        pc += glm::vec2(dx, dy);
+        glm::vec2 edge1 = glm::normalize(glm::vec2(0, 1));
+        glm::vec2 edge2 = glm::normalize(glm::vec2(dx, 0.5));
+        glm::vec2 edge3 = glm::normalize(glm::vec2(dx, -0.5));
+        glm::vec2 edge4 = glm::normalize(glm::vec2(0,-1));
+        glm::vec2 edge5 = glm::normalize(glm::vec2(-dx, 0.5));
+        glm::vec2 edge6 = glm::normalize(glm::vec2(-dx,-0.5));
+        if(abs(glm::dot(edge1, ori - pc)) > 0.7) return false;
+        if(abs(glm::dot(edge2, ori - pc)) > 0.7) return false;
+        if(abs(glm::dot(edge3, ori - pc)) > 0.7) return false;
+
+        if(abs(glm::dot(edge4, ori - pc)) > 0.7) return false;
+        if(abs(glm::dot(edge5, ori - pc)) > 0.7) return false;
+        if(abs(glm::dot(edge6, ori - pc)) > 0.7) return false;
+
+        return true;
+    }
     void run() {
         unsigned int fps = 0;
         glm::mat4 m = glm::translate(glm::vec3(0, 0, 0));
         glClearColor(0.3, 0.3, 0.3, 1);
 
         while(!_ctxt->shouldClose()) {
+            // calculate lookat tile
             glm::mat4 mvp = _cam.camera->matrices().pv * m;
             qe::Cache::objv2->use();
             qe::Cache::objv2->setUniform<qe::UNIMVP>(mvp);
@@ -141,33 +163,47 @@ public:
     void render() {
         auto b = _match.board().begin();
         auto e = _match.board().end();
+        std::array<gamespace::BoardTile*, 3> selected;
+        uint8_t len = 0;
 
         // render tiles and units
         for(; b != e; ++b) {
-            glm::vec2 p = b->centerPos();
-            glm::vec3 ho(0, 0, 0);
-            if(b->marked()) {
-                ho = glm::vec3(0.2, 0.2, 0.2);
+            if(isLookedAtTile(b->centerPos(), _cam.camera->getPlaneCoord())) {
+                selected[len++] = &*b;
+            } else {
+                renderTile(&*b, glm::vec3(0, 0, 0));
             }
-            glm::mat4 m = glm::translate(glm::vec3(p.x, -0.25, p.y));
-            glm::mat4 mvp = _cam.camera->matrices().pv * m;
-            qe::Cache::objv2->use();
-            qe::Cache::objv2->setUniform<qe::UNIMVP>(mvp);
-            qe::Cache::objv2->setUniform<qe::UNIM>(m);
-            qe::Cache::objv2->setUniform<qe::UNICOLOR>(ho);
-            _tile->render();
-            // render unit
-            if(b->unit() != nullptr) {
-                m = glm::translate(glm::vec3(p.x, 0, p.y));
-                mvp = _cam.camera->matrices().pv * m;
-                b->unit()->render(*b, mvp, m);
-            }
+        }
+
+        if(len == 1) { // render one selected
+            renderTile(selected[0], glm::vec3(0.2, 0.2, 0.2));
+        } else if(len != 0){
+            for(uint8_t i = 0; i < len; ++i) renderTile(selected[i], glm::vec3(0, 0, 0));
         }
 
         // render text
         _ctxt->textcontext();
         _strings.gamename.render();
         _ctxt->meshcontext();
+    }
+    void renderTile(gamespace::BoardTile *b, glm::vec3 ho) {
+        glm::vec2 p = b->centerPos();
+        if(b->marked()) {
+            ho = glm::vec3(0.2, 0.2, 0.2);
+        }
+        glm::mat4 m = glm::translate(glm::vec3(p.x, -0.25, p.y));
+        glm::mat4 mvp = _cam.camera->matrices().pv * m;
+        qe::Cache::objv2->use();
+        qe::Cache::objv2->setUniform<qe::UNIMVP>(mvp);
+        qe::Cache::objv2->setUniform<qe::UNIM>(m);
+        qe::Cache::objv2->setUniform<qe::UNICOLOR>(ho);
+        _tile->render();
+        // render unit
+        if(b->unit() != nullptr) {
+            m = glm::translate(glm::vec3(p.x, 0, p.y));
+            mvp = _cam.camera->matrices().pv * m;
+            b->unit()->render(*b, mvp, m);
+        }
     }
     qe::Camera *camera() {
         return _cam.camera.get();
