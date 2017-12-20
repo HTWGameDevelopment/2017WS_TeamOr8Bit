@@ -31,8 +31,12 @@ private:
         qe::Text<qe::GlyphmapLatin> gamename;
     } _strings;
     gamespace::GameBoard _board;
+    gamespace::Player _player0;
+    gamespace::Player _player1;
 public:
-    Game(qe::Context *ctxt): _ctxt(ctxt), _font(font::Font::get("assets/fonts/DejaVuSans.ttf"_p)), _board(15, 8) {
+    Game(qe::Context *ctxt)
+    : _ctxt(ctxt), _font(font::Font::get("assets/fonts/DejaVuSans.ttf"_p)), _board(15, 8),
+      _player0(glm::vec3(0.448, 0.884, 1)), _player1(glm::vec3(1, 0.448, 0.448)) {
         assert(ctxt);
 #ifdef HAS_FREETYPE
         qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _font->face(), 32, _ctxt->getResolution());
@@ -83,7 +87,7 @@ public:
             b->setUnit(nullptr);
         }
 
-        auto *u = new gamespace::Unit(_tank.get(),
+        auto *u = new gamespace::Unit(_tank.get(), &_player1,
             100,
             50,
             50,
