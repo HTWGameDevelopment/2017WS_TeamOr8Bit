@@ -19,6 +19,7 @@
 // SOFTWARE.
 #include "savegame.hpp"
 
+#include<iostream>
 #include<string.h>
 
 using namespace savegame;
@@ -102,8 +103,10 @@ void SaveGame::save() {
 void SaveGame::generateIndex() {
     std::ifstream inp(_path, std::ios_base::in | std::ios_base::binary);
 
-    if(inp.fail()) // file doesnt exist
+    if(inp.fail()) { // file doesnt exist
+        std::cout << "File " << _path << " does not exist. Not loading." << std::endl;
         return;
+    }
 
     inp.exceptions(std::ios::badbit);
     std::string m = _read(inp);
