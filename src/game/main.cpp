@@ -122,7 +122,7 @@ public:
             render();
             _ctxt->swap();
 
-            if(fps != _ctxt->fps() && abs(fps - _ctxt->fps()) > 10) {
+            if(fps != _ctxt->fps()) {
                 fps = _ctxt->fps();
                 GINFO("FPS " << std::to_string(fps));
             }
@@ -134,30 +134,27 @@ public:
         auto b = _board.begin();
         auto e = _board.end();
 
-        static bool f = false;
-
         // render tiles and units
         for(; b != e; ++b) {
             glm::vec2 p = b->centerPos();
-            double ho = 0;
+            glm::vec3 ho(0, 0, 0);
             if(b->marked()) {
-                if(f == false) std::cout << "marked " << b->coord().x << b->coord().y << " at " << p.x << ";" << p.y << std::endl;
-                ho = 0.25;
+                ho = glm::vec3(0.2, 0.2, 0.2);
             }
-            glm::mat4 m = glm::translate(glm::vec3(p.x, ho - 0.25, p.y));
+            glm::mat4 m = glm::translate(glm::vec3(p.x, -0.25, p.y));
             glm::mat4 mvp = _cam.camera->matrices().pv * m;
             qe::Cache::objv2->use();
             qe::Cache::objv2->setUniform<qe::UNIMVP>(mvp);
             qe::Cache::objv2->setUniform<qe::UNIM>(m);
+            qe::Cache::objv2->setUniform<qe::UNICOLOR>(ho);
             _tile->render();
             // render unit
             if(b->unit() != nullptr) {
-                m = glm::translate(glm::vec3(p.x, ho, p.y));
+                m = glm::translate(glm::vec3(p.x, 0, p.y));
                 mvp = _cam.camera->matrices().pv * m;
                 b->unit()->render(*b, mvp, m);
             }
         }
-        f = true;
 
         // render text
         _ctxt->textcontext();
