@@ -38,6 +38,21 @@ namespace gamespace {
         void render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m);
         void markVisibility(BoardTile &tile);
         void markMovement(BoardTile &tile);
+        void markAttack(BoardTile &tile);
+        Player &player() {
+            return *_player;
+        }
+        void attackedWith(Unit &o) {
+            unsigned int off = o.ap;
+            if(hp < off) {
+                hp = 0;
+                return;
+            }
+            hp -= off;
+        }
+        bool dead() {
+            return hp == 0;
+        }
     };
 
 }

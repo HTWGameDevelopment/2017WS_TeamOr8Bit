@@ -66,6 +66,7 @@ namespace gamespace {
             if(marked()) return _mark.val;
             return 0;
         }
+        void destroyUnit();
     };
 
     typedef hextile::hexpoint_t hexpoint_t;
@@ -74,6 +75,7 @@ namespace gamespace {
     public:
         GameBoard(int x, int y): hextile::HexTile<BoardTile>(x, y) {}
         void moveUnit(hexpoint_t from, hexpoint_t to);
+        void attackUnit(hexpoint_t from, hexpoint_t to);
     };
 
 }

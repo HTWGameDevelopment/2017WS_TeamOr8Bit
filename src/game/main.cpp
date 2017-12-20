@@ -152,12 +152,31 @@ public:
             _selection.hovering = nullptr;
         } else {
             if(_selection.hovering->unit() == nullptr) return; // no unit to select
+            if(_selection.hovering->unit()->player() != _match.currentPlayer()) return; // can only select own units
             _selection.hovering->unit()->markMovement(*_selection.hovering);
             _selection.selected = _selection.hovering;
             _selection.type = SelectionState::Type::SEL_TO_MOVE;
         }
     }
     void enableAttackMask() {
+        if(_selection.hovering == nullptr) return; // no tile to select
+        if(_selection.type == SelectionState::Type::SEL_TO_ATTACK) {
+            if(_selection.hovering->marked()) {
+                assert(_selection.selected);
+                if(_selection.hovering->unit() == nullptr) return; // cannot attack empty tile
+                if(_selection.hovering->unit()->player() == _match.currentPlayer()) return; // cannot attack own unit
+                _match.board().attackUnit(_selection.selected->coord(), _selection.hovering->coord());
+            }
+            _selection.type = SelectionState::Type::SEL_NONE;
+            _selection.selected = nullptr;
+            _selection.hovering = nullptr;
+        } else {
+            if(_selection.hovering->unit() == nullptr) return; // no unit to select
+            if(_selection.hovering->unit()->player() != _match.currentPlayer()) return; // can only select own units
+            _selection.hovering->unit()->markAttack(*_selection.hovering);
+            _selection.selected = _selection.hovering;
+            _selection.type = SelectionState::Type::SEL_TO_ATTACK;
+        }
     }
     bool isLookedAtTile(glm::vec2 ori, glm::vec3 planecoord) {
         glm::vec2 pc(planecoord.x, planecoord.z);
