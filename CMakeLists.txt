@@ -21,6 +21,8 @@ set(DISABLE_FREETYPE OFF CACHE BOOL "Disable freetype rendering and use baked fo
 # program
 add_executable(Or8Bit
     src/game/main.cpp
+    src/game/board.cpp
+    src/game/unit.cpp
     extern/glad/src/glad.c
     src/engine/loader.c
     src/engine/screenshot.cpp

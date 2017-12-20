@@ -1,7 +1,7 @@
 #include<engine/qe.hpp>
 #include<font/font.hpp>
 
-#include "board.hpp"
+#include "match.hpp"
 
 #include<logger.h>
 
@@ -30,13 +30,13 @@ private:
     struct Text {
         qe::Text<qe::GlyphmapLatin> gamename;
     } _strings;
-    gamespace::GameBoard _board;
-    gamespace::Player _player0;
-    gamespace::Player _player1;
+    gamespace::Match _match;
 public:
     Game(qe::Context *ctxt)
-    : _ctxt(ctxt), _font(font::Font::get("assets/fonts/DejaVuSans.ttf"_p)), _board(15, 8),
-      _player0(glm::vec3(0.448, 0.884, 1)), _player1(glm::vec3(1, 0.448, 0.448)) {
+    : _ctxt(ctxt), _font(font::Font::get("assets/fonts/DejaVuSans.ttf"_p)),
+        _match(glm::ivec2(15, 8),
+                gamespace::Player(glm::vec3(0.448, 0.884, 1)),
+                gamespace::Player(glm::vec3(1, 0.448, 0.448))) {
         assert(ctxt);
 #ifdef HAS_FREETYPE
         qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _font->face(), 32, _ctxt->getResolution());
@@ -80,14 +80,14 @@ public:
                           ));
     }
     void initializeMap() {
-        auto b = _board.begin();
-        auto e = _board.end();
+        auto b = _match.board().begin();
+        auto e = _match.board().end();
 
         for(; b != e; ++b) {
             b->setUnit(nullptr);
         }
 
-        auto *u = new gamespace::Unit(_tank.get(), &_player1,
+        auto *u = new gamespace::Unit(_tank.get(), &_match.player1(),
             100,
             50,
             50,
@@ -99,12 +99,12 @@ public:
             gamespace::defaultFalloff,
             gamespace::defaultFalloff);
         // TESTING PURPOSES. UNITS NEED TO BE DEEP COPIES IN GAME
-        _board[0][0].setUnit(u);
-        _board[1][0].setUnit(u);
-        _board[0][1].setUnit(u);
-        _board[1][1].setUnit(u);
+        _match.board()[0][0].setUnit(u);
+        _match.board()[1][0].setUnit(u);
+        _match.board()[0][1].setUnit(u);
+        _match.board()[1][1].setUnit(u);
 
-        _board[0][0].unit()->markVisibility(_board[0][0]);
+        _match.board()[0][0].unit()->markVisibility(_match.board()[0][0]);
     }
     void bakeAssets() {
         qe::Cache::glyphlatin->bake();
@@ -135,8 +135,8 @@ public:
         }
     }
     void render() {
-        auto b = _board.begin();
-        auto e = _board.end();
+        auto b = _match.board().begin();
+        auto e = _match.board().end();
 
         // render tiles and units
         for(; b != e; ++b) {

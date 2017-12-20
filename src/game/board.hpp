@@ -22,6 +22,7 @@ namespace gamespace {
         const float dim_x = 2 * 0.866; // dimension in X direction
         const float dim_y = 2 * 1.0; // dimension in Y direction
     public:
+        ~BoardTile();
         void board(hextile::HexTile<BoardTile> *t) {
             _board = t;
             _mark.id = 0;
@@ -94,7 +95,5 @@ namespace gamespace {
     };
 
 }
-
-#include<game/unit.hpp>
 
 #endif

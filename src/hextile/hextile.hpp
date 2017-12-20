@@ -20,6 +20,7 @@
 #ifndef HEXTILE_HPP
 #define HEXTILE_HPP
 
+#include<functional>
 #include<memory>
 #include<vector>
 
