@@ -3,12 +3,12 @@
 
 #include<stdio.h>
 #include<assert.h>
-#include<GL/glew.h>
+#include<glad/glad.h>
 
 #ifdef __cplusplus
 #include<string>
 #include<iostream>
-GLenum _logger_e;
+extern GLenum _logger_e;
 #define GLERRORCHECK if((_logger_e = glGetError()) != GL_NO_ERROR) throw_glerror(_logger_e, __FILE__, __LINE__);
 #ifndef NDEBUG
 #define GERR(x)  std::cerr << "GERROR " << x << " (" << __FILE__ << ":" << __LINE__ << ")" << std::endl;
@@ -27,14 +27,8 @@ struct glerror: public std::runtime_error {
 struct glshadererror: public std::runtime_error {
     glshadererror(std::string s): runtime_error(s) {}
 };
-void throw_glerror(GLenum error, const char* file, int line) {
-    std::string r(file);
-    r += ":";
-    r += std::to_string(line);
-    r += ": ";
-    r += (const char*)gluErrorString(error);
-    throw glerror(r);
-}
+const char *getErrorString(GLenum error);
+void throw_glerror(GLenum error, const char *file, int line);
 #else
 #ifndef NDEBUG
 #define GERR(x)  fprintf(stderr, "GERROR %s (%s:%s)\n", x, __FILE__, __LINE__);

@@ -1,0 +1,51 @@
+* All tasks
+** Engine [0/8]
+*** TODO Font rendering
+*** TODO Hud rendering
+*** TODO Animation
+*** TODO Shadows
+*** TODO Input revised
+*** TODO Options
+*** TODO Save game
+*** TODO Save options
+** Gameplay [0/12]
+*** TODO Tile class
+*** TODO Unit class
+*** TODO Attacking
+*** TODO Defense Mode
+*** TODO Trenches
+*** TODO Vertical
+*** TODO Special Buildings
+*** TODO Base Production
+*** TODO Building class
+*** TODO Game state class
+*** TODO Game screen class
+*** TODO Level Generator
+** Assets [0/3]
+*** TODO Terrain [0/4]
+**** TODO Plains
+**** TODO Hills
+**** TODO Mountains
+**** TODO Water
+*** TODO Units [0/5]
+**** TODO Infantry
+**** TODO Tank
+**** TODO Artillery
+**** TODO Snipers
+**** TODO Recon
+*** TODO Buildings [0/4]
+**** TODO Production Base
+**** TODO Tower
+**** TODO Trench
+**** TODO Dam
+** Menu [0/4]
+*** TODO Main Menu
+*** TODO Options Menu
+*** TODO Level Creation Menu
+*** TODO Pause Menu
+** Optimization [0/3]
+*** TODO Better tile rendering
+*** TODO Render by type
+*** TODO Multithreading
+** Sound [0/1]
+*** TODO Choose middleware

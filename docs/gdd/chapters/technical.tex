@@ -1,0 +1,41 @@
+\part{Technical}
+\section{Target Hardware}
+The game will be made for the 64-bit PC platform with Microsoft Windows
+or Linux as the target software.
+\section{Development procedures and standards}
+The game code will be written in a coherent formatting style, the details of
+which can be read in the astyle (formatting software) configuration.
+The code will be published in a public GitHub repository. The exact branching
+structure is as follows:
+\begin{description}
+    \item[master branch] for releases.
+    \item[develop branch] for merge commits.
+    \item[feature branches] for implementing features and bugfixes.
+\end{description}
+\section{Game Engine}
+The game runs on its own simple graphics engine built on top of OpenGL as a
+rendering interface.
+\section{Network}
+The game features simple local network play.
+\section{Dependencies}
+The game requires the following internal dependencies:
+
+\begin{description}
+    \item[glad] for loading an OpenGL context.
+    \item[GLFW] for cross-platform window creation.
+    \item[glm] for mathematics.
+    \item[libPNG] for textures handling.
+    \item[freetype2] for fonts (Linux only, will bake fonts into PNG files for Windows and release).
+\end{description}
+
+The game requires the following external dependencies:
+
+\begin{description}
+    \item[OpenGL] also known as a graphics driver.
+\end{description}
+
+Outstanding additions:
+
+\begin{itemize}
+    \item Sound Middleware
+\end{itemize}

@@ -1,0 +1,40 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{makeidx}
+\hypersetup{pdftex,colorlinks=true,allcolors=blue}
+\makeindex
+\title{Or8Bit - Game Design Document}
+\author{Team Or8Bit: Fabian Stiewitz, Manuel Jung, Simon Triem}
+\date{14.11.2017}
+\begin{document}
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+\include{chapters/overview}
+\include{chapters/gameplay}
+\include{chapters/levels}
+\include{chapters/interface}
+\include{chapters/ai}
+\include{chapters/technical}
+\include{chapters/art}
+\include{chapters/secondary}
+\include{chapters/management}
+\appendix
+\part{Appendix}
+\include{chapters/assets}
+\section{History}
+\begin{tabularx}{\textwidth}{ l X }
+  2017-11-03 & Start des Projekts \\
+  2017-11-06 & GDD Rahmen \\
+  2017-11-14 & GDD pre-release \\
+\end{tabularx}
+\newpage
+\printindex
+\end{document}

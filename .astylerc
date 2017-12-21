@@ -1,0 +1,11 @@
+--indent-namespaces
+--break-blocks
+--pad-oper
+--unpad-paren
+--convert-tabs
+--suffix=none
+--indent=spaces=4
+--align-pointer=name
+--align-reference=name
+--mode=c
+--lineend=linux

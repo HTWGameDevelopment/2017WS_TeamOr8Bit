@@ -1,0 +1,101 @@
+\part{Gameplay and Mechanics}
+\section{Gameplay}
+The most basic premise is this:
+
+\begin{itemize}
+\item Two players (A.I., local or network) play on a hexagonal map.
+\item Each player has a set of units \index{unit} and buildings \index{building}.
+\item Each unit \index{unit} occupies one  tile \index{tile}. Each building \index{building} one or more.
+\item Symmetry depends on the map being played.
+\item The goal of each player is to destroy or conquer every enemy base. Campaign goals may vary.
+\item During the match, each player takes turns where they can move their units \index{unit}, start attacks, take over buildings \index{building} or build new ones.
+\end{itemize}
+\subsection{Round setup}
+Players take turns (rounds). Actions are performed immediately and cannot be undone. The round ends by clicking a button on screen.
+\section{Mechanics}
+\subsection{Moving units \index{unit}}
+The core game mechanic of this game are moveable units \index{unit} which occupy empty  tile \index{tile} on our hexagonal  board \index{board}.
+The units \index{unit} have the following parameters:
+
+\begin{itemize}
+    \item The faction $f$ to which the unit \index{unit} belongs.
+    \item The position $p$.
+    \item The number of health points $h$.
+    \item A level $l$ indicating unit \index{unit} experience (currently unused).
+    \item A dynamic defense point metric $d$ indicating defensive capabilities.
+    \item A dynamic attack point metric $a$ indicating offensive capabilities.
+    \item The maximum travel distance per turn $dpt$.
+    \item A relation $T: terrain \to dpt$ for calculating the maximum travel distance over different terrain.
+    \item The maximum attack range $ar$.
+    \item A relation $A: terrain \to ar$ for calculating the maximum attack range over different terrain.
+    \item A relation $D: terrain \to ar$ for calculating the attack damage over different terrain.
+    \item The maximum viewing range $vr$.
+    \item A relation $V: terrain \to vr$ for calculating the visibility over different terrain.
+    \item Additional data for unit \index{unit} actions outside of simple attacks.
+\end{itemize}
+\subsection{Moving}
+Every unit type has a maximum travel distance and a different movement ,,cost'' per terrain type.
+\subsection{Visibility}
+Every unit type has a maximum viewing distance and a different viewing ,,cost'' per terrain type.
+\subsection{Attacking}
+Every unit type has a maximum attack range and a different attack range ,,cost'' per terrain type.
+The attacking system is deterministic without any random interference. The algorithm for determining the outcome
+of an encounter is also easy to learn but hard to master.
+
+\begin{align}
+    \text{attack possible?} &= (\begin{Vmatrix}p_{att} - p_{def}\end{Vmatrix} - \sum_{t=p_{att}}^{p_{def}} A_{att}(t)) > 0 \\
+    adj &= a_{att} - \sum_{t=p_{att}}^{p_{def}} D_{att}(t) \\
+    d &= d_{def} - adj \\
+    h_{def} &= h_{def} + d \\
+    l_{def} &= l_{def} + adj \\
+    l_{att} &= l_{att} + d
+\end{align}
+
+$a$ is static but may change during balancing. $l$ is unused in the current algorithm.
+\subsection{Defending}
+A unit \index{unit} can go into defense mode which boosts the defensive metric $d$ by $1.5$ but renders the unit \index{unit} unable to move.
+Going into and out of DM takes up one turn.
+\subsection{Building units \index{unit}}
+\label{building units}
+Units can be built in static and indestructable (but not invincible) bases.
+A base can be tasked to continuously produce units \index{unit} for the owning player. Each base can only build one unit \index{unit}
+at a time. The type of unit \index{unit} is determined by the player but not all bases can build all unit \index{unit} types. The length and cooldown
+of each production also varies between unit \index{unit} types.
+\subsection{Buildings}
+\subsubsection{Production Base}
+Base type which produces units \index{unit} for the owning player. See~\ref{building units} for details.
+\subsubsection{Radar Base}
+Detects player movement of large units in a larger radius.
+\subsubsection{Stronghold}
+Simple camping spot with a defensive boost.
+\subsubsection{Trench}
+Infantry units \index{unit} have a special action for building \index{building} trenches. A trench is a terrain modifier which boosts the
+defensive metric $d$ of infantry units \index{unit} by $2$ and increases the travel distance for infantry units \index{unit} along the trench.
+\subsection{Tower}
+Additionally some unit \index{unit} types can be ,,upgraded'' into a building \index{building} with a significantly higher $d$. The original unit \index{unit} is replaced by the
+building and that building \index{building} cannot be ,,downgraded'' back.
+\subsection{Special buildings \index{building}} %TODO ref
+Some buildings \index{building} have special features that can be triggered under certain conditions. See~\ref{level} for details.
+\section{Screen Flow} %TODO
+There are four screens:
+
+\begin{enumerate}
+    \item Main Menu
+    \item Level Creation
+    \item Level
+    \item Options Menu
+\end{enumerate}
+\section{Game Options} %TODO
+The match can be modified with the following settings:
+
+\begin{description}
+    \item[difficulty] changes the difficulty when playing against an AI (if we have time to make one).
+    \item[map] changes the map.
+    \item[Various toggles] for enabling/disabling/breaking selected gameplay elements.
+    \item[Max Moves Per Turn] optional. Only allow a fixed number of actions per turn.
+\end{description}
+\section{Saving}
+Each match can be saved into a custom file format and loaded back into the game.
+\section{Cheats and Easter Eggs}
+There might be cheats.
+% anno cheat RUAMZUZLA
