@@ -5,7 +5,10 @@
 
 namespace gamespace {
     class GameScreen: public Screen {
-public:
+    public:
+        void newGame() {
+            // TODO
+        }
         void activate_screen() {
 
         }

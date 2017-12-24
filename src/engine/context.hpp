@@ -140,6 +140,20 @@ namespace qe {
             glfwSetCursorPos(_window, 0, 0);
         }
         /**
+         * \brief Return mouse position
+         */
+        glm::dvec2 getMousePos() {
+            glm::dvec2 r;
+            glfwGetCursorPos(_window, &r.x, &r.y);
+            return r;
+        }
+        /**
+         * \brief Convert absolute coordinates (in pixels) to window coordinates (-1,-1 to 1,1)
+         */
+        glm::dvec2 absToRel(glm::dvec2 in) {
+            return glm::dvec2(-1.0 + 2.0 * in.x / _w, -1.0 + 2.0 * in.y / _h);
+        }
+        /**
          * \brief true if close() call or window was closed by user
          */
         inline bool shouldClose() {
@@ -191,6 +205,9 @@ namespace qe {
             glfwPollEvents();
             idlecallback();
         }
+        /**
+         * \brief Handle GLFW events. blocks until event received
+         */
         void waitEvents() {
             glfwWaitEvents();
         }

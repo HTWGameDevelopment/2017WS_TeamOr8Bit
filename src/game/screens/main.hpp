@@ -14,9 +14,10 @@ namespace gamespace {
         AboutScreen *_about;
         GameScreen *_game;
         qe::Context *_ctxt;
+        GameScreen *_gamescreen;
         bool _active;
     public:
-        MainScreen(qe::Context *ctxt): Screen(), _ctxt(ctxt) {
+        MainScreen(qe::Context *ctxt, GameScreen &gamescreen): Screen(), _ctxt(ctxt), _gamescreen(&gamescreen) {
             assert(ctxt);
         }
         void activate_screen() {
@@ -55,6 +56,12 @@ namespace gamespace {
         }
         void process_events() {
             _ctxt->waitEvents();
+        }
+        void mouse_button_callback(int button, int action, int mods) {
+            glm::dvec2 cpos = _ctxt->absToRel(_ctxt->getMousePos());
+            if(cpos.x >= -0.25 && cpos.x <= 0.25 && cpos.y >= 0 && cpos.y <= 0.25) {
+                _gamescreen->newGame();
+            }
         }
     };
 }

@@ -106,9 +106,9 @@ public:
                           ));
     }
     void initializeScreens() {
-        _mainmenu = _screens.addScreen(new gamespace::MainScreen(_ctxt));
         auto *a = _screens.addScreen(new gamespace::AboutScreen());
         auto *g = _screens.addScreen(new gamespace::GameScreen());
+        _mainmenu = _screens.addScreen(new gamespace::MainScreen(_ctxt, *g));
 
         _mainmenu->linkAbout(a);
         _mainmenu->linkGame(g);
