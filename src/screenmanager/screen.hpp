@@ -17,15 +17,32 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#include "cache.hpp"
+#ifndef SCREEN_HPP
+#define SCREEN_HPP
 
-using namespace qe;
+#include<memory>
+#include<type_traits>
+#include<vector>
 
-GlyphmapLatin *Cache::glyphlatin;
-qe::Program *Cache::objv1;
-qe::Program *Cache::objv2;
-qe::Program *Cache::objv3;
-qe::Program *Cache::texts;
-qe::Program *Cache::sprite2d;
-qe::Mesh<TEXTG> *Cache::meshm;
-qe::Texture<PNGRGBA, DIFFTEXBIND_GL> *Cache::buttont;
+namespace screen {
+    template<typename T>
+    class ScreenManager {
+    private:
+        std::vector<std::unique_ptr<T>> _screens;
+        T *_active_screen;
+    public:
+        template<typename I>
+        I *addScreen(I *obj) {
+            assert(obj);
+            _screens.emplace_back(obj);
+            return obj;
+        }
+        void changeActiveScreen(T &target) {
+            if(_active_screen) _active_screen->deactivate_screen();
+            target.activate_screen();
+            _active_screen = &target;
+        }
+    };
+}
+
+#endif

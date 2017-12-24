@@ -35,7 +35,9 @@ namespace qe {
         static qe::Program *objv2; //!< OBJv2 shader
         static qe::Program *objv3; //!< OBJv3 shader
         static qe::Program *texts; //!< text shader
+        static qe::Program *sprite2d; //!< 2D sprite shader
         static qe::Mesh<TEXTG> *meshm; //!< glyph rendering mesh
+        static qe::Texture<PNGRGBA, DIFFTEXBIND_GL> *buttont; //!< 2D button texture
         /**
          * \brief Destroy all objects
          */
@@ -45,7 +47,9 @@ namespace qe {
             delete objv2;
             delete objv3;
             delete texts;
+            delete sprite2d;
             delete meshm;
+            delete buttont;
         }
     };
 

@@ -7,6 +7,9 @@
 
 #include<config.h>
 
+#include<game/screens/screens.hpp>
+#include<screenmanager/screen.hpp>
+
 #include<string.h>
 
 #include <stdio.h>
@@ -40,6 +43,8 @@ private:
         gamespace::BoardTile *hovering;
     } _selection;
     gamespace::Match _match;
+    screen::ScreenManager<gamespace::Screen> _screens;
+    gamespace::MainScreen *_mainmenu;
 public:
     Game(qe::Context *ctxt)
     : _ctxt(ctxt), _font(font::Font::get("assets/fonts/DejaVuSans.ttf"_p)),
@@ -78,6 +83,8 @@ public:
         qe::Cache::objv2 = qe::mkProgram("assets/shaders/objv2.vsh"_p, "assets/shaders/objv2.fsh"_p);
         qe::Cache::objv3 = qe::mkProgram("assets/shaders/objv3.vsh"_p, "assets/shaders/objv3.fsh"_p);
         qe::Cache::texts = qe::mkProgram("assets/shaders/texts.vsh"_p, "assets/shaders/texts.fsh"_p);
+        qe::Cache::sprite2d = qe::mkProgram("assets/shaders/s2d.vsh"_p, "assets/shaders/s2d.fsh"_p);
+        qe::Cache::buttont = new qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>(qe::Loader<qe::PNGRGBA>("assets/textures/button.png"_p));
         // SETUP
         qe::Cache::objv2->use();
         qe::Cache::objv2->setUniform<qe::UNIDIFFTEX>(qe::DIFFTEXBIND);
@@ -97,6 +104,14 @@ public:
                               _ctxt->getAR(),
                               90
                           ));
+    }
+    void initializeScreens() {
+        _mainmenu = _screens.addScreen(new gamespace::MainScreen(_ctxt));
+        auto *a = _screens.addScreen(new gamespace::AboutScreen());
+        auto *g = _screens.addScreen(new gamespace::GameScreen());
+
+        _mainmenu->linkAbout(a);
+        _mainmenu->linkGame(g);
     }
     gamespace::Match &match() {
         return _match;
@@ -213,9 +228,12 @@ public:
         return true;
     }
     void run() {
+        //_screens.changeActiveScreen(*_mainmenu); // display main menu
         unsigned int fps = 0;
         glm::mat4 m = glm::translate(glm::vec3(0, 0, 0));
         glClearColor(0.3, 0.3, 0.3, 1);
+
+        _textures.hextile_grass->bindTo();
 
         while(!_ctxt->shouldClose()) {
             // calculate lookat tile
@@ -380,6 +398,7 @@ int main(int argc, char *argv[]) {
         Game g(&context);
         game = &g;
         g.initializeAssets();
+        g.initializeScreens();
         g.initializeMap();
 
         if(qe::BAKEFONTS()) g.bakeAssets();

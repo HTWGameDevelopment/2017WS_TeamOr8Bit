@@ -191,6 +191,9 @@ namespace qe {
             glfwPollEvents();
             idlecallback();
         }
+        void waitEvents() {
+            glfwWaitEvents();
+        }
         /**
          * \brief Set glEnable config to MESH rendering
          */
