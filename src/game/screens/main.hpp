@@ -8,6 +8,8 @@
 #include<game/screens/about.hpp>
 #include<game/screens/game.hpp>
 
+#include<screenmanager/screen.hpp>
+
 namespace gamespace {
     class MainScreen: public Screen {
     private:
@@ -15,17 +17,21 @@ namespace gamespace {
         GameScreen *_game;
         qe::Context *_ctxt;
         GameScreen *_gamescreen;
+        screen::ScreenManager<Screen> *_manager;
         bool _active;
     public:
-        MainScreen(qe::Context *ctxt, GameScreen &gamescreen): Screen(), _ctxt(ctxt), _gamescreen(&gamescreen) {
+        MainScreen(screen::ScreenManager<Screen> &manager, qe::Context *ctxt, GameScreen &gamescreen): Screen(), _ctxt(ctxt), _gamescreen(&gamescreen), _manager(&manager) {
             assert(ctxt);
         }
         void activate_screen() {
             _active = true;
             qe::Cache::sprite2d->use();
+            _ctxt->displayCursor();
             while(_active) {
+                _ctxt->start();
                 render_background();
                 render_buttons();
+                _ctxt->swap();
                 process_events();
             }
         }
@@ -57,12 +63,18 @@ namespace gamespace {
         void process_events() {
             _ctxt->waitEvents();
         }
-        void mouse_button_callback(int button, int action, int mods) {
+        virtual void mouse_button_callback(int button, int action, int mods) {
             glm::dvec2 cpos = _ctxt->absToRel(_ctxt->getMousePos());
             if(cpos.x >= -0.25 && cpos.x <= 0.25 && cpos.y >= 0 && cpos.y <= 0.25) {
-                _gamescreen->newGame();
+                _gamescreen->newGame(glm::ivec2(15, 8),
+                    gamespace::Player(glm::vec3(0.448, 0.884, 1), "Blue"),
+                    gamespace::Player(glm::vec3(1, 0.448, 0.448), "Red"));
+                _manager->changeActiveScreen(*_gamescreen);
             }
         }
+        void key_callback(int key, int action) {}
+        void mouse_callback(double x, double y) {}
+        void idle_callback() {}
     };
 }
 

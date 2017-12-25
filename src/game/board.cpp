@@ -1,8 +1,24 @@
-#include "board.hpp"
+#include "gameboard.hpp"
 
 #include "unit.hpp"
 
 using namespace gamespace;
+
+GameBoard::GameBoard(int x, int y): hextile::HexTile<BoardTile>(x, y) {
+    for(int i = 0; i < _x; ++i) {
+        for(int j = 0; j < _y; ++j) {
+            _data[i][j].setBoard(this);
+        }
+    }
+}
+
+GameBoard::GameBoard(GameBoard &&other): hextile::HexTile<BoardTile>(std::move(other)) {
+    for(int i = 0; i < _x; ++i) {
+        for(int j = 0; j < _y; ++j) {
+            _data[i][j].setBoard(this);
+        }
+    }
+}
 
 BoardTile::~BoardTile() {
     delete _unit;
@@ -26,6 +42,14 @@ bool BoardTile::mark(unsigned int d) {
         _mark.val = d;
         return true;
     }
+}
+
+GameBoard &BoardTile::board() {
+    return *_board;
+}
+
+bool BoardTile::marked() {
+    return _mark.id == _board->currentMarker() && _mark.val != 0;
 }
 
 void GameBoard::moveUnit(hexpoint_t from, hexpoint_t to) {

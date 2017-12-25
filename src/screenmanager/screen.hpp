@@ -30,6 +30,7 @@ namespace screen {
     private:
         std::vector<std::unique_ptr<T>> _screens;
         T *_active_screen;
+        T *_next_screen;
     public:
         template<typename I>
         I *addScreen(I *obj) {
@@ -39,8 +40,33 @@ namespace screen {
         }
         void changeActiveScreen(T &target) {
             if(_active_screen) _active_screen->deactivate_screen();
-            target.activate_screen();
-            _active_screen = &target;
+            _next_screen = &target;
+        }
+        void nextScreen() {
+            if(_next_screen) {
+                _active_screen = _next_screen;
+                _next_screen = nullptr;
+                _active_screen->activate_screen();
+            }
+        }
+        T &getScreen(unsigned int k) {
+            return *_screens[k].get();
+        }
+        void input_key(int key, int action) {
+            assert(_active_screen);
+            _active_screen->key_callback(key, action);
+        }
+        void input_mouse(double x, double y) {
+            assert(_active_screen);
+            _active_screen->mouse_callback(x, y);
+        }
+        void input_button(int button, int action, int mods) {
+            assert(_active_screen);
+            _active_screen->mouse_button_callback(button, action, mods);
+        }
+        void input_idle() {
+            assert(_active_screen);
+            _active_screen->idle_callback();
         }
     };
 }

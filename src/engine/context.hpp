@@ -206,6 +206,20 @@ namespace qe {
             idlecallback();
         }
         /**
+         * \brief Display cursor
+         */
+        void displayCursor() {
+            glfwSetCursorPos(_window, 0, 0);
+            glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+        /**
+         * \brief Hide cursor (FPS mode)
+         */
+        void hideCursor() {
+            glfwSetCursorPos(_window, 0, 0);
+            glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+        /**
          * \brief Handle GLFW events. blocks until event received
          */
         void waitEvents() {

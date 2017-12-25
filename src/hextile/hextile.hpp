@@ -22,15 +22,17 @@
 
 #include<functional>
 #include<memory>
+#include<string>
 #include<vector>
-
-#include<stdio.h>
 
 namespace hextile {
 
     struct hexpoint_t {
         int x;
         int y;
+        std::string string() {
+            return std::string("(") + std::to_string(x) + "," + std::to_string(y) + ")";
+        }
     };
 
     struct marker_t {
@@ -50,12 +52,22 @@ namespace hextile {
          */
         struct col_type {
             std::vector<tile_type> rows;
-            col_type(size_t i): rows(i, tile_type()) {}
+            col_type() {}
+            col_type(const col_type &other) = delete;
+            col_type(col_type &&other): rows(std::move(other.rows)) {}
+            col_type &operator=(const col_type &other) = delete;
+            col_type &operator=(col_type &&other) {
+                rows = std::move(other.rows);
+                return *this;
+            }
             tile_type &operator[](size_t i) {
                 return rows[i];
             }
+            void push_back(tile_type &&t) {
+                rows.push_back(std::move(t));
+            }
         };
-    private:
+    protected:
         size_t _x;
         size_t _y;
         std::vector<col_type> _data;
@@ -109,15 +121,17 @@ namespace hextile {
             }
         }
     public:
-        HexTile(size_t x, size_t y): _x(x), _y(y), _data(_x, col_type(y)), _marker_id(0) {
-            for(int i = 0; i < _data.size(); ++i)
-                for(int j = 0; j < _data[i].rows.size(); ++j) {
-                    _data[i][j].board(this);
-                    _data[i][j] = hexpoint_t {i, j};
+        HexTile(size_t x, size_t y): _x(x), _y(y), _marker_id(0) {
+            for(int i = 0; i < _x; ++i) {
+                col_type t;
+                for(int j = 0; j < _y; ++j) {
+                    t.push_back(T(nullptr, hexpoint_t {i, j}));
                 }
+                _data.push_back(std::move(t));
+            }
         }
         HexTile(const HexTile &other) = delete;
-        HexTile(HexTile &&other) = delete;
+        HexTile(HexTile &&other): _x(other._x), _y(other._y), _data(std::move(other._data)), _marker_id(other._marker_id) {}
         ssize_t x() {
             return _x;
         }

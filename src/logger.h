@@ -14,11 +14,13 @@ extern GLenum _logger_e;
 #define GERR(x)  std::cerr << "GERROR " << x << " (" << __FILE__ << ":" << __LINE__ << ")" << std::endl;
 #define GWARN(x)  std::cerr << "GWARN " << x << " (" << __FILE__ << ":" << __LINE__ << ")" << std::endl;
 #define GINFO(x)  std::cerr << "GINFO " << x << " (" << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+#define GDBG(x)  std::cerr << "GDBG " << x << " (" << __FILE__ << ":" << __LINE__ << ")" << std::endl;
 #define GLSERRORCHECK if((_logger_e = glGetError()) != GL_NO_ERROR) throw_glerror(_logger_e, __FILE__, __LINE__);
 #else
 #define GERR(x)  std::cerr << "GERROR " << x << std::endl;
 #define GWARN(x)  std::cerr << "GWARN " << x << std::endl;
 #define GINFO(x)  std::cerr << "GINFO " << x << std::endl;
+#define GDBG(x)
 #define GLSERRORCHECK
 #endif
 struct glerror: public std::runtime_error {
