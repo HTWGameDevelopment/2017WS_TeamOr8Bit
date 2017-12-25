@@ -8,13 +8,16 @@
 #ifdef __cplusplus
 #include<string>
 #include<iostream>
+inline std::string cut(const char* f) {
+    return std::string(f).erase(0, std::string(f).find("src/") + 4);
+}
 extern GLenum _logger_e;
 #define GLERRORCHECK if((_logger_e = glGetError()) != GL_NO_ERROR) throw_glerror(_logger_e, __FILE__, __LINE__);
 #ifndef NDEBUG
-#define GERR(x)  std::cerr << "GERROR " << x << " (" << __FILE__ << ":" << __LINE__ << ")" << std::endl;
-#define GWARN(x)  std::cerr << "GWARN " << x << " (" << __FILE__ << ":" << __LINE__ << ")" << std::endl;
-#define GINFO(x)  std::cerr << "GINFO " << x << " (" << __FILE__ << ":" << __LINE__ << ")" << std::endl;
-#define GDBG(x)  std::cerr << "GDBG " << x << " (" << __FILE__ << ":" << __LINE__ << ")" << std::endl;
+#define GERR(x)  std::cerr <<  "GERROR " << x << " (" << cut(__FILE__) << ":" << __LINE__ << ")" << std::endl;
+#define GWARN(x)  std::cerr << "GWARN  " << x << " (" << cut(__FILE__) << ":" << __LINE__ << ")" << std::endl;
+#define GINFO(x)  std::cerr << "GINFO  " << x << " (" << cut(__FILE__) << ":" << __LINE__ << ")" << std::endl;
+#define GDBG(x)  std::cerr <<  "GDBG   " << x << " (" << cut(__FILE__) << ":" << __LINE__ << ")" << std::endl;
 #define GLSERRORCHECK if((_logger_e = glGetError()) != GL_NO_ERROR) throw_glerror(_logger_e, __FILE__, __LINE__);
 #else
 #define GERR(x)  std::cerr << "GERROR " << x << std::endl;
