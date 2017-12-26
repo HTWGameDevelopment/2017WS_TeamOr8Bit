@@ -148,6 +148,12 @@ namespace qe {
             return r;
         }
         /**
+         * \brief Get coordinate of screen center
+         */
+        glm::dvec2 getCenterCoordinate() {
+            return glm::dvec2(0.5 * _w, 0.5 * _h);
+        }
+        /**
          * \brief Convert absolute coordinates (in pixels) to window coordinates (-1,-1 to 1,1)
          */
         glm::dvec2 absToRel(glm::dvec2 in) {
@@ -208,9 +214,9 @@ namespace qe {
         /**
          * \brief Display cursor
          */
-        void displayCursor() {
-            glfwSetCursorPos(_window, 0, 0);
+        void displayCursor(glm::dvec2 pos = glm::dvec2(0, 0)) {
             glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            glfwSetCursorPos(_window, pos.x, pos.y);
         }
         /**
          * \brief Hide cursor (FPS mode)

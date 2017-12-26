@@ -19,14 +19,16 @@ namespace gamespace {
         GameScreen *_gamescreen;
         screen::ScreenManager<Screen> *_manager;
         bool _active;
+        glm::dvec2 _save;
     public:
         MainScreen(screen::ScreenManager<Screen> &manager, qe::Context *ctxt, GameScreen &gamescreen): Screen(), _ctxt(ctxt), _gamescreen(&gamescreen), _manager(&manager) {
             assert(ctxt);
+            _save = _ctxt->getCenterCoordinate();
         }
         void activate_screen() {
             _active = true;
             qe::Cache::sprite2d->use();
-            _ctxt->displayCursor();
+            _ctxt->displayCursor(_save);
             while(_active) {
                 _ctxt->start();
                 render_background();
@@ -36,6 +38,7 @@ namespace gamespace {
             }
         }
         void deactivate_screen() {
+            _save = _ctxt->getMousePos();
             _active = false;
         }
         void linkAbout(AboutScreen *about) {
