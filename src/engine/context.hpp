@@ -140,6 +140,26 @@ namespace qe {
             glfwSetCursorPos(_window, 0, 0);
         }
         /**
+         * \brief Return mouse position
+         */
+        glm::dvec2 getMousePos() {
+            glm::dvec2 r;
+            glfwGetCursorPos(_window, &r.x, &r.y);
+            return r;
+        }
+        /**
+         * \brief Get coordinate of screen center
+         */
+        glm::dvec2 getCenterCoordinate() {
+            return glm::dvec2(0.5 * _w, 0.5 * _h);
+        }
+        /**
+         * \brief Convert absolute coordinates (in pixels) to window coordinates (-1,-1 to 1,1)
+         */
+        glm::dvec2 absToRel(glm::dvec2 in) {
+            return glm::dvec2(-1.0 + 2.0 * in.x / _w, -1.0 + 2.0 * in.y / _h);
+        }
+        /**
          * \brief true if close() call or window was closed by user
          */
         inline bool shouldClose() {
@@ -190,6 +210,32 @@ namespace qe {
             ++_fpsc;
             glfwPollEvents();
             idlecallback();
+        }
+        /**
+         * \brief Display cursor
+         */
+        void displayCursor(glm::dvec2 pos = glm::dvec2(0, 0)) {
+            glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            glfwSetCursorPos(_window, pos.x, pos.y);
+        }
+        /**
+         * \brief Hide cursor (FPS mode)
+         */
+        void hideCursor() {
+            glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            glfwSetCursorPos(_window, 0, 0);
+        }
+        /**
+         * \brief Set cursor to coordinate
+         */
+        void setCursor(glm::dvec2 pos) {
+            glfwSetCursorPos(_window, pos.x, pos.y);
+        }
+        /**
+         * \brief Handle GLFW events. blocks until event received
+         */
+        void waitEvents() {
+            glfwWaitEvents();
         }
         /**
          * \brief Set glEnable config to MESH rendering

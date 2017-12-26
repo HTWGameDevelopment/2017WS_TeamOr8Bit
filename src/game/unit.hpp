@@ -2,7 +2,7 @@
 #define OR8BIT_UNIT_HPP
 
 #include<functional>
-#include<game/board.hpp>
+#include<game/gameboard.hpp>
 #include<game/player.hpp>
 #include<game/terrain.hpp>
 
