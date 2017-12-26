@@ -42,7 +42,7 @@ public:
     }
     void run() {
         _screens.changeActiveScreen(*_mainmenu); // display main menu
-        while(!_ctxt->shouldClose()) {
+        while(!_ctxt->shouldClose() && _screens.stopped() == false) {
             _screens.nextScreen();
         }
     }

@@ -31,6 +31,7 @@ namespace screen {
         std::vector<std::unique_ptr<T>> _screens;
         T *_active_screen;
         T *_next_screen;
+        bool _stopped;
     public:
         template<typename I>
         I *addScreen(I *obj) {
@@ -41,13 +42,21 @@ namespace screen {
         void changeActiveScreen(T &target) {
             if(_active_screen) _active_screen->deactivate_screen();
             _next_screen = &target;
+            _stopped = false;
         }
         void nextScreen() {
             if(_next_screen) {
                 _active_screen = _next_screen;
                 _next_screen = nullptr;
                 _active_screen->activate_screen();
-            }
+            } else _stopped = true;
+        }
+        bool stopped() {
+            return _stopped;
+        }
+        void quit() {
+            if(_active_screen) _active_screen->deactivate_screen();
+            _next_screen = nullptr;
         }
         T &getScreen(unsigned int k) {
             return *_screens[k].get();

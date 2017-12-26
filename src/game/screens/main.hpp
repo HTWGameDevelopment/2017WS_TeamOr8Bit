@@ -49,6 +49,7 @@ namespace gamespace {
         }
         void render_buttons() {
             render_button(glm::vec2(-0.25, -0.25), glm::vec2(0.5, 0.25));
+            render_button(glm::vec2(-0.25, -0.75), glm::vec2(0.5, 0.25));
         }
         // TODO text rendering
         void render_button(glm::vec2 origin, glm::vec2 size) {
@@ -73,6 +74,8 @@ namespace gamespace {
                     gamespace::Player(glm::vec3(0.448, 0.884, 1), "Blue"),
                     gamespace::Player(glm::vec3(1, 0.448, 0.448), "Red"));
                 _manager->changeActiveScreen(*_gamescreen);
+            } else if(cpos.x >= -0.25 && cpos.x <= 0.25 && cpos.y >= 0.5 && cpos.y <= 0.75) {
+                _manager->quit();
             }
         }
         void key_callback(int key, int action) {}
