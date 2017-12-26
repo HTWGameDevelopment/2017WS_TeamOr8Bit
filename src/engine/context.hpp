@@ -222,8 +222,14 @@ namespace qe {
          * \brief Hide cursor (FPS mode)
          */
         void hideCursor() {
-            glfwSetCursorPos(_window, 0, 0);
             glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            glfwSetCursorPos(_window, 0, 0);
+        }
+        /**
+         * \brief Set cursor to coordinate
+         */
+        void setCursor(glm::dvec2 pos) {
+            glfwSetCursorPos(_window, pos.x, pos.y);
         }
         /**
          * \brief Handle GLFW events. blocks until event received

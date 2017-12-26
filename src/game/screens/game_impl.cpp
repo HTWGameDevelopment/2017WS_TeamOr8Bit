@@ -156,10 +156,14 @@ void GameScreenImpl::enableAttackMask() {
     }
 }
 
+void GameScreenImpl::pre_run() {
+    _ctxt->hideCursor();
+    _ctxt->events();
+}
+
 void GameScreenImpl::run() {
     GDBG("activating game screen");
     _shouldClose = false;
-    _ctxt->hideCursor();
     unsigned int fps = 0;
     glm::mat4 m = glm::translate(glm::vec3(0, 0, 0));
     glClearColor(0.3, 0.3, 0.3, 1);

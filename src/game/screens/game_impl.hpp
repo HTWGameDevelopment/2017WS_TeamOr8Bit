@@ -41,6 +41,7 @@ namespace gamespace {
         void renderTile(gamespace::BoardTile *b, glm::vec3 ho);
     public:
         GameScreenImpl(gamespace::Match &&match, qe::Context *ctxt, std::shared_ptr<font::Font> font);
+        void pre_run();
         void run();
         void deactivate();
         void initializeAssets();

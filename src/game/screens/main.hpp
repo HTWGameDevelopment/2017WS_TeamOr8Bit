@@ -68,7 +68,6 @@ namespace gamespace {
         }
         virtual void mouse_button_callback(int button, int action, int mods) {
             glm::dvec2 cpos = _ctxt->absToRel(_ctxt->getMousePos());
-            std::cout << cpos.x << ";" << cpos.y << std::endl;
             if(cpos.x >= -0.25 && cpos.x <= 0.25 && cpos.y >= 0 && cpos.y <= 0.25) {
                 _gamescreen->newGame(glm::ivec2(15, 8),
                     gamespace::Player(glm::vec3(0.448, 0.884, 1), "Blue"),
