@@ -13,6 +13,11 @@ namespace gamespace {
 
     typedef hextile::hexpoint_t hexpoint_t;
 
+    const unsigned int VISIBILITY_LAYER = 0;
+    const unsigned int ACTION_LAYER = 1;
+    const unsigned int MOVE_LAYER = 2;
+    const unsigned int AOE_LAYER = 3;
+
     /**
      * \brief Our tile type for HexTile elements
      */
@@ -21,13 +26,13 @@ namespace gamespace {
         Unit *_unit;
         GameBoard *_board; // pointer to board
         hextile::hexpoint_t _p; // coordinate
-        hextile::marker_t _mark;
+        std::array<hextile::marker_t, 3> _marker_layer;
     public:
         static constexpr float dim_x = 2 * 0.866; // dimension in X direction
         static constexpr float dim_y = 2 * 1.0; // dimension in Y direction
         BoardTile(GameBoard *t, hextile::hexpoint_t o): _unit(nullptr), _board(t), _p(o) {}
         BoardTile(const BoardTile &other) = delete;
-        BoardTile(BoardTile &&other): _unit(other._unit), _board(other._board), _p(other._p), _mark(other._mark) {
+        BoardTile(BoardTile &&other): _unit(other._unit), _board(other._board), _p(other._p), _marker_layer(other._marker_layer) {
             other._unit = nullptr;
             other._board = nullptr;
         }
@@ -41,10 +46,6 @@ namespace gamespace {
                 r.x -= 0.5 * dim_x;
             }
             return r;
-            // if((_p.x + 1) % 2 == 1)
-            //     return glm::vec2(2 * dim_x * (_p.x / 2), 3 * dim_y * (_p.y + 1));
-            // else
-            //     return glm::vec2(2 * dim_x * (_p.x / 2) - dim_x, 3 * dim_y * (_p.y + 1) + 1.5 * dim_y);
         }
         void setUnit(Unit *unit) {
             _unit = unit;
@@ -56,13 +57,13 @@ namespace gamespace {
             return _p;
         }
         GameBoard &board();
-        bool mark(unsigned int d);
-        bool marked();
-        unsigned int lastMarkerId() {
-            return _mark.id;
+        bool mark(unsigned int layer, unsigned int d);
+        bool marked(unsigned int layer);
+        unsigned int lastMarkerId(unsigned int layer) {
+            return _marker_layer[layer].id;
         }
-        unsigned int marker() {
-            if(marked()) return _mark.val;
+        unsigned int marker(unsigned int layer) {
+            if(marked(layer)) return _marker_layer[layer].val;
             return 0;
         }
         void destroyUnit();

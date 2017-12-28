@@ -4,7 +4,7 @@
 
 using namespace gamespace;
 
-GameBoard::GameBoard(int x, int y): hextile::HexTile<BoardTile>(x, y) {
+GameBoard::GameBoard(int x, int y): hextile::HexTile<BoardTile, 4>(x, y) {
     for(int i = 0; i < _x; ++i) {
         for(int j = 0; j < _y; ++j) {
             _data[i][j].setBoard(this);
@@ -12,7 +12,7 @@ GameBoard::GameBoard(int x, int y): hextile::HexTile<BoardTile>(x, y) {
     }
 }
 
-GameBoard::GameBoard(GameBoard &&other): hextile::HexTile<BoardTile>(std::move(other)) {
+GameBoard::GameBoard(GameBoard &&other): hextile::HexTile<BoardTile, 4>(std::move(other)) {
     for(int i = 0; i < _x; ++i) {
         for(int j = 0; j < _y; ++j) {
             _data[i][j].setBoard(this);
@@ -31,15 +31,15 @@ void BoardTile::destroyUnit() {
     }
 }
 
-bool BoardTile::mark(unsigned int d) {
-    if(_board->currentMarker() == _mark.id) {
-        if(_mark.val < d) {
-            _mark.val = d;
+bool BoardTile::mark(unsigned int layer, unsigned int d) {
+    if(_board->currentMarker(layer) == _marker_layer[layer].id) {
+        if(_marker_layer[layer].val < d) {
+            _marker_layer[layer].val = d;
             return true;
         } else return false;
     } else {
-        _mark.id = _board->currentMarker();
-        _mark.val = d;
+        _marker_layer[layer].id = _board->currentMarker(layer);
+        _marker_layer[layer].val = d;
         return true;
     }
 }
@@ -48,8 +48,8 @@ GameBoard &BoardTile::board() {
     return *_board;
 }
 
-bool BoardTile::marked() {
-    return _mark.id == _board->currentMarker() && _mark.val != 0;
+bool BoardTile::marked(unsigned int layer) {
+    return _marker_layer[layer].id == _board->currentMarker(layer) && _marker_layer[layer].val != 0;
 }
 
 void GameBoard::moveUnit(hexpoint_t from, hexpoint_t to) {
