@@ -115,7 +115,7 @@ void GameScreenImpl::initializeMap() {
 void GameScreenImpl::enableMoveMask() {
     if(_selection.hovering == nullptr) return; // no tile to select
     if(_selection.type == SelectionState::Type::SEL_TO_MOVE) {
-        if(_selection.hovering->marked() && _selection.hovering != _selection.selected) {
+        if(_selection.hovering->marked(MOVE_LAYER) && _selection.hovering != _selection.selected) {
             assert(_selection.selected);
             if(_selection.hovering->unit() != nullptr) return; // cannot move to an occupied tile
             _match.board().moveUnit(_selection.selected->coord(), _selection.hovering->coord());
@@ -123,7 +123,7 @@ void GameScreenImpl::enableMoveMask() {
         _selection.type = SelectionState::Type::SEL_NONE;
         _selection.selected = nullptr;
         _selection.hovering = nullptr;
-        _match.board().clearMarker();
+        _match.board().clearMarker(MOVE_LAYER);
     } else {
         if(_selection.hovering->unit() == nullptr) return; // no unit to select
         if(_selection.hovering->unit()->player() != _match.currentPlayer()) return; // can only select own units
@@ -137,7 +137,7 @@ void GameScreenImpl::enableMoveMask() {
 void GameScreenImpl::enableAttackMask() {
     if(_selection.hovering == nullptr) return; // no tile to select
     if(_selection.type == SelectionState::Type::SEL_TO_ATTACK) {
-        if(_selection.hovering->marked() && _selection.hovering != _selection.selected) {
+        if(_selection.hovering->marked(ACTION_LAYER) && _selection.hovering != _selection.selected) {
             assert(_selection.selected);
             if(_selection.hovering->unit() == nullptr) return; // cannot attack empty tile
             if(_selection.hovering->unit()->player() == _match.currentPlayer()) return; // cannot attack own unit
@@ -146,7 +146,7 @@ void GameScreenImpl::enableAttackMask() {
         _selection.type = SelectionState::Type::SEL_NONE;
         _selection.selected = nullptr;
         _selection.hovering = nullptr;
-        _match.board().clearMarker();
+        _match.board().clearMarker(ACTION_LAYER);
     } else {
         if(_selection.hovering->unit() == nullptr) return; // no unit to select
         if(_selection.hovering->unit()->player() != _match.currentPlayer()) return; // can only select own units
@@ -230,8 +230,11 @@ void GameScreenImpl::render() {
 
 void GameScreenImpl::renderTile(gamespace::BoardTile *b, glm::vec3 ho) {
     glm::vec2 p = b->centerPos();
-    if(b->marked()) {
-        if(_selection.type == SelectionState::Type::SEL_NONE) _match.board().clearMarker();
+    if(b->marked(ACTION_LAYER) || b->marked(MOVE_LAYER)) {
+        if(_selection.type == SelectionState::Type::SEL_NONE) {
+            _match.board().clearMarker(ACTION_LAYER);
+            _match.board().clearMarker(MOVE_LAYER);
+        }
         else ho += glm::vec3(0.2, 0.2, 0.2);
     }
     glm::mat4 m = glm::translate(glm::vec3(p.x, -0.25, p.y));
