@@ -107,8 +107,8 @@ namespace hextile {
                 }
             }
             bool inbounds(ssize_t x, ssize_t y) { // unsigned to signed. just use signed? TODO
-                return (x >= 0 && x < _board->x() - 1)
-                    && (y >= 0 && y < _board->y() - 1);
+                return (x >= 0 && x < _board->x())
+                    && (y >= 0 && y < _board->y());
             }
         };
         template<typename P>
