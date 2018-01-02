@@ -17,19 +17,27 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef UI_ABSTRACT_UI_HPP
-#define UI_ABSTRACT_UI_HPP
+#ifndef UI_DEFINED_COMMON_HPP
+#define UI_DEFINED_COMMON_HPP
 
 #include<ui/abstract_common.hpp>
 
+#include<memory>
+#include<vector>
+
 namespace ui {
 
-    class AbstractUI {
+    class DefinedArea {
     private:
-        std::unique_ptr<Renderable> _container;
+        defp_t _origin;
+        defp_t _size;
     public:
-        void set_container(Renderable *r) {_container.reset(r);}
-        Renderable *get() {return _container.get();}
+        defp_t &origin() {
+            return _origin;
+        }
+        defp_t &dimension() {
+            return _size;
+        }
     };
 
 }

@@ -26,6 +26,7 @@
 namespace ui {
 
     typedef float AbstractNumber;
+    typedef unsigned int DefinedNumber;
 
     template<typename T>
     class Point {
@@ -38,6 +39,7 @@ namespace ui {
     };
 
     typedef Point<AbstractNumber> absp_t;
+    typedef Point<DefinedNumber> defp_t;
 
     class AbstractArea {
     private:
@@ -55,6 +57,7 @@ namespace ui {
     class Renderable {
     public:
         virtual void render() {}
+        virtual Renderable *buildDefined(defp_t res) = 0;
     };
 
     class Container {

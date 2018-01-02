@@ -17,19 +17,22 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef UI_ABSTRACT_UI_HPP
-#define UI_ABSTRACT_UI_HPP
+#ifndef UI_UIFACTORY_HPP
+#define UI_UIFACTORY_HPP
 
-#include<ui/abstract_common.hpp>
+#include<ui/abstractui.hpp>
+#include<ui/definedui.hpp>
+#include<ui/defined_common.hpp>
 
 namespace ui {
 
-    class AbstractUI {
+    class UIFactory {
     private:
-        std::unique_ptr<Renderable> _container;
+        DefinedUI _ui;
     public:
-        void set_container(Renderable *r) {_container.reset(r);}
-        Renderable *get() {return _container.get();}
+        UIFactory(AbstractUI &ui, DefinedNumber resx, DefinedNumber resy);
+        DefinedUI &get() {return _ui;}
+        DefinedUI &&release() {return std::move(_ui);}
     };
 
 }
