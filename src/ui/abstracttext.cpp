@@ -17,29 +17,14 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef UI_DEFINED_COMMON_HPP
-#define UI_DEFINED_COMMON_HPP
+#include "abstracttext.hpp"
 
-#include<ui/abstract_common.hpp>
+#include "definedtext.hpp"
 
-#include<memory>
-#include<vector>
+using namespace ui;
 
-namespace ui {
-
-    class DefinedArea {
-    private:
-        defp_t _origin;
-        defp_t _size;
-    public:
-        defp_t &origin() {
-            return _origin;
-        }
-        defp_t &dimension() {
-            return _size;
-        }
-    };
-
+DefinedRenderable *AbstractText::buildDefined(defp_t res) {
+    auto *i = new DefinedText();
+    i->dimension() = res * dimension();
+    return i;
 }
-
-#endif

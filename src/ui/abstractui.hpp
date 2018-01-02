@@ -26,10 +26,10 @@ namespace ui {
 
     class AbstractUI {
     private:
-        std::unique_ptr<Renderable> _container;
+        std::unique_ptr<AbstractRenderable> _container;
     public:
-        void set_container(Renderable *r) {_container.reset(r);}
-        Renderable *get() {return _container.get();}
+        void set_container(AbstractRenderable *r) {_container.reset(r);}
+        AbstractRenderable *get() {return _container.get();}
     };
 
 }

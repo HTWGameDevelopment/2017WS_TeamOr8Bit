@@ -20,26 +20,50 @@
 #ifndef UI_ABSTRACT_COMMON_HPP
 #define UI_ABSTRACT_COMMON_HPP
 
+#include<iostream>
+#include<functional>
 #include<memory>
 #include<vector>
 
 namespace ui {
 
     typedef float AbstractNumber;
-    typedef unsigned int DefinedNumber;
+    typedef int DefinedNumber;
 
     template<typename T>
-    class Point {
-    private:
-        T _x;
-        T _y;
+    struct Point {
     public:
-        T &x() {return _x;}
-        T &y() {return _y;}
+        T x;
+        T y;
+        bool operator==(const Point<T> &a) {
+            return x == a.x && y == a.y;
+        }
+        bool operator!=(const Point<T> &a) {
+            return operator==(a) == false;
+        }
+        bool operator<(const Point<T> &a) {
+            return x < a.x && y < a.y;
+        }
+        bool operator>=(const Point<T> &a) {
+            return x >= a.x && y >= a.y;
+        }
+        bool operator>(const Point<T> &a) {
+            return x > a.x && y > a.y;
+        }
+        bool operator<=(const Point<T> &a) {
+            return x <= a.x && y <= a.y;
+        }
     };
 
     typedef Point<AbstractNumber> absp_t;
     typedef Point<DefinedNumber> defp_t;
+
+    inline defp_t operator*(defp_t a, absp_t d) {
+        return defp_t {(int)(a.x * d.x), (int)(a.y * d.y)};
+    }
+
+    template<typename T>
+    Point<T> operator-(Point<T> a, Point<T> b) {return Point<T> {a.x - b.x, a.y - b.y};}
 
     class AbstractArea {
     private:
@@ -54,20 +78,79 @@ namespace ui {
         }
     };
 
-    class Renderable {
+    class DefinedArea {
+    private:
+        defp_t _origin;
+        defp_t _size;
     public:
-        virtual void render() {}
-        virtual Renderable *buildDefined(defp_t res) = 0;
+        defp_t &origin() {
+            return _origin;
+        }
+        defp_t &dimension() {
+            return _size;
+        }
+        virtual void recalculate() {}
+        virtual bool is_dynamic() {return false;}
     };
 
+    class DefinedRenderable: public DefinedArea {
+    private:
+        std::function<void(void)> _render;
+        std::function<void(void)> _click;
+    public:
+        template<typename F> void render_with(F &&r) {
+            _render = std::move(r);
+        }
+        template<typename F> void on_click(F &&c) {
+            _click = std::move(c);
+        }
+        virtual DefinedRenderable *get(const char* str) {
+            return this;
+        }
+        virtual void render() {
+            _render();
+        }
+        virtual void debug(unsigned int off) {
+            std::cout << std::string(" ", off)
+                << "[" << origin().x
+                << "," << origin().y
+                << "] dim ["
+                << dimension().x
+                << ","
+                << dimension().y
+                << "] "
+                << (_click ? "C" : "")
+                << (_render ? "R" : "")
+                << std::endl;
+        }
+        virtual bool click(defp_t p) {
+            if(!_click) return false;
+            defp_t t = p - origin();
+            if(t >= defp_t {0, 0} && t <= dimension()) {
+                _click();
+                return true;
+            }
+            return false;
+        }
+    };
+
+    class AbstractRenderable {
+    public:
+        virtual DefinedRenderable *buildDefined(defp_t res) = 0;
+    };
+
+    template<typename T>
     class Container {
     private:
-        std::vector<std::unique_ptr<Renderable>> _items;
+        std::vector<std::unique_ptr<T>> _items;
     public:
-        template<typename T> void append(T &&item) {_items.emplace_back(new T(std::forward<T>(item)));}
-        Renderable *operator[](unsigned int i) {return _items[i].get();}
+        void append(T *item) {_items.emplace_back(item);}
+        T *operator[](unsigned int i) {return _items[i].get();}
         unsigned int count() {return _items.size();}
     };
+
+    typedef Container<AbstractRenderable> AbstractContainer;
+    typedef Container<DefinedRenderable> DefinedContainer;
 
 }
 

@@ -24,8 +24,9 @@
 
 namespace ui {
 
-    class AbstractText: public AbstractArea, public Renderable {
-
+    class AbstractText: public AbstractArea, public AbstractRenderable {
+    public:
+        DefinedRenderable *buildDefined(defp_t res);
     };
 
 }

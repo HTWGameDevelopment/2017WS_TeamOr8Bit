@@ -17,24 +17,15 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef UI_UIFACTORY_HPP
-#define UI_UIFACTORY_HPP
+#include "abstractbox.hpp"
 
-#include<ui/abstractui.hpp>
-#include<ui/definedui.hpp>
-#include<ui/abstract_common.hpp>
+#include "definedbox.hpp"
 
-namespace ui {
+using namespace ui;
 
-    class UIFactory {
-    private:
-        DefinedUI _ui;
-    public:
-        UIFactory(AbstractUI &ui, DefinedNumber resx, DefinedNumber resy);
-        DefinedUI &get() {return _ui;}
-        DefinedUI &&release() {return std::move(_ui);}
-    };
-
+DefinedRenderable *AbstractBox::buildDefined(defp_t res) {
+    DefinedBox *defb = new DefinedBox(_orientation, _growth, _x, _y);
+    for(auto i = 0; i < count(); ++i)
+        defb->append(operator[](i)->buildDefined(res));
+    return defb;
 }
-
-#endif

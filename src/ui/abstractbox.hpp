@@ -24,7 +24,7 @@
 
 namespace ui {
 
-    class AbstractBox: public Renderable, public AbstractArea, public Container {
+    class AbstractBox: public AbstractRenderable, public AbstractArea, public AbstractContainer {
     public:
         enum Orientation { HORIZONTAL, VERTICAL };
         enum Growth { MINIMUM, FILL };
@@ -38,6 +38,7 @@ namespace ui {
         void set_orientation(Orientation o) {_orientation = o;}
         void set_growth(Growth g) {_growth = g;}
         void set_align_inner(Align x, Align y) {_x = x; _y = y;}
+        DefinedRenderable *buildDefined(defp_t res);
     };
 
 }

@@ -17,44 +17,45 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef UI_DEFINED_UI_HPP
-#define UI_DEFINED_UI_HPP
+#ifndef UI_DEFINED_BOX_HPP
+#define UI_DEFINED_BOX_HPP
 
 #include<ui/abstract_common.hpp>
-
-#include<iostream>
+#include<ui/abstractbox.hpp>
 
 #include<assert.h>
-#include<stdlib.h>
 
 namespace ui {
 
-    class DefinedUI {
+    class DefinedBox: public DefinedRenderable, public DefinedContainer {
     private:
-        std::unique_ptr<DefinedRenderable> _container;
-        defp_t _res;
+        AbstractBox::Orientation _orientation;
+        AbstractBox::Growth _growth;
+        AbstractBox::Align _x;
+        AbstractBox::Align _y;
     public:
-        DefinedUI(DefinedNumber resx, DefinedNumber resy): _res{resx, resy} {}
-        void set_container(DefinedRenderable *r) {_container.reset(r);}
-        defp_t resolution() {return _res;}
-        void recalculate();
-        void render() {
-            if(_container.get()) _container->render();
-        }
-        DefinedRenderable *get(const char* coord) {
+        DefinedBox(AbstractBox::Orientation o, AbstractBox::Growth g, AbstractBox::Align x, AbstractBox::Align y);
+        void render();
+        virtual void recalculate();
+        virtual bool is_dynamic();
+        virtual DefinedRenderable *get(const char* coord) {
             char* next;
             int i = strtol(coord, &next, 10);
-            assert(i == 1);
+            assert(i > 0);
             assert(*next == '\0' || *next == '.');
-            if(*next == '\0') return _container.get();
-            return _container->get(next + 1);
+            if(*next == '\0') return operator[](i - 1);
+            return operator[](i - 1)->get(next + 1);
         }
-        void debug() {
-            std::cerr << "UI[" << _res.x << "," << _res.y << "]" << std::endl;
-            if(_container.get()) _container->debug(0);
+        virtual void debug(unsigned int off) {
+            DefinedRenderable::debug(off);
+            for(unsigned int i = 0; i < count(); ++i)
+                operator[](i)->debug(off + 2);
         }
-        void click(defp_t pos) {
-            if(_container.get()) _container->click(pos);
+        virtual bool click(defp_t p) {
+            for(unsigned int i = 0; i < count(); ++i) {
+                if(operator[](i)->click(p)) return true;
+            }
+            return false;
         }
     };
 
