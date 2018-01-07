@@ -22,9 +22,17 @@
 
 #include<ui/abstract_common.hpp>
 
+#include<string>
+
 namespace ui {
 
     class DefinedText: public DefinedRenderable {
+    private:
+        std::string _text;
+    public:
+        std::string &text() {
+            return _text;
+        }
     };
 
 }

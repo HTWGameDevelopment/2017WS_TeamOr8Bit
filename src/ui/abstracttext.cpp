@@ -27,5 +27,7 @@ DefinedRenderable *AbstractText::buildDefined(defp_t res) {
     auto *i = new DefinedText();
     i->dimension() = res * dimension();
     i->margin() = res * margin();
+    i->padding() = res * padding();
+    i->text() = text();
     return i;
 }

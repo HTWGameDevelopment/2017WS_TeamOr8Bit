@@ -22,11 +22,18 @@
 
 #include<ui/abstract_common.hpp>
 
+#include<string>
+
 namespace ui {
 
     class AbstractText: public AbstractArea, public AbstractRenderable {
+    private:
+        std::string _text;
     public:
         DefinedRenderable *buildDefined(defp_t res);
+        std::string &text() {
+            return _text;
+        }
     };
 
 }
