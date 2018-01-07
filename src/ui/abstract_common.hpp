@@ -109,8 +109,8 @@ namespace ui {
 
     class DefinedRenderable: public DefinedArea {
     private:
-        std::function<void(void)> _render;
-        std::function<void(void)> _click;
+        std::function<void(DefinedRenderable*)> _render;
+        std::function<void(DefinedRenderable*)> _click;
     public:
         template<typename F> void render_with(F &&r) {
             _render = std::move(r);
@@ -122,7 +122,7 @@ namespace ui {
             return this;
         }
         virtual void render() {
-            _render();
+            _render(this);
         }
         virtual void debug(unsigned int off) {
             std::cout << std::string(" ", off)
@@ -141,7 +141,7 @@ namespace ui {
             if(!_click) return false;
             defp_t t = p - origin();
             if(t >= defp_t {0, 0} && t <= dimension()) {
-                _click();
+                _click(this);
                 return true;
             }
             return false;

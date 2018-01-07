@@ -106,17 +106,18 @@ namespace gamespace {
             _ui.reset(new ui::DefinedUI(ui::UIFactory(ui, _ctxt->width(), _ctxt->height()).release()));
             auto *quit = _ui->get("1.1");
             auto *start = _ui->get("1.2");
-            start->on_click([this](void) mutable {
+            start->on_click([this](void*) mutable {
                 _gamescreen->newGame(glm::ivec2(15, 8),
                     gamespace::Player(glm::vec3(0.448, 0.884, 1), "Blue"),
                     gamespace::Player(glm::vec3(1, 0.448, 0.448), "Red"));
                 _manager->changeActiveScreen(*_gamescreen);
             });
-            quit->on_click([this](void) mutable {
+            quit->on_click([this](void*) mutable {
                 _manager->quit();
             });
-            start->render_with([this, start](void) mutable {this->render_button(start->origin() + start->margin(), start->dimension() - start->margin());});
-            quit->render_with([this, quit](void) mutable {this->render_button(quit->origin() + quit->margin(), quit->dimension() - quit->margin());});
+            auto renderer = [this](ui::DefinedRenderable *t) mutable {this->render_button(t->origin() + t->margin(), t->dimension() - t->margin());};
+            start->render_with(renderer);
+            quit->render_with(renderer);
 #ifndef NDEBUG
             _ui->debug();
 #endif
