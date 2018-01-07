@@ -20,6 +20,7 @@
 #ifndef SAVEGAME_HPP
 #define SAVEGAME_HPP
 
+#include<type_traits>
 #include<fstream>
 #include<memory>
 #include<stdexcept>
@@ -75,6 +76,9 @@ namespace savegame {
         inline bool operator>=(unsigned int version) {
             return _version >= version;
         }
+        unsigned int version() {
+            return _version;
+        }
         bool hasDataBlock(std::string b);
         DataBlock getDataBlock(std::string b);
         void storeDataBlock(std::string n, uint32_t size, unsigned char *data);
@@ -93,16 +97,12 @@ namespace savegame {
         magic_error(std::string exp, std::string got): runtime_error(std::string("SaveGame invalid magic value. expected: " + exp + ", got: " + got)) {}
     };
 
-    template<unsigned int TYPE, unsigned int VERSION> SaveGame &&migrate(SaveGame &&s) {
-        return std::move(s);
-    }
-
-    template<unsigned int TYPE, unsigned int VERSION>
-    SaveGame load(std::string p, std::string magic) {
+    template<unsigned int TYPE, unsigned int VERSION, typename F>
+    SaveGame load(std::string p, std::string magic, F &&migrate) {
         SaveGame s(p, magic, VERSION);
 
         if(s == VERSION) return s; // same version
-        else if(s < VERSION) return migrate < TYPE, VERSION - 1 > (std::move(s)); // migrate upwards
+        else if(s < VERSION) return migrate(std::move(s), s.version(), VERSION); // migrate upwards
         else throw upper_barrier_error();
     }
 

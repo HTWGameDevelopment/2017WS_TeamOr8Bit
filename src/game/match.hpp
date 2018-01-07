@@ -11,6 +11,7 @@ namespace gamespace {
     private:
         GameBoard _board; //!< pointer to board
         std::vector<Move> _move;
+        std::vector<std::function<void(Player&)>> _on_player_change;
         gamespace::Player _player1;
         gamespace::Player _player2;
         gamespace::Player *_currentPlayer;
@@ -28,6 +29,13 @@ namespace gamespace {
         void endTurn() {
             if(_currentPlayer == &_player1) _currentPlayer = &_player2;
             else _currentPlayer = &_player1;
+
+            for(size_t i = 0; i < _on_player_change.size(); ++i)
+                _on_player_change[i](currentPlayer());
+        }
+        template<typename F> void observe_player_change(F &&f) {
+            _on_player_change.push_back(f);
+            f(currentPlayer());
         }
     };
 }

@@ -29,7 +29,7 @@ namespace screen {
     class ScreenManager {
     private:
         std::vector<std::unique_ptr<T>> _screens;
-        T *_active_screen;
+        T *_active_screen = nullptr;
         T *_next_screen;
         bool _stopped;
     public:

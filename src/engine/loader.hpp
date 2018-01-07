@@ -95,7 +95,7 @@ namespace qe {
      */
     template<> class Loader<PNGRGBA> {
     private:
-        std::unique_ptr<unsigned char[]> _pixels; //!< Pixel array
+        std::unique_ptr<unsigned char, decltype(std::free)*> _pixels; //!< Pixel array
         size_t _size; //!< Size of pixel array in bytes
         size_t _width; //!< Width in pixels
         size_t _height; //!< Height in pixels
@@ -136,7 +136,7 @@ namespace qe {
         /**
          * \brief Construct loader from file path
          */
-        Loader(std::string path): _path(path), _size(0) {}
+        Loader(std::string path): _pixels(nullptr, std::free), _path(path), _size(0) {}
         /**
          * \brief Parse file and return data pointer
          */

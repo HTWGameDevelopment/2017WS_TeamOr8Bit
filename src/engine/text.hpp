@@ -41,9 +41,10 @@ namespace qe {
         std::string _text; //!< text
         glyphmap *_glyphmap; //!< Glyphmap
         glm::ivec2 _baseline; //!< Starting position of baseline
+        float _scale;
     public:
         Text() {}
-        Text(glyphmap *g, glm::ivec2 baseline, PositionMode mode = BOTTOM): _glyphmap(g), _baseline(baseline) {
+        Text(glyphmap *g, glm::ivec2 baseline, PositionMode mode = BOTTOM): _glyphmap(g), _baseline(baseline), _scale(1) {
             switch(mode) {
             case TOP:
                 _baseline.y = _glyphmap->getResolution().y - _glyphmap->highestGlyph() - _baseline.y;
@@ -53,18 +54,44 @@ namespace qe {
                 break; // ignore
             }
         }
+        Text(std::string text, glyphmap *g, glm::ivec2 baseline, int maxheight, int maxlength): _text(text), _glyphmap(g) {
+            scale_text(baseline, maxheight, maxlength);
+        }
         void render() {
             qe::Cache::texts->use();
             glm::ivec2 pos = _baseline;
 
             for(size_t i = 0; i < _text.length(); ++i) { // TODO Unicode support?
-                fontmetrics metrics = _glyphmap->getMetrics(_text[i]);
-                qe::Cache::texts->setUniform<UNIM>(_glyphmap->scalePosition(pos, metrics));
-                qe::Cache::texts->setUniform<UNITEXTUVP>(_glyphmap->scaleOrigin(metrics));
-                qe::Cache::texts->setUniform<UNITEXTUVS>(_glyphmap->scaleUVScale(metrics));
-                qe::Cache::meshm->render();
-                pos.x += metrics.adv_x;
+                if(_text[i] == '\n') {
+                    pos.x = _baseline.x;
+                    pos.y += _glyphmap->linespace();
+                } else {
+                    fontmetrics metrics = _glyphmap->getMetrics(_text[i]);
+                    qe::Cache::texts->setUniform<UNIM>(_glyphmap->scalePosition(pos, metrics, _scale));
+                    qe::Cache::texts->setUniform<UNITEXTUVP>(_glyphmap->scaleOrigin(metrics));
+                    qe::Cache::texts->setUniform<UNITEXTUVS>(_glyphmap->scaleUVScale(metrics));
+                    qe::Cache::meshm->render();
+                    pos.x += metrics.adv_x * _scale;
+                }
             }
+        }
+        void scale_text(glm::ivec2 baseline, int maxheight, int maxlength) {
+            _baseline = baseline;
+            ssize_t px = 0;
+            ssize_t yb = 0;
+            for(size_t i = 0; i < _text.length(); ++i) { // TODO Unicode support?
+                if(_text[i] == '\n') {
+                    yb += _glyphmap->linespace();
+                } else {
+                    fontmetrics metrics = _glyphmap->getMetrics(_text[i]);
+                    px += metrics.adv_x;
+                    yb = std::max(yb, metrics.off_y);
+                }
+            }
+
+            glm::vec2 scale = glm::vec2(1.0 * maxlength / px, 1.0 * maxheight / yb);
+            //_scale = std::min(scale.x, scale.y);
+            _scale = 1;
         }
         std::string &text() {
             return _text;

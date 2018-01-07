@@ -97,6 +97,7 @@ namespace qe {
         std::unique_ptr<Texture<TEXTG, FONTMAPBIND_GL>> _glyphmap; //!< Texture
         std::array<fontmetrics, capacity> _metrics; //!< Metrics
         glm::ivec2 _res; //!< screen resolution
+        size_t _linespace; //!< line space (baseline-to-baseline)
         std::string _path; //!< font path
 #ifdef HAS_FREETYPE
         /**
@@ -131,18 +132,21 @@ namespace qe {
 
             return mh;
         }
+        size_t linespace() {
+            return _linespace;
+        }
         fontmetrics getMetrics(unsigned char c) {
             return _metrics[c <= 255 ? c : 0];
         }
         /**
          * \brief Return position and scaling vector in screen coordinates
          */
-        glm::vec4 scalePosition(glm::ivec2 pos, fontmetrics metrics) {
+        glm::vec4 scalePosition(glm::ivec2 pos, fontmetrics metrics, float xscale) {
             return (glm::vec4(
-                        (1.0f * pos.x + metrics.off_x),
-                        (1.0f * pos.y - (metrics.h - metrics.off_y)),
-                        1.0f * metrics.w,
-                        1.0f * metrics.h)
+                        (1.0f * pos.x + metrics.off_x * xscale),
+                        (1.0f * pos.y - (metrics.h - metrics.off_y) * xscale),
+                        1.0f * metrics.w * xscale,
+                        1.0f * metrics.h * xscale)
                     - glm::vec4(_res.x >> 1, _res.y >> 1, 1, 1))
                    / glm::vec4(_res.x >> 1, _res.y >> 1, _res.x >> 1, _res.y >> 1);
         }

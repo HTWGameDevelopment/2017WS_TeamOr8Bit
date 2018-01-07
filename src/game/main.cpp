@@ -27,15 +27,26 @@ public:
     Game(qe::Context *ctxt)
     : _ctxt(ctxt), _font(font::Font::get("assets/fonts/DejaVuSans.ttf"_p)) {
         assert(ctxt);
+        initializeGlyphmap();
         initializeCacheAssets();
+        initializeScreens();
     }
     void initializeScreens() {
         auto *a = _screens.addScreen(new gamespace::AboutScreen());
         auto *g = _screens.addScreen(new gamespace::GameScreen(_screens, *_ctxt, _font));
-        _mainmenu = _screens.addScreen(new gamespace::MainScreen(_screens, _ctxt, *g));
+        _mainmenu = _screens.addScreen(new gamespace::MainScreen(_screens, _ctxt, qe::Cache::glyphlatin));
 
         _mainmenu->linkAbout(a);
         _mainmenu->linkGame(g);
+    }
+    void initializeGlyphmap() {
+#ifdef HAS_FREETYPE
+        std::cout << "Using font " << _font->bpath() << std::endl;
+        qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _font->face(), 32, _ctxt->getResolution());
+#else
+        std::cout << "Using baked font " << _font->bpath() << std::endl;
+        qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _ctxt->getResolution());
+#endif
     }
     void bakeAssets() {
         qe::Cache::glyphlatin->bake();
@@ -132,7 +143,6 @@ int main(int argc, char *argv[]) {
     {
         Game g(&context);
         game = &g;
-        g.initializeScreens();
 
         if(qe::BAKEFONTS()) g.bakeAssets();
 

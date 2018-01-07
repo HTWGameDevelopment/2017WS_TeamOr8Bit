@@ -1,6 +1,11 @@
 #include "game_impl.hpp"
 
 using namespace gamespace;
+using namespace std::string_literals;
+
+inline glm::ivec2 to_ivec2(ui::defp_t t) {
+    return glm::ivec2(t.x, t.y);
+}
 
 bool isLookedAtTile(glm::vec2 ori, glm::vec3 planecoord) {
     glm::vec2 pc(planecoord.x, planecoord.z);
@@ -37,20 +42,43 @@ void GameScreenImpl::initializeSelection() {
 }
 
 void GameScreenImpl::initializeHUD() {
-#ifdef HAS_FREETYPE
-    std::cout << "Using font " << _font->bpath() << std::endl;
-    qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _font->face(), 32, _ctxt->getResolution());
-#else
-    std::cout << "Using baked font " << _font->bpath() << std::endl;
-    qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _ctxt->getResolution());
+    ui::AbstractUI ui;
+    std::unique_ptr<ui::AbstractBox> box(new ui::AbstractBox());
+    std::unique_ptr<ui::AbstractText> text(new ui::AbstractText());
+    text->dimension() = ui::absp_t {1, 0.25};
+    text->margin() = ui::absp_t {0.02, 0.02};
+
+    box->set_orientation(ui::AbstractBox::VERTICAL);
+    box->set_growth(ui::AbstractBox::MINIMUM);
+    box->set_align_inner(ui::AbstractBox::BEGINNING, ui::AbstractBox::END);
+
+    box->append(text.release());
+    ui.set_container(box.release());
+
+    _ui.reset(new ui::DefinedUI(ui::UIFactory(ui, _ctxt->width(), _ctxt->height()).release()));
+    auto *t = _ui->get("1.1");
+    t->render_with([this](ui::DefinedRenderable *t) mutable {
+        if(t->payload() == nullptr) {
+            t->payload() = new text_t(
+                ((ui::DefinedText*)t)->text(),
+                qe::Cache::glyphlatin,
+                to_ivec2(t->origin() + t->margin() + t->padding() + ui::absp_t {0, 0.5} * (t->dimension() - t->margin() - t->padding())),
+                (int)(0.5 * (t->dimension().y - t->margin().y - t->padding().y)),
+                (int)(t->dimension().x - t->margin().x - t->padding().x));
+        }
+        ((text_t*)(t->payload()))->render();
+    });
+    t->payload([](void* t){delete (text_t*)t;});
+    _match.observe_player_change([this, t](auto np) {
+        ((ui::DefinedText*)t)->text() = "Or8Bit - (c) 2017-2018 Team Or8Bit\n"s
+            + "LMB to move, RMB to attack\n"
+            + "Current player (. for ending a turn): " + np.name();
+        ((ui::DefinedText*)t)->delete_payload();
+    });
+    t->payload() = nullptr;
+#ifndef NDEBUG
+    _ui->debug();
 #endif
-    _strings.gamename = qe::Text<qe::GlyphmapLatin>(qe::Cache::glyphlatin, glm::ivec2(500, 100), qe::PositionMode::TOP);
-    _strings.help1 = qe::Text<qe::GlyphmapLatin>(qe::Cache::glyphlatin, glm::ivec2(500, 150), qe::PositionMode::TOP);
-    _strings.help2 = qe::Text<qe::GlyphmapLatin>(qe::Cache::glyphlatin, glm::ivec2(500, 200), qe::PositionMode::TOP);
-    _strings.gamename.text() = "Or8Bit - (c) 2017 Team Or8Bit";
-    _strings.help1.text() = "LMB to move, RMB to attack";
-    _strings.help2_tmp = "Current player (. for ending a turn): ";
-    _strings.help2.text() = _strings.help2_tmp + _match.currentPlayer().name();
 }
 
 void GameScreenImpl::initializeAssets() {
@@ -221,10 +249,7 @@ void GameScreenImpl::render() {
 
     // render text
     _ctxt->textcontext();
-    _strings.gamename.render();
-    _strings.help1.render();
-    _strings.help2.text() = _strings.help2_tmp + _match.currentPlayer().name();
-    _strings.help2.render();
+    _ui->render();
     _ctxt->meshcontext();
 }
 
