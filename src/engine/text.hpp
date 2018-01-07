@@ -62,12 +62,17 @@ namespace qe {
             glm::ivec2 pos = _baseline;
 
             for(size_t i = 0; i < _text.length(); ++i) { // TODO Unicode support?
-                fontmetrics metrics = _glyphmap->getMetrics(_text[i]);
-                qe::Cache::texts->setUniform<UNIM>(_glyphmap->scalePosition(pos, metrics, _scale));
-                qe::Cache::texts->setUniform<UNITEXTUVP>(_glyphmap->scaleOrigin(metrics));
-                qe::Cache::texts->setUniform<UNITEXTUVS>(_glyphmap->scaleUVScale(metrics));
-                qe::Cache::meshm->render();
-                pos.x += metrics.adv_x * _scale;
+                if(_text[i] == '\n') {
+                    pos.x = _baseline.x;
+                    pos.y += _glyphmap->linespace();
+                } else {
+                    fontmetrics metrics = _glyphmap->getMetrics(_text[i]);
+                    qe::Cache::texts->setUniform<UNIM>(_glyphmap->scalePosition(pos, metrics, _scale));
+                    qe::Cache::texts->setUniform<UNITEXTUVP>(_glyphmap->scaleOrigin(metrics));
+                    qe::Cache::texts->setUniform<UNITEXTUVS>(_glyphmap->scaleUVScale(metrics));
+                    qe::Cache::meshm->render();
+                    pos.x += metrics.adv_x * _scale;
+                }
             }
         }
         void scale_text(glm::ivec2 baseline, int maxheight, int maxlength) {
@@ -75,9 +80,13 @@ namespace qe {
             ssize_t px = 0;
             ssize_t yb = 0;
             for(size_t i = 0; i < _text.length(); ++i) { // TODO Unicode support?
-                fontmetrics metrics = _glyphmap->getMetrics(_text[i]);
-                px += metrics.adv_x;
-                yb = std::max(yb, metrics.off_y);
+                if(_text[i] == '\n') {
+                    yb += _glyphmap->linespace();
+                } else {
+                    fontmetrics metrics = _glyphmap->getMetrics(_text[i]);
+                    px += metrics.adv_x;
+                    yb = std::max(yb, metrics.off_y);
+                }
             }
 
             glm::vec2 scale = glm::vec2(1.0 * maxlength / px, 1.0 * maxheight / yb);

@@ -34,7 +34,7 @@ void GlyphmapLatin::initialize(FT_Face face, size_t height) {
     FT_Set_Pixel_Sizes(face, 0, height);
     size_t x = 0, y = 0;
     size_t max_y = 0;
-
+    _linespace = (face->size->metrics.height) >> 6;
     for(size_t i = 0; i < capacity; ++i) {
         FT_UInt glyph_index = FT_Get_Char_Index(face, i);
 
@@ -73,12 +73,26 @@ void GlyphmapLatin::initialize(FT_Face face, size_t height) {
 }
 #endif
 
+savegame::SaveGame &&glyphmap_migrate(savegame::SaveGame &&sg, unsigned int v, unsigned int wanted) {
+    if(wanted == 1 && v == 0) {
+        uint32_t linespace_default = 32;
+        sg.storeDataBlock("linespace", 4, (unsigned char*)&linespace_default);
+        sg.save();
+    }
+    return std::move(sg);
+}
+
 GlyphmapLatin::GlyphmapLatin(std::string path, glm::ivec2 res): _res(res) {
     // load file
-    auto sg = savegame::load<1, 0>(path, "GlyphmapLatin");
+    auto sg = savegame::load<1, 1>(path, "GlyphmapLatin", glyphmap_migrate);
     // fill _metrics
     auto metrics = sg.getDataBlock("metrics");
     memcpy(_metrics.data(), metrics.data, sizeof(fontmetrics) * capacity);
+    // get linespace
+    auto linespace = sg.getDataBlock("linespace");
+    uint32_t ls;
+    memcpy(&ls, linespace.data, 4);
+    _linespace = ls;
     // create texture
     auto texture = sg.getDataBlock("texture");
     _glyphmap.reset(new Texture<TEXTG, FONTMAPBIND_GL>(Loader<TEXTG>(texture)));
@@ -87,11 +101,13 @@ GlyphmapLatin::GlyphmapLatin(std::string path, glm::ivec2 res): _res(res) {
 
 void GlyphmapLatin::bake() {
     // load file
-    auto sg = savegame::load<1, 0>(std::string(_path), "GlyphmapLatin");
+    auto sg = savegame::load<1, 1>(std::string(_path), "GlyphmapLatin", glyphmap_migrate);
     // fill _metrics
     sg.storeDataBlock("metrics", sizeof(fontmetrics) * capacity, (unsigned char *)_metrics.data());
     // fill texture
     auto &l = _glyphmap->getLoader();
     sg.storeDataBlock("texture", l.size(), l.parse());
+    uint32_t linespace = _linespace;
+    sg.storeDataBlock("linespace", 4, (unsigned char*)&linespace);
     sg.save();
 }

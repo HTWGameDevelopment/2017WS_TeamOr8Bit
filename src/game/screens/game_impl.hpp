@@ -7,9 +7,18 @@
 
 #include<game/match.hpp>
 
+#include<ui/abstractbox.hpp>
+#include<ui/abstracttext.hpp>
+#include<ui/definedtext.hpp>
+#include<ui/uifactory.hpp>
+
 #include<memory>
 
 namespace gamespace {
+
+    typedef decltype(qe::Cache::glyphlatin) glyphmap;
+    typedef qe::Text<std::remove_pointer<glyphmap>::type> text_t;
+
     class GameScreenImpl {
     private:
         qe::Context *_ctxt;
@@ -24,12 +33,7 @@ namespace gamespace {
         struct Textures {
             std::unique_ptr<qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>> hextile_grass;
         } _textures;
-        struct Text {
-            qe::Text<qe::GlyphmapLatin> gamename;
-            qe::Text<qe::GlyphmapLatin> help1;
-            qe::Text<qe::GlyphmapLatin> help2;
-            std::string help2_tmp;
-        } _strings;
+        std::unique_ptr<ui::DefinedUI> _ui;
         struct SelectionState {
             enum Type { SEL_TO_MOVE, SEL_TO_ATTACK, SEL_NONE };
             Type type;
