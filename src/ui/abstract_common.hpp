@@ -53,6 +53,11 @@ namespace ui {
         bool operator<=(const Point<T> &a) {
             return x <= a.x && y <= a.y;
         }
+        Point<T> &operator+=(const Point<T> &a) {
+            x += a.x;
+            y += a.y;
+            return *this;
+        }
     };
 
     typedef Point<AbstractNumber> absp_t;
@@ -62,8 +67,9 @@ namespace ui {
         return defp_t {(int)(a.x * d.x), (int)(a.y * d.y)};
     }
 
-    template<typename T>
-    Point<T> operator-(Point<T> a, Point<T> b) {return Point<T> {a.x - b.x, a.y - b.y};}
+    template<typename T> Point<T> operator+(Point<T> a, Point<T> b) {return Point<T> {a.x + b.x, a.y + b.y};}
+    template<typename T> Point<T> operator-(Point<T> a, Point<T> b) {return Point<T> {a.x - b.x, a.y - b.y};}
+    template<typename T> Point<T> operator/(Point<T> a, Point<T> b) {return Point<T> {a.x / b.x, a.y / b.y};}
 
     class AbstractArea {
     private:
