@@ -68,13 +68,13 @@ void GameScreenImpl::initializeHUD() {
         }
         ((text_t*)(t->payload()))->render();
     });
+    t->payload([](void* t){delete (text_t*)t;});
     _match.observe_player_change([this, t](auto np) {
         ((ui::DefinedText*)t)->text() = "Or8Bit - (c) 2017-2018 Team Or8Bit\n"s
             + "LMB to move, RMB to attack\n"
             + "Current player (. for ending a turn): " + np.name();
-        ((ui::DefinedText*)t)->payload() = nullptr;
+        ((ui::DefinedText*)t)->delete_payload();
     });
-    t->payload([](void* t){delete (text_t*)t;});
     t->payload() = nullptr;
 #ifndef NDEBUG
     _ui->debug();

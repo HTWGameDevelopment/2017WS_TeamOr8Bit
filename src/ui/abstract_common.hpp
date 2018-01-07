@@ -20,6 +20,7 @@
 #ifndef UI_ABSTRACT_COMMON_HPP
 #define UI_ABSTRACT_COMMON_HPP
 
+#include<assert.h>
 #include<iostream>
 #include<functional>
 #include<memory>
@@ -132,6 +133,11 @@ namespace ui {
         }
         void *&payload() {
             return _payload;
+        }
+        void delete_payload() {
+            assert(_deleter);
+            _deleter(_payload);
+            _payload = nullptr;
         }
         template<typename F> void payload(F &&d) {
             _deleter = d;

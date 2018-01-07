@@ -126,6 +126,9 @@ namespace qe {
             glfwGetFramebufferSize(_window, &nw, &nh);
             _w = w;
             _h = h;
+
+            _lastfpstime = 0;
+            _fps = 0;
         }
         Context(const Context &other) = delete;
         ~Context() {

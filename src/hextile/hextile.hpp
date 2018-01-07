@@ -36,8 +36,8 @@ namespace hextile {
     };
 
     struct marker_t {
-        unsigned int id;
-        unsigned int val;
+        unsigned int id = 0;
+        unsigned int val = 0;
     };
 
     /**
