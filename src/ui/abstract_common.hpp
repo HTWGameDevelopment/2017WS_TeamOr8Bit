@@ -75,6 +75,7 @@ namespace ui {
     private:
         absp_t _origin;
         absp_t _size;
+        absp_t _margin;
     public:
         absp_t &origin() {
             return _origin;
@@ -82,18 +83,25 @@ namespace ui {
         absp_t &dimension() {
             return _size;
         }
+        absp_t &margin() {
+            return _margin;
+        }
     };
 
     class DefinedArea {
     private:
         defp_t _origin;
         defp_t _size;
+        defp_t _margin;
     public:
         defp_t &origin() {
             return _origin;
         }
         defp_t &dimension() {
             return _size;
+        }
+        defp_t &margin() {
+            return _margin;
         }
         virtual void recalculate() {}
         virtual bool is_dynamic() {return false;}

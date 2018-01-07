@@ -92,6 +92,8 @@ namespace gamespace {
 
             text1->dimension() = ui::absp_t {0.15, 0.15};
             text2->dimension() = ui::absp_t {0.15, 0.15};
+            text1->margin() = ui::absp_t {0.02, 0.02};
+            text2->margin() = ui::absp_t {0.02, 0.02};
 
             box->set_orientation(ui::AbstractBox::Orientation::VERTICAL);
             box->set_growth(ui::AbstractBox::Growth::FILL);
@@ -113,8 +115,8 @@ namespace gamespace {
             quit->on_click([this](void) mutable {
                 _manager->quit();
             });
-            start->render_with([this, start](void) mutable {this->render_button(start->origin(), start->dimension());});
-            quit->render_with([this, quit](void) mutable {this->render_button(quit->origin(), quit->dimension());});
+            start->render_with([this, start](void) mutable {this->render_button(start->origin() + start->margin(), start->dimension() - start->margin());});
+            quit->render_with([this, quit](void) mutable {this->render_button(quit->origin() + quit->margin(), quit->dimension() - quit->margin());});
 #ifndef NDEBUG
             _ui->debug();
 #endif
