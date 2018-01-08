@@ -2,7 +2,7 @@
 #define OR8BIT_UNIT_HPP
 
 #include<functional>
-#include<game/board.hpp>
+#include<game/gameboard.hpp>
 #include<game/player.hpp>
 #include<game/terrain.hpp>
 
@@ -16,7 +16,7 @@ namespace gamespace {
 
     typedef std::function<unsigned int(BoardTile &)> relation;
 
-    std::function<bool(BoardTile&,unsigned int&)> getEdgeRelation(relation _v);
+    std::function<bool(BoardTile&,unsigned int&)> getEdgeRelation(unsigned int layer, relation _v);
 
     class Unit {
     private:

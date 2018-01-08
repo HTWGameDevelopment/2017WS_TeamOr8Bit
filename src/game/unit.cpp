@@ -6,20 +6,20 @@ unsigned int gamespace::defaultFalloff(BoardTile &t) {
     return 1;
 }
 
-std::function<bool(BoardTile&,unsigned int&)> gamespace::getEdgeRelation(relation _v) {
-    return [_v](BoardTile &b, unsigned int &p) {if(p == 0) return false; return b.mark(p--);};
+std::function<bool(BoardTile&,unsigned int&)> gamespace::getEdgeRelation(unsigned int layer, relation _v) {
+    return [layer, _v](BoardTile &b, unsigned int &p) {if(p == 0) return false; return b.mark(layer, p--);};
 }
 
 void Unit::markVisibility(BoardTile &tile) {
-    tile.board().markByEdge(tile.coord(), vr, getEdgeRelation(_v));
+    tile.board().markByEdge(tile.coord(), vr, VISIBILITY_LAYER, getEdgeRelation(VISIBILITY_LAYER, _v));
 }
 
 void Unit::markMovement(BoardTile &tile) {
-    tile.board().markByEdge(tile.coord(), vr, getEdgeRelation(_t));
+    tile.board().markByEdge(tile.coord(), vr, MOVE_LAYER, getEdgeRelation(MOVE_LAYER, _t));
 }
 
 void Unit::markAttack(BoardTile &tile) {
-    tile.board().markByEdge(tile.coord(), vr, getEdgeRelation(_a));
+    tile.board().markByEdge(tile.coord(), vr, ACTION_LAYER, getEdgeRelation(ACTION_LAYER, _a));
 }
 
 void Unit::render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m) {

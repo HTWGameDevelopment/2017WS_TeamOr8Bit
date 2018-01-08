@@ -22,26 +22,28 @@
 
 #include<functional>
 #include<memory>
+#include<string>
 #include<vector>
-
-#include<stdio.h>
 
 namespace hextile {
 
     struct hexpoint_t {
         int x;
         int y;
+        std::string string() {
+            return std::string("(") + std::to_string(x) + "," + std::to_string(y) + ")";
+        }
     };
 
     struct marker_t {
-        unsigned int id;
-        unsigned int val;
+        unsigned int id = 0;
+        unsigned int val = 0;
     };
 
     /**
      * \brief A 2D board of hexagonal tiles of type T
      */
-    template<typename T>
+    template<typename T, unsigned int L>
     class HexTile {
     public:
         typedef T tile_type;
@@ -50,23 +52,34 @@ namespace hextile {
          */
         struct col_type {
             std::vector<tile_type> rows;
-            col_type(size_t i): rows(i, tile_type()) {}
+            col_type() {}
+            col_type(const col_type &other) = delete;
+            col_type(col_type &&other): rows(std::move(other.rows)) {}
+            col_type &operator=(const col_type &other) = delete;
+            col_type &operator=(col_type &&other) {
+                rows = std::move(other.rows);
+                return *this;
+            }
             tile_type &operator[](size_t i) {
                 return rows[i];
             }
+            void push_back(tile_type &&t) {
+                rows.push_back(std::move(t));
+            }
         };
-    private:
+    protected:
         size_t _x;
         size_t _y;
         std::vector<col_type> _data;
-        unsigned int _marker_id;
+        std::array<unsigned int, L> _marker_ids;
+        unsigned int _current_layer;
         class edgeiterator {
         private:
-            HexTile<T> *_board;
+            HexTile<T, L> *_board;
             hexpoint_t _coord;
             unsigned int _step;
         public:
-            edgeiterator(HexTile<T> *board, hexpoint_t coord): _board(board), _coord(coord), _step(0) {}
+            edgeiterator(HexTile<T, L> *board, hexpoint_t coord): _board(board), _coord(coord), _step(0) {}
             T *next() {
                 auto step = _step++;
 
@@ -94,8 +107,8 @@ namespace hextile {
                 }
             }
             bool inbounds(ssize_t x, ssize_t y) { // unsigned to signed. just use signed? TODO
-                return (x >= 0 && x < _board->x() - 1)
-                    && (y >= 0 && y < _board->y() - 1);
+                return (x >= 0 && x < _board->x())
+                    && (y >= 0 && y < _board->y());
             }
         };
         template<typename P>
@@ -109,15 +122,19 @@ namespace hextile {
             }
         }
     public:
-        HexTile(size_t x, size_t y): _x(x), _y(y), _data(_x, col_type(y)), _marker_id(0) {
-            for(int i = 0; i < _data.size(); ++i)
-                for(int j = 0; j < _data[i].rows.size(); ++j) {
-                    _data[i][j].board(this);
-                    _data[i][j] = hexpoint_t {i, j};
+        HexTile(size_t x, size_t y): _x(x), _y(y) {
+            for(int i = 0; i < L; ++i)
+                _marker_ids[i] = 0;
+            for(int i = 0; i < _x; ++i) {
+                col_type t;
+                for(int j = 0; j < _y; ++j) {
+                    t.push_back(T(nullptr, hexpoint_t {i, j}));
                 }
+                _data.push_back(std::move(t));
+            }
         }
         HexTile(const HexTile &other) = delete;
-        HexTile(HexTile &&other) = delete;
+        HexTile(HexTile &&other): _x(other._x), _y(other._y), _data(std::move(other._data)), _marker_ids(other._marker_ids) {}
         ssize_t x() {
             return _x;
         }
@@ -142,7 +159,7 @@ namespace hextile {
             bigiter _bigend;
             smalliter _smallend;
         public:
-            hexiterator(HexTile<T> &cont): _bigiter(cont._data.begin()), _smalliter(_bigiter->rows.begin()), _bigend(cont._data.end()), _smallend(_bigiter->rows.end()) {}
+            hexiterator(HexTile<T, L> &cont): _bigiter(cont._data.begin()), _smalliter(_bigiter->rows.begin()), _bigend(cont._data.end()), _smallend(_bigiter->rows.end()) {}
             bool operator==(hexiterator &other) {
                 if(_bigend != other._bigend) return false; // wrong iterator pair
 
@@ -184,16 +201,17 @@ namespace hextile {
         hexiterator end() {
             return hexiterator(*this).end();
         }
-        unsigned int currentMarker() {
-            return _marker_id;
+        unsigned int currentMarker(unsigned int layer) {
+            return _marker_ids[layer];
         }
         template<typename P>
-        void markByEdge(hexpoint_t start, P init, std::function<bool(T&,P&)> relation) {
-            ++_marker_id;
+        void markByEdge(hexpoint_t start, P init, unsigned int layer, std::function<bool(T&,P&)> relation) {
+            ++_marker_ids[layer];
+            _current_layer = layer;
             markByEdgeIterator(edgeiterator(this, start), init, relation);
         }
-        void clearMarker() {
-            ++_marker_id;
+        void clearMarker(unsigned int layer) {
+            ++_marker_ids[layer];
         }
     };
 

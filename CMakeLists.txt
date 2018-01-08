@@ -23,6 +23,8 @@ add_executable(Or8Bit
     src/game/main.cpp
     src/game/board.cpp
     src/game/unit.cpp
+    src/game/screens/game_impl.cpp
+    src/game/screens/gameinput.cpp
     extern/glad/src/glad.c
     src/engine/loader.c
     src/engine/screenshot.cpp
@@ -32,7 +34,12 @@ add_executable(Or8Bit
     src/font/font_win.cpp
     src/engine/cache.cpp
     src/engine/programs.cpp
-    src/savegame/savegame.cpp)
+    src/savegame/savegame.cpp
+    src/ui/abstractbox.cpp
+    src/ui/abstracttext.cpp
+    src/ui/definedbox.cpp
+    src/ui/definedui.cpp
+    src/ui/uifactory.cpp)
 
 # dependencies
 find_package(Freetype)
