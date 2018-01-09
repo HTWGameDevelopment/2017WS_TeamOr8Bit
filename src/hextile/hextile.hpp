@@ -47,30 +47,20 @@ namespace hextile {
     class HexTile {
     public:
         typedef T tile_type;
-        /**
-         * \brief Sub-class representing one row of tiles
-         */
-        struct col_type {
-            std::vector<tile_type> rows;
-            col_type() {}
-            col_type(const col_type &other) = delete;
-            col_type(col_type &&other): rows(std::move(other.rows)) {}
-            col_type &operator=(const col_type &other) = delete;
-            col_type &operator=(col_type &&other) {
-                rows = std::move(other.rows);
-                return *this;
-            }
+        typedef typename std::vector<tile_type>::iterator hexiterator;
+        class col_type {
+        private:
+            tile_type *_data;
+        public:
+            col_type(tile_type *d): _data(d) {}
             tile_type &operator[](size_t i) {
-                return rows[i];
-            }
-            void push_back(tile_type &&t) {
-                rows.push_back(std::move(t));
+                return _data[i];
             }
         };
     protected:
         size_t _x;
         size_t _y;
-        std::vector<col_type> _data;
+        std::vector<tile_type> _data;
         std::array<unsigned int, L> _marker_ids;
         unsigned int _current_layer;
         class edgeiterator {
@@ -126,11 +116,9 @@ namespace hextile {
             for(int i = 0; i < L; ++i)
                 _marker_ids[i] = 0;
             for(int i = 0; i < _x; ++i) {
-                col_type t;
                 for(int j = 0; j < _y; ++j) {
-                    t.push_back(T(nullptr, hexpoint_t {i, j}));
+                    _data.push_back(T(nullptr, hexpoint_t {i, j}));
                 }
-                _data.push_back(std::move(t));
             }
         }
         HexTile(const HexTile &other) = delete;
@@ -141,65 +129,17 @@ namespace hextile {
         ssize_t y() {
             return _y;
         }
-        col_type &operator[](size_t i) {
-            return _data[i];
+        col_type operator[](size_t i) {
+            return col_type(_data.data() + i * _y);
         }
         T &get(hexpoint_t i) {
-            return _data[i.x][i.y];
+            return _data[i.x * _y + i.y];
         }
-        /**
-         * \brief Iterator over all tiles
-         */
-        class hexiterator {
-        private:
-            typedef typename std::vector<col_type>::iterator bigiter;
-            typedef typename std::vector<tile_type>::iterator smalliter;
-            bigiter _bigiter;
-            smalliter _smalliter;
-            bigiter _bigend;
-            smalliter _smallend;
-        public:
-            hexiterator(HexTile<T, L> &cont): _bigiter(cont._data.begin()), _smalliter(_bigiter->rows.begin()), _bigend(cont._data.end()), _smallend(_bigiter->rows.end()) {}
-            bool operator==(hexiterator &other) {
-                if(_bigend != other._bigend) return false; // wrong iterator pair
-
-                if(other._bigiter == _bigiter && _bigiter == _bigend) return true; // iter == end()?
-
-                return (other._bigiter == _bigiter) && (other._smalliter == _smalliter);
-            }
-            bool operator!=(hexiterator &other) {
-                return !(*this == other);
-            }
-            hexiterator &operator++() {
-                ++_smalliter;
-
-                if(_smalliter == _smallend) {
-                    ++_bigiter;
-
-                    if(_bigiter == _bigend) return *this;
-
-                    _smalliter = _bigiter->rows.begin();
-                    _smallend = _bigiter->rows.end();
-                }
-
-                return *this;
-            }
-            T *operator->() {
-                return _smalliter.operator->();
-            }
-            T &operator*() {
-                return *_smalliter;
-            }
-            hexiterator &end() {
-                _bigiter = _bigend;
-                return *this;
-            }
-        };
         hexiterator begin() {
-            return hexiterator(*this);
+            return _data.begin();
         }
         hexiterator end() {
-            return hexiterator(*this).end();
+            return _data.end();
         }
         unsigned int currentMarker(unsigned int layer) {
             return _marker_ids[layer];
