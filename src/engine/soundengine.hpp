@@ -8,6 +8,8 @@
 #include<stdio.h>
 #include <portaudio.h>
 
+#define ERRCHECK(x) { if(!(x)) {exit(1); } }
+
 namespace gamespace {
     class SoundEngine {
     private:
@@ -37,10 +39,12 @@ namespace gamespace {
         }
 
         bool portAudioOpen() {
+            ERRCHECK(Pa_Initialize() == paNoError);
 
             PaStreamParameters outputParameters;
 
             outputParameters.device = Pa_GetDefaultOutputDevice();
+            ERRCHECK(outputParameters.device != paNoDevice);
 
             outputParameters.channelCount = numChannels;
             outputParameters.sampleFormat = sampleFormat;
@@ -63,17 +67,20 @@ namespace gamespace {
                     Pa_CloseStream(stream);
                 return false;
             }
+            ERRCHECK(Pa_StartStream(stream) == paNoError);
             return true;
         }
 
         std::string freadStr(FILE* f, size_t len) {
             std::string s(len, '\0');
+            ERRCHECK(fread(&s[0], 1, len, f) == len);
             return s;
         }
 
         template<typename T>
         T freadNum(FILE* f) {
             T value;
+            ERRCHECK(fread(&value, sizeof(value), 1, f) == 1);
             return value;
         }
 
@@ -103,7 +110,9 @@ namespace gamespace {
         int playsound(char** path) {
             wavfile = fopen(path, "r");
 
+            ERRCHECK(freadStr(wavfile, 4) == "RIFF");
             uint32_t wavechunksize = freadNum<uint32_t>(wavfile);
+            ERRCHECK(freadStr(wavfile, 4) == "WAVE");
             while(true) {
                 std::string chunkName = freadStr(wavfile, 4);
                 uint32_t chunkLen = freadNum<uint32_t>(wavfile);
@@ -113,12 +122,15 @@ namespace gamespace {
                     break; // start playing now
                 } else {
                     // skip chunk
+                    ERRCHECK(fseek(wavfile, chunkLen, SEEK_CUR) == 0);
                 }
             }
 
+            ERRCHECK(portAudioOpen());
+
             // wait until stream has finished playing
             while(Pa_IsStreamActive(stream) > 0)
-                usleep(1000);
+                usleep(1000);mom
 
             fclose(wavfile);
             Pa_CloseStream(stream);
