@@ -14,7 +14,7 @@ namespace gamespace {
     class SoundEngine {
     private:
         PaStream* stream;
-        FILE* audiofile;
+        FILE* wavfile;
         int channels;
         int sampleRate;
         PaSampleFormat sampleFormat;
@@ -130,7 +130,7 @@ namespace gamespace {
 
             // wait until stream has finished playing
             while(Pa_IsStreamActive(stream) > 0)
-                usleep(1000);mom
+                usleep(1000);
 
             fclose(wavfile);
             Pa_CloseStream(stream);
