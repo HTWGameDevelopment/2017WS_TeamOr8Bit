@@ -27,6 +27,7 @@ namespace gamespace {
         std::unique_ptr<qe::Mesh<qe::OBJV1>> _cube;
         std::unique_ptr<qe::Mesh<qe::OBJV2>> _tile;
         std::unique_ptr<qe::Mesh<qe::OBJV3>> _tank;
+        std::unique_ptr<qe::Mesh<qe::OBJV3>> _ground;
         struct CameraData {
             std::unique_ptr<qe::Camera> camera;
         } _cam;

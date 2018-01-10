@@ -86,6 +86,7 @@ void GameScreenImpl::initializeAssets() {
     _cube.reset(new qe::Mesh<qe::OBJV1>(qe::Loader<qe::OBJV1>("assets/models/cube.objv1"_p)));
     _tile.reset(new qe::Mesh<qe::OBJV2>(qe::Loader<qe::OBJV2>("assets/models/hextile.objv2"_p)));
     _tank.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/tank.objv3"_p)));
+    _ground.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/map.objv3"_p)));
     // TEXTURES
     _textures.hextile_grass.reset(new qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>(qe::Loader<qe::PNGRGBA>("assets/textures/hextile-grass.png"_p)));
     _cam.camera.reset(new qe::Camera(
@@ -127,14 +128,14 @@ void GameScreenImpl::initializeMap() {
         gamespace::defaultFalloff,
         gamespace::defaultFalloff);
     // TESTING PURPOSES. MOVE THIS TO MATCH SOMEHOW
-    _match.board()[0][0].setUnit(new gamespace::Unit(*u1));
-    _match.board()[1][0].setUnit(new gamespace::Unit(*u1));
-    _match.board()[0][1].setUnit(new gamespace::Unit(*u1));
-    _match.board()[1][1].setUnit(new gamespace::Unit(*u1));
-    _match.board()[0][5].setUnit(new gamespace::Unit(*u2));
-    _match.board()[1][5].setUnit(new gamespace::Unit(*u2));
-    _match.board()[0][6].setUnit(new gamespace::Unit(*u2));
-    _match.board()[1][6].setUnit(new gamespace::Unit(*u2));
+    // _match.board()[0][0].setUnit(new gamespace::Unit(*u1));
+    // _match.board()[1][0].setUnit(new gamespace::Unit(*u1));
+    // _match.board()[0][1].setUnit(new gamespace::Unit(*u1));
+    // _match.board()[1][1].setUnit(new gamespace::Unit(*u1));
+    // _match.board()[0][5].setUnit(new gamespace::Unit(*u2));
+    // _match.board()[1][5].setUnit(new gamespace::Unit(*u2));
+    // _match.board()[0][6].setUnit(new gamespace::Unit(*u2));
+    // _match.board()[1][6].setUnit(new gamespace::Unit(*u2));
     delete u1;
     delete u2;
     // _match.board()[0][0].unit()->markVisibility(_match.board()[0][0]);
@@ -231,21 +232,28 @@ void GameScreenImpl::render() {
     uint8_t len = 0;
 
     // render tiles and units
-    for(; b != e; ++b) {
-        if(isLookedAtTile(b->centerPos(), _cam.camera->getPlaneCoord())) {
-            selected[len++] = &*b;
-        } else {
-            renderTile(&*b, glm::vec3(0, 0, 0));
-        }
-    }
-
-    _selection.hovering = nullptr;
-    if(len == 1) { // render one selected
-        _selection.hovering = selected[0];
-        renderTile(selected[0], glm::vec3(0.2, 0.2, 0.2));
-    } else if(len != 0){
-        for(uint8_t i = 0; i < len; ++i) renderTile(selected[i], glm::vec3(0, 0, 0));
-    }
+    // for(; b != e; ++b) {
+    //     if(isLookedAtTile(b->centerPos(), _cam.camera->getPlaneCoord())) {
+    //         selected[len++] = &*b;
+    //     } else {
+    //         renderTile(&*b, glm::vec3(0, 0, 0));
+    //     }
+    // }
+    //
+    // _selection.hovering = nullptr;
+    // if(len == 1) { // render one selected
+    //     _selection.hovering = selected[0];
+    //     renderTile(selected[0], glm::vec3(0.2, 0.2, 0.2));
+    // } else if(len != 0){
+    //     for(uint8_t i = 0; i < len; ++i) renderTile(selected[i], glm::vec3(0, 0, 0));
+    // }
+    glm::mat4 m = glm::translate(glm::vec3(0, 0, 0));
+    glm::mat4 mvp = _cam.camera->matrices().pv * m;
+    qe::Cache::objv3->use();
+    qe::Cache::objv3->setUniform<qe::UNIMVP>(mvp);
+    qe::Cache::objv3->setUniform<qe::UNIM>(m);
+    qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.800, 0.567, 0.305));
+    _ground->render();
 
     // render text
     _ctxt->textcontext();
