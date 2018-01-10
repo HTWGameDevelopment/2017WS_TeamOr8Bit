@@ -15,6 +15,7 @@ namespace gamespace {
         gamespace::Player _player1;
         gamespace::Player _player2;
         gamespace::Player *_currentPlayer;
+        unsinged int turn;
     public:
         Match(glm::ivec2 dim, Player player1, Player player2)
         : _board(dim.x, dim.y), _player1(player1), _player2(player2), _currentPlayer(&_player1) {}
