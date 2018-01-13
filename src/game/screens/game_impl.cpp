@@ -3,6 +3,42 @@
 using namespace gamespace;
 using namespace std::string_literals;
 
+const char* GameScreenImpl::ground_names[16] = {
+    "Cylinder.002_Cylinder.007",
+    "Cylinder.001_Cylinder.006",
+    "Cylinder_Cylinder.003",
+    "WaterPlane_Plane.003",
+    "WaterBlock_Cube.004",
+    "DamBaseBottom.002_Cube.003",
+    "DamBaseMiddle.002_Cylinder.002",
+    "DamBaseTop.002_Cone.002",
+    "DamBaseBottom.001_Cube.002",
+    "DamBaseMiddle.001_Cylinder.001",
+    "DamBaseTop.001_Cone.001",
+    "DamBaseTop_Cone",
+    "DamBaseMiddle_Cylinder",
+    "DamBaseBottom_Cube.001",
+    "DamMain_CUBezierCurve",
+    "Ground_Plane.002"
+};
+
+#define Cylinder_002_Cylinder_007 0
+#define Cylinder_001_Cylinder_006 1
+#define Cylinder_Cylinder_003 2
+#define WaterPlane_Plane_003 3
+#define WaterBlock_Cube_004 4
+#define DamBaseBottom_002_Cube_003 5
+#define DamBaseMiddle_002_Cylinder_002 6
+#define DamBaseTop_002_Cone_002 7
+#define DamBaseBottom_001_Cube_002 8
+#define DamBaseMiddle_001_Cylinder_001 9
+#define DamBaseTop_001_Cone_001 10
+#define DamBaseTop_Cone 11
+#define DamBaseMiddle_Cylinder 12
+#define DamBaseBottom_Cube_001 13
+#define DamMain_CUBezierCurve 14
+#define Ground_Plane_002 15
+
 inline glm::ivec2 to_ivec2(ui::defp_t t) {
     return glm::ivec2(t.x, t.y);
 }
@@ -87,6 +123,28 @@ void GameScreenImpl::initializeAssets() {
     _tile.reset(new qe::Mesh<qe::OBJV2>(qe::Loader<qe::OBJV2>("assets/models/hextile.objv2"_p)));
     _tank.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/tank.objv3"_p)));
     _ground.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/map.objv3"_p)));
+    // RESOLVE SUBOBJS
+        const char* names[] = {
+            "Cylinder.002_Cylinder.007",
+            "Cylinder.001_Cylinder.006",
+            "Cylinder_Cylinder.003",
+            "WaterPlane_Plane.003",
+            "WaterBlock_Cube.004",
+            "DamBaseBottom.002_Cube.003",
+            "DamBaseMiddle.002_Cylinder.002",
+            "DamBaseTop.002_Cone.002",
+            "DamBaseBottom.001_Cube.002",
+            "DamBaseMiddle.001_Cylinder.001",
+            "DamBaseTop.001_Cone.001",
+            "DamBaseTop_Cone",
+            "DamBaseMiddle_Cylinder",
+            "DamBaseBottom_Cube.001",
+            "DamMain_CUBezierCurve",
+            "Ground_Plane.002"
+        };
+    for(size_t i = 0; i < 16; ++i) {
+        _ground_indices[i] = _ground->get_object(names[i]);
+    }
     // TEXTURES
     _textures.hextile_grass.reset(new qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>(qe::Loader<qe::PNGRGBA>("assets/textures/hextile-grass.png"_p)));
     _cam.camera.reset(new qe::Camera(
@@ -252,8 +310,30 @@ void GameScreenImpl::render() {
     qe::Cache::objv3->use();
     qe::Cache::objv3->setUniform<qe::UNIMVP>(mvp);
     qe::Cache::objv3->setUniform<qe::UNIM>(m);
-    qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.800, 0.567, 0.305));
-    _ground->render();
+    // qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.800, 0.567, 0.305));
+    // render grey areas
+    qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.8, 0.8));
+    _ground->render_sub(_ground_indices[DamMain_CUBezierCurve]);
+    _ground->render_sub(_ground_indices[DamBaseBottom_Cube_001]);
+    _ground->render_sub(_ground_indices[DamBaseBottom_001_Cube_002]);
+    _ground->render_sub(_ground_indices[DamBaseBottom_002_Cube_003]);
+    _ground->render_sub(_ground_indices[Cylinder_Cylinder_003]);
+    _ground->render_sub(_ground_indices[Cylinder_001_Cylinder_006]);
+    _ground->render_sub(_ground_indices[Cylinder_002_Cylinder_007]);
+    // TODO render faction colors
+    _ground->render_sub(_ground_indices[DamBaseMiddle_Cylinder]);
+    _ground->render_sub(_ground_indices[DamBaseMiddle_001_Cylinder_001]);
+    _ground->render_sub(_ground_indices[DamBaseMiddle_002_Cylinder_002]);
+    _ground->render_sub(_ground_indices[DamBaseTop_Cone]);
+    _ground->render_sub(_ground_indices[DamBaseTop_001_Cone_001]);
+    _ground->render_sub(_ground_indices[DamBaseTop_002_Cone_002]);
+    // render ground areas
+    qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.567, 0.305));
+    _ground->render_sub(_ground_indices[Ground_Plane_002]);
+    // render water
+    qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.0, 0.551, 0.8));
+    _ground->render_sub(_ground_indices[WaterPlane_Plane_003]);
+    _ground->render_sub(_ground_indices[WaterBlock_Cube_004]);
 
     // render text
     _ctxt->textcontext();

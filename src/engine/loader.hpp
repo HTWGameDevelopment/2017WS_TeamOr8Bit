@@ -78,6 +78,15 @@ namespace qe {
     };
 
     /**
+     * \brief Index and size of one sub-object in obj meshes
+     */
+    struct subobj_t {
+        std::string name;
+        size_t index;
+        size_t size;
+    };
+
+    /**
      * \brief Data about one vertex in OBJV2 meshes
      */
     struct objv2_point_t {
@@ -185,6 +194,7 @@ namespace qe {
     private:
         std::vector<objv3_point_t> _points;
         std::string _path;
+        std::vector<subobj_t> _objects;
         /**
          * \brief Load data from file
          */
@@ -194,6 +204,8 @@ namespace qe {
             std::vector<glm::vec3> tvertices;
             std::vector<glm::vec3> tnormals;
             std::vector<glm::ivec2> indices;
+
+            subobj_t tobj {"", 0, 0};
 
             for(std::string line; std::getline(file, line, '\n');) {
                 if(startswith(line, "v ")) {
@@ -231,8 +243,18 @@ namespace qe {
                     indices.push_back(points[0]);
                     indices.push_back(points[1]);
                     indices.push_back(points[2]);
+                } else if(startswith(line, "o ")) {
+                    tobj.size = indices.size() - tobj.index;
+                    if(tobj.name.empty()) tobj.name = "FIRSTNONAME";
+                    _objects.push_back(tobj);
+                    tobj.name = line.substr(2);
+                    tobj.index = indices.size();
                 }
             }
+
+            tobj.size = indices.size() - tobj.index;
+            if(tobj.name.empty()) tobj.name = "NONAME";
+            _objects.push_back(tobj);
 
             if(file.bad()) throw loader_error(_path, __FILE__, __LINE__);
 
@@ -275,6 +297,10 @@ namespace qe {
         unsigned int elementSize() {
             return sizeof(objv3_point_t);
         }
+
+        std::vector<subobj_t> &objects() {
+            return _objects;
+        }
     };
 
     /**
@@ -284,6 +310,7 @@ namespace qe {
     private:
         std::vector<objv2_point_t> _points;
         std::string _path;
+        std::vector<subobj_t> _objects;
         /**
          * \brief Load data from file
          */
@@ -294,6 +321,8 @@ namespace qe {
             std::vector<glm::vec2> tuvs;
             std::vector<glm::vec3> tnormals;
             std::vector<glm::ivec3> indices;
+
+            subobj_t tobj {"", 0, 0};
 
             for(std::string line; std::getline(file, line, '\n');) {
                 if(startswith(line, "v ")) {
@@ -342,8 +371,18 @@ namespace qe {
                     indices.push_back(points[0]);
                     indices.push_back(points[1]);
                     indices.push_back(points[2]);
+                } else if(startswith(line, "o ")) {
+                    tobj.size = indices.size() - tobj.index;
+                    if(tobj.name.empty()) tobj.name = "FIRSTNONAME";
+                    _objects.push_back(tobj);
+                    tobj.name = line.substr(2);
+                    tobj.index = indices.size();
                 }
             }
+
+            tobj.size = indices.size() - tobj.index;
+            if(tobj.name.empty()) tobj.name = "NONAME";
+            _objects.push_back(tobj);
 
             if(file.bad()) throw loader_error(_path, __FILE__, __LINE__);
 
@@ -387,6 +426,9 @@ namespace qe {
         unsigned int elementSize() {
             return sizeof(objv2_point_t);
         }
+        std::vector<subobj_t> &objects() {
+            return _objects;
+        }
     };
 
     /**
@@ -396,6 +438,7 @@ namespace qe {
     private:
         std::vector<glm::vec3> _vertices;
         std::string _path;
+        std::vector<subobj_t> _objects;
         /**
          * \brief Load data from file
          */
@@ -404,6 +447,8 @@ namespace qe {
             file.exceptions(std::ifstream::badbit);
             std::vector<glm::vec3> tvertices;
             std::vector<unsigned int> indices;
+
+            subobj_t tobj {"", 0, 0};
 
             for(std::string line; std::getline(file, line, '\n');) {
                 if(startswith(line, "v ")) {
@@ -428,8 +473,18 @@ namespace qe {
                     indices.push_back(vi[0]);
                     indices.push_back(vi[1]);
                     indices.push_back(vi[2]);
+                } else if(startswith(line, "o ")) {
+                    tobj.size = indices.size() - tobj.index;
+                    if(tobj.name.empty()) tobj.name = "FIRSTNONAME";
+                    _objects.push_back(tobj);
+                    tobj.name = line.substr(2);
+                    tobj.index = indices.size();
                 }
             }
+
+            tobj.size = indices.size() - tobj.index;
+            if(tobj.name.empty()) tobj.name = "NONAME";
+            _objects.push_back(tobj);
 
             if(file.bad() || indices.size() == 0) throw loader_error(_path, __FILE__, __LINE__);
 
@@ -467,6 +522,9 @@ namespace qe {
          */
         unsigned int elementSize() {
             return sizeof(glm::vec3);
+        }
+        std::vector<subobj_t> &objects() {
+            return _objects;
         }
     };
 

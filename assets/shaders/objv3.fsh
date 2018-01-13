@@ -17,7 +17,7 @@ void main() {
     vec3 l = normalize(light_camera);
     float cosTheta = clamp(dot(n,l),0,1);
 
-    vec3 visvalue = vec3(0.1, 0.1, 0.1);
+    float visvalue = 0.1;
 
     float yval1 = floor(pos_world.z / 1.5);
     float xval1 = floor((pos_world.x + mod(yval1, 2) * 0.5 * 2 * 0.866) / (2 * 0.866));
@@ -43,8 +43,8 @@ void main() {
     else if(all(lessThanEqual(distances.zzzz, distances))) tcoord = vec2(xval.z, yval.z);
     else if(all(lessThanEqual(distances.wwww, distances))) tcoord = vec2(xval.w, yval.w);
 
-    visvalue = vec3(tcoord.x * 0.2, tcoord.y * 0.2, 0);
+    visvalue = 0.1;
 
-//    color = 0.1 * uni_color + cosTheta * uni_color + visvalue * uni_color;
-    color = visvalue * uni_color;
+    color = 0.1 * uni_color + cosTheta * uni_color + visvalue * uni_color;
+//    color = visvalue * uni_color;
 }
