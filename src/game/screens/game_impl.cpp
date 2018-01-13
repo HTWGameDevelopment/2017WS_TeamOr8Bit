@@ -247,7 +247,7 @@ void GameScreenImpl::render() {
     // } else if(len != 0){
     //     for(uint8_t i = 0; i < len; ++i) renderTile(selected[i], glm::vec3(0, 0, 0));
     // }
-    glm::mat4 m = glm::translate(glm::vec3(0, 0, 0));
+    glm::mat4 m = glm::translate(glm::vec3(18.099, 0, 10.963));
     glm::mat4 mvp = _cam.camera->matrices().pv * m;
     qe::Cache::objv3->use();
     qe::Cache::objv3->setUniform<qe::UNIMVP>(mvp);
