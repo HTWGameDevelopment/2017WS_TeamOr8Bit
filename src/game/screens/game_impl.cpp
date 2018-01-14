@@ -304,12 +304,13 @@ void GameScreenImpl::render() {
     // }
     glm::mat4 m = glm::translate(glm::vec3(18.099, 0, 10.963));
     glm::mat4 mvp = _cam.camera->matrices().pv * m;
-    qe::Cache::objv3->use();
-    qe::Cache::objv3->setUniform<qe::UNIMVP>(mvp);
-    qe::Cache::objv3->setUniform<qe::UNIM>(m);
+    qe::Cache::terrain->use();
+    qe::Cache::terrain->setUniform<qe::UNIMVP>(mvp);
+    qe::Cache::terrain->setUniform<qe::UNIM>(m);
+    qe::Cache::terrain->setUniform<qe::UNIV>(_cam.camera->matrices().v);
     // qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.800, 0.567, 0.305));
     // render grey areas
-    qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.8, 0.8));
+    qe::Cache::terrain->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.8, 0.8));
     _ground->render_sub(_ground_indices[DamMain_CUBezierCurve]);
     _ground->render_sub(_ground_indices[DamBaseBottom_Cube_001]);
     _ground->render_sub(_ground_indices[DamBaseBottom_001_Cube_002]);
@@ -325,10 +326,10 @@ void GameScreenImpl::render() {
     _ground->render_sub(_ground_indices[DamBaseTop_001_Cone_001]);
     _ground->render_sub(_ground_indices[DamBaseTop_002_Cone_002]);
     // render ground areas
-    qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.567, 0.305));
+    qe::Cache::terrain->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.567, 0.305));
     _ground->render_sub(_ground_indices[Ground_Plane_002]);
     // render water
-    qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.0, 0.551, 0.8));
+    qe::Cache::terrain->setUniform<qe::UNICOLOR>(glm::vec3(0.0, 0.551, 0.8));
     _ground->render_sub(_ground_indices[WaterPlane_Plane_003]);
     _ground->render_sub(_ground_indices[WaterBlock_Cube_004]);
 

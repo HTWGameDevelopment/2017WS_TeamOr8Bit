@@ -25,6 +25,7 @@ GlyphmapLatin *Cache::glyphlatin;
 qe::Program *Cache::objv1;
 qe::Program *Cache::objv2;
 qe::Program *Cache::objv3;
+qe::Program *Cache::terrain;
 qe::Program *Cache::texts;
 qe::Program *Cache::sprite2d;
 qe::Mesh<TEXTG> *Cache::meshm;
