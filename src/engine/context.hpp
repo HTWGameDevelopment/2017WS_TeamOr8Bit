@@ -308,6 +308,9 @@ namespace qe {
         inline unsigned int height() {
             return _h;
         }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "Context[" << _w << "," << _h << "]" << std::endl;
+        }
     };
 }
 

@@ -24,6 +24,14 @@
 
 #include<string>
 
+inline std::string replaceNewline(std::string t) {
+    std::string r = t;
+    size_t i = 0;
+    while((i = r.find('\n', i)) != std::string::npos)
+        r.replace(i, 1, "\\n");
+    return r;
+}
+
 namespace ui {
 
     class DefinedText: public DefinedRenderable {
@@ -32,6 +40,10 @@ namespace ui {
     public:
         std::string &text() {
             return _text;
+        }
+        virtual void __introspect(size_t off) {
+            DefinedRenderable::__introspect(off);
+            std::cout << std::string(off + 2, ' ') << "Text = '" << replaceNewline(_text) << "'" << std::endl;
         }
     };
 

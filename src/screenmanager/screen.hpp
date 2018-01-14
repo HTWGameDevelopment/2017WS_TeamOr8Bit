@@ -20,6 +20,7 @@
 #ifndef SCREEN_HPP
 #define SCREEN_HPP
 
+#include<iostream>
 #include<memory>
 #include<type_traits>
 #include<vector>
@@ -76,6 +77,11 @@ namespace screen {
         void input_idle() {
             assert(_active_screen);
             _active_screen->idle_callback();
+        }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "ScreenManager" << std::endl;
+            for(size_t i = 0; i < _screens.size(); ++i)
+                _screens[i]->__introspect(off + 2);
         }
     };
 }

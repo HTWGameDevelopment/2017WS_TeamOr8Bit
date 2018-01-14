@@ -70,3 +70,8 @@ void GameBoard::attackUnit(hexpoint_t from, hexpoint_t to) {
     tt.unit()->attackedWith(*ft.unit());
     if(tt.unit()->dead()) tt.destroyUnit();
 }
+
+void BoardTile::__introspect(size_t off) {
+    std::cout << std::string(off, ' ') << "BoardTile[" << _p.x << "," << _p.y << "]" << std::endl;
+    if(_unit) _unit->__introspect(off + 2);
+}

@@ -20,6 +20,7 @@
 #ifndef HEXTILE_HPP
 #define HEXTILE_HPP
 
+#include<iostream>
 #include<functional>
 #include<memory>
 #include<string>
@@ -152,6 +153,11 @@ namespace hextile {
         }
         void clearMarker(unsigned int layer) {
             ++_marker_ids[layer];
+        }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "HexTile[" << _x << "," << _y << "]" << std::endl;
+            for(size_t i = 0; i < _x * _y; ++i)
+                _data[i].__introspect(off + 2);
         }
     };
 

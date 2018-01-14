@@ -90,6 +90,11 @@ public:
         qe::Cache::texts->use();
         qe::Cache::texts->setUniform<qe::UNICOLOR>(qe::FONTMAPBIND);
     }
+    void __introspect(size_t off) {
+        std::cout << std::string(off, ' ') << "Game" << std::endl;
+        _font->__introspect(off + 2);
+        _screens.__introspect(off + 2);
+    }
 };
 
 Game *game;
@@ -127,6 +132,8 @@ namespace qe {
 }
 
 int main(int argc, char *argv[]) {
+    bool introspect = false;
+
     for(int i = 1; i < argc; i++) {
         if(strcmp(argv[i], "--vsync") == 0) {
             qe::VSYNC() = 1;
@@ -135,6 +142,8 @@ int main(int argc, char *argv[]) {
             exit(0);
         } else if(strcmp(argv[i], "--bake") == 0) {
             qe::BAKEFONTS() = true;
+        } else if(strcmp(argv[i], "--introspect") == 0) {
+            introspect = true;
         }
     }
 
@@ -147,6 +156,11 @@ int main(int argc, char *argv[]) {
         if(qe::BAKEFONTS()) g.bakeAssets();
 
         g.run();
+
+        if(introspect) {
+            context.__introspect(0);
+            g.__introspect(0);
+        }
     }
     return 0;
 }

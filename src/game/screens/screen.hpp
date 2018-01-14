@@ -1,6 +1,8 @@
 #ifndef GAMESPACE_MENU
 #define GAMESPACE_MENU
 
+#include<string.h>
+
 namespace gamespace {
 
     class Screen {
@@ -11,6 +13,7 @@ namespace gamespace {
         virtual void mouse_callback(double x, double y) = 0;
         virtual void mouse_button_callback(int button, int action, int mods) = 0;
         virtual void idle_callback() = 0;
+        virtual void __introspect(size_t off) = 0;
     };
 
 }

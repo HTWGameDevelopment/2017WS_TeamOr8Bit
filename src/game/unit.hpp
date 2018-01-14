@@ -53,6 +53,7 @@ namespace gamespace {
         bool dead() {
             return hp == 0;
         }
+        void __introspect(size_t off);
     };
 
 }

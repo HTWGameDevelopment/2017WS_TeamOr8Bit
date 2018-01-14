@@ -148,8 +148,8 @@ namespace ui {
         virtual void render() {
             _render(this);
         }
-        virtual void debug(unsigned int off) {
-            std::cout << std::string(" ", off)
+        virtual void __introspect(size_t off) {
+            std::cout << std::string(off, ' ')
                 << "[" << origin().x
                 << "," << origin().y
                 << "] dim ["

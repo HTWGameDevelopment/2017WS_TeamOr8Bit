@@ -66,6 +66,7 @@ namespace gamespace {
         qe::Context *context() {
             return _ctxt;
         }
+        void __introspect(size_t off);
     };
 }
 

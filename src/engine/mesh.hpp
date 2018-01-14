@@ -182,6 +182,13 @@ namespace qe {
             }
             throw loader_error("could not find sub-object " + name, __FILE__, __LINE__);
         }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "Mesh<" << constantToString(T) << ">[" << _size << " of " << _elementsize  << " bytes]"<< std::endl;
+            for(size_t i = 0; i < _objects.size(); ++i) {
+                auto &o = _objects[i];
+                std::cout << std::string(off + 2, ' ') << "subobj[" << o.name << " of " << o.size << "@" << o.index << "]" << std::endl;
+            }
+        }
     };
 
 }

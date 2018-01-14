@@ -112,9 +112,6 @@ void GameScreenImpl::initializeHUD() {
         ((ui::DefinedText*)t)->delete_payload();
     });
     t->payload() = nullptr;
-#ifndef NDEBUG
-    _ui->debug();
-#endif
 }
 
 void GameScreenImpl::initializeAssets() {
@@ -363,4 +360,12 @@ void GameScreenImpl::renderTile(gamespace::BoardTile *b, glm::vec3 ho) {
         mvp = _cam.camera->matrices().pv * m;
         b->unit()->render(*b, mvp, m);
     }
+}
+void GameScreenImpl::__introspect(size_t off) {
+    std::cout << std::string(off, ' ') << "GameScreenImpl" << std::endl;
+    _match.__introspect(off + 2);
+    if(_cube.get()) _cube->__introspect(off + 2);
+    if(_tank.get()) _tank->__introspect(off + 2);
+    if(_ground.get()) _ground->__introspect(off + 2);
+    if(_ui.get()) _ui->__introspect(off + 2);
 }

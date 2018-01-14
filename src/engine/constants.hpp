@@ -44,6 +44,20 @@ namespace qe {
     const flag_t TEXTG = 5; //!< Glyphmap/Glyph mesh
     const flag_t LATIN = 6; //!< Latin (ASCII) character set
 
+    inline const char* constantToString(flag_t cons) {
+        switch(cons) {
+            case VERTEX: return "VERTEX";
+            case FRAGMENT: return "FRAGMENT";
+            case OBJV1: return "OBJV1";
+            case OBJV2: return "OBJV2";
+            case OBJV3: return "OBJV3";
+            case PNGRGBA: return "PNGRGBA";
+            case TEXTG: return "TEXTG";
+            case LATIN: return "LATIN";
+            default: return "lolwhat?";
+        }
+    }
+
 // UNIFORMS
     const flag_t UNIMVP = 0;
     const flag_t UNIM = 1;
