@@ -134,6 +134,10 @@ namespace qe {
         Loader<T> &getLoader() {
             return _source;
         }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "Texture<" << constantToString(T) << "," << U << ">[" << std::endl;
+            _source.__introspect(off + 2);
+        }
     };
 
 }

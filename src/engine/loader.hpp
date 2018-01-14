@@ -27,6 +27,7 @@
 
 #include<png.h>
 
+#include<iostream>
 #include<array>
 #include<fstream>
 #include<memory>
@@ -185,6 +186,9 @@ namespace qe {
         unsigned int elementSize() {
             return sizeof(unsigned char[4]);
         }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "Loader<PNGRGBA>[path=" << _path << ", " << _width << "x" << _height << "]" << std::endl;
+        }
     };
 
     /**
@@ -300,6 +304,9 @@ namespace qe {
 
         std::vector<subobj_t> &objects() {
             return _objects;
+        }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "Loader<OBV3>[path=" << _path << "]" << std::endl;
         }
     };
 
@@ -429,6 +436,9 @@ namespace qe {
         std::vector<subobj_t> &objects() {
             return _objects;
         }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "Loader<OBV2>[path=" << _path << "]" << std::endl;
+        }
     };
 
     /**
@@ -525,6 +535,9 @@ namespace qe {
         }
         std::vector<subobj_t> &objects() {
             return _objects;
+        }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "Loader<OBV1>[path=" << _path << "]" << std::endl;
         }
     };
 

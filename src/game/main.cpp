@@ -97,6 +97,7 @@ public:
         std::cout << std::string(off, ' ') << "Game" << std::endl;
         _font->__introspect(off + 2);
         _screens.__introspect(off + 2);
+        qe::Cache::__introspect(off + 2);
     }
 };
 

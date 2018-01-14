@@ -118,6 +118,9 @@ namespace qe {
             glUniform4fv(binding, 1, (float *)&pos);
             GLSERRORCHECK;
         }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "Program[" << _initialized << "]" << std::endl;
+        }
     };
 
     /**

@@ -12,6 +12,7 @@ inline std::string cut(const char* f) {
     return std::string(f).erase(0, std::string(f).find("src/") + 4);
 }
 #define GV3TOSTR(t) "vec3(" << t.x << "," << t.y << "," << t.z << ")"
+#define GV2TOSTR(t) "vec2(" << t.x << "," << t.y << ")"
 extern GLenum _logger_e;
 #define GLERRORCHECK if((_logger_e = glGetError()) != GL_NO_ERROR) throw_glerror(_logger_e, __FILE__, __LINE__);
 #ifndef NDEBUG
