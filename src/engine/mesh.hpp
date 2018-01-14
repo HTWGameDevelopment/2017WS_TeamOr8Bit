@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Fabian Stiewitz
+// Copyright (c) 2017-2018 Fabian Stiewitz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -40,109 +40,7 @@ namespace qe {
         size_t _size; //!< Vertex count
         size_t _elementsize; //!< Size per vertex in bytes
         std::vector<subobj_t> _objects; //!< Sub-objects in buffer
-        /**
-         * \brief Initialize VAO
-         */
-        void initVAO() {
-            if(T == OBJV1) return initVAOAsOBJV1();
-            else if(T == OBJV2) return initVAOAsOBJV2();
-            else if(T == OBJV3) return initVAOAsOBJV3();
-
-            assert(false);
-        }
-        /**
-         * \brief Initialize VAO for an OBJV1 mesh
-         */
-        void initVAOAsOBJV1() {
-            glGenVertexArrays(1, &_vao);
-            GLSERRORCHECK;
-            glBindVertexArray(_vao);
-            GLSERRORCHECK;
-            glEnableVertexAttribArray(0);
-            GLSERRORCHECK;
-            _buffer.bind();
-            glVertexAttribPointer(
-                (GLuint)0,
-                3,
-                GL_FLOAT,
-                GL_FALSE,
-                0,
-                (void *)0
-            );
-            GLSERRORCHECK;
-            glBindVertexArray(0);
-        }
-        /**
-         * \brief Initialize VAO for an OBJV2 mesh
-         */
-        void initVAOAsOBJV2() {
-            glGenVertexArrays(1, &_vao);
-            GLSERRORCHECK;
-            glBindVertexArray(_vao);
-            GLSERRORCHECK;
-            glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(1);
-            glEnableVertexAttribArray(2);
-            GLSERRORCHECK;
-            _buffer.bind();
-            glVertexAttribPointer(
-                (GLuint)0, // vertex
-                3,
-                GL_FLOAT,
-                GL_FALSE,
-                _elementsize,
-                (void *)0
-            );
-            glVertexAttribPointer(
-                (GLuint)1, // uv
-                2,
-                GL_FLOAT,
-                GL_FALSE,
-                _elementsize,
-                (void *)12 // 3 * float
-            );
-            glVertexAttribPointer(
-                (GLuint)2, // normal
-                3,
-                GL_FLOAT,
-                GL_FALSE,
-                _elementsize,
-                (void *)20 // 5 * float
-            );
-            GLSERRORCHECK;
-            glBindVertexArray(0);
-        }
-        /**
-         * \brief Initialize VAO for an OBJV3 mesh
-         */
-        void initVAOAsOBJV3() {
-            glGenVertexArrays(1, &_vao);
-            GLSERRORCHECK;
-            glBindVertexArray(_vao);
-            GLSERRORCHECK;
-            glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(2);
-            GLSERRORCHECK;
-            _buffer.bind();
-            glVertexAttribPointer(
-                (GLuint)0, // vertex
-                3,
-                GL_FLOAT,
-                GL_FALSE,
-                _elementsize,
-                (void *)0
-            );
-            glVertexAttribPointer(
-                (GLuint)2, // normal
-                3,
-                GL_FLOAT,
-                GL_FALSE,
-                _elementsize,
-                (void *)12 // 3 * float
-            );
-            GLSERRORCHECK;
-            glBindVertexArray(0);
-        }
+        void initVAO();
     public:
         /**
          * \brief Construct mesh from Loader

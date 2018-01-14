@@ -23,6 +23,7 @@ add_executable(Or8Bit
     src/game/main.cpp
     src/game/board.cpp
     src/game/unit.cpp
+    src/engine/mesh.cpp
     src/game/screens/game_impl.cpp
     src/game/screens/gameinput.cpp
     extern/glad/src/glad.c
