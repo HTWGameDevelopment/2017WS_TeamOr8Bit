@@ -45,7 +45,8 @@ namespace gamespace {
         } _selection;
         bool _shouldClose;
         void render();
-        void renderTile(gamespace::BoardTile *b, glm::vec3 ho);
+        void renderTerrain();
+        void renderUnitOf(gamespace::BoardTile *b);
     public:
         GameScreenImpl(gamespace::Match &&match, qe::Context *ctxt, std::shared_ptr<font::Font> font);
         void pre_run();

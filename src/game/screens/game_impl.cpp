@@ -43,24 +43,28 @@ inline glm::ivec2 to_ivec2(ui::defp_t t) {
     return glm::ivec2(t.x, t.y);
 }
 
-bool isLookedAtTile(glm::vec2 ori, glm::vec3 planecoord) {
-    glm::vec2 pc(planecoord.x, planecoord.z);
-    auto dx = 0.5 * gamespace::BoardTile::dim_x;
-    auto dy = 0.5 * gamespace::BoardTile::dim_y;
-    pc += glm::vec2(dx, dy);
-    glm::vec2 edge1 = glm::normalize(glm::vec2(0, 1));
-    glm::vec2 edge2 = glm::normalize(glm::vec2(dx, 0.5));
-    glm::vec2 edge3 = glm::normalize(glm::vec2(dx, -0.5));
-    glm::vec2 edge4 = glm::normalize(glm::vec2(0,-1));
-    glm::vec2 edge5 = glm::normalize(glm::vec2(-dx, 0.5));
-    glm::vec2 edge6 = glm::normalize(glm::vec2(-dx,-0.5));
-    if(abs(glm::dot(edge1, ori - pc)) > 0.7) return false;
-    if(abs(glm::dot(edge2, ori - pc)) > 0.7) return false;
-    if(abs(glm::dot(edge3, ori - pc)) > 0.7) return false;
-    if(abs(glm::dot(edge4, ori - pc)) > 0.7) return false;
-    if(abs(glm::dot(edge5, ori - pc)) > 0.7) return false;
-    if(abs(glm::dot(edge6, ori - pc)) > 0.7) return false;
-    return true;
+hextile::hexpoint_t getLookedAtTile(glm::vec2 pc) {
+    float yval1 = floor(pc.y / 1.5);
+    float xval1 = floor((pc.x + (((int)yval1) % 2) * 0.5f * 2.0f * 0.866f) / (2.0f * 0.866f));
+    glm::vec4 xval = glm::vec4(0, 1, 0, 1) + xval1;
+    glm::vec4 yval = glm::vec4(0, 0, 1, 1) + yval1;
+
+    glm::vec4 xpoints(2.0f * 0.866f * xval.x - ((int)yval.x % 2) * 0.5f * 2.0f * 0.866f,
+        2.0f * 0.866f * xval.y - ((int)yval.y % 2) * 0.5f * 2.0f * 0.866f,
+        2.0f * 0.866f * xval.z - ((int)yval.z % 2) * 0.5f * 2.0f * 0.866f,
+        2.0f * 0.866f * xval.w - ((int)yval.w % 2) * 0.5f * 2.0f * 0.866f);
+    glm::vec4 ypoints(yval * 1.5f);
+
+    glm::vec4 distances(distance(pc, glm::vec2(xpoints.x, ypoints.x)),
+        distance(pc, glm::vec2(xpoints.y, ypoints.y)),
+        distance(pc, glm::vec2(xpoints.z, ypoints.z)),
+        distance(pc, glm::vec2(xpoints.w, ypoints.w)));
+
+    float d = std::min(distances.x, std::min(distances.y, std::min(distances.z, distances.w)));
+    if(d == distances.x) return hextile::hexpoint_t {(int)xval.x, (int)yval.x};
+    else if(d == distances.y) return hextile::hexpoint_t {(int)xval.y, (int)yval.y};
+    else if(d == distances.z) return hextile::hexpoint_t {(int)xval.z, (int)yval.z};
+    else if(d == distances.w) return hextile::hexpoint_t {(int)xval.w, (int)yval.w};
 }
 
 GameScreenImpl::GameScreenImpl(gamespace::Match &&match, qe::Context *ctxt, std::shared_ptr<font::Font> font)
@@ -183,14 +187,14 @@ void GameScreenImpl::initializeMap() {
         gamespace::defaultFalloff,
         gamespace::defaultFalloff);
     // TESTING PURPOSES. MOVE THIS TO MATCH SOMEHOW
-    // _match.board()[0][0].setUnit(new gamespace::Unit(*u1));
-    // _match.board()[1][0].setUnit(new gamespace::Unit(*u1));
-    // _match.board()[0][1].setUnit(new gamespace::Unit(*u1));
-    // _match.board()[1][1].setUnit(new gamespace::Unit(*u1));
-    // _match.board()[0][5].setUnit(new gamespace::Unit(*u2));
-    // _match.board()[1][5].setUnit(new gamespace::Unit(*u2));
-    // _match.board()[0][6].setUnit(new gamespace::Unit(*u2));
-    // _match.board()[1][6].setUnit(new gamespace::Unit(*u2));
+    _match.board()[0][0].setUnit(new gamespace::Unit(*u1));
+    _match.board()[1][0].setUnit(new gamespace::Unit(*u1));
+    _match.board()[0][1].setUnit(new gamespace::Unit(*u1));
+    _match.board()[1][1].setUnit(new gamespace::Unit(*u1));
+    _match.board()[0][5].setUnit(new gamespace::Unit(*u2));
+    _match.board()[1][5].setUnit(new gamespace::Unit(*u2));
+    _match.board()[0][6].setUnit(new gamespace::Unit(*u2));
+    _match.board()[1][6].setUnit(new gamespace::Unit(*u2));
     delete u1;
     delete u2;
     // _match.board()[0][0].unit()->markVisibility(_match.board()[0][0]);
@@ -287,21 +291,21 @@ void GameScreenImpl::render() {
     uint8_t len = 0;
 
     // render tiles and units
-    // for(; b != e; ++b) {
-    //     if(isLookedAtTile(b->centerPos(), _cam.camera->getPlaneCoord())) {
-    //         selected[len++] = &*b;
-    //     } else {
-    //         renderTile(&*b, glm::vec3(0, 0, 0));
-    //     }
-    // }
-    //
-    // _selection.hovering = nullptr;
-    // if(len == 1) { // render one selected
-    //     _selection.hovering = selected[0];
-    //     renderTile(selected[0], glm::vec3(0.2, 0.2, 0.2));
-    // } else if(len != 0){
-    //     for(uint8_t i = 0; i < len; ++i) renderTile(selected[i], glm::vec3(0, 0, 0));
-    // }
+    for(; b != e; ++b) {
+        if(b->unit())
+            renderUnitOf(&*b);
+    }
+
+    // render terrain
+    renderTerrain();
+
+    // render text
+    _ctxt->textcontext();
+    _ui->render();
+    _ctxt->meshcontext();
+}
+
+void GameScreenImpl::renderTerrain() {
     glm::mat4 m = glm::translate(glm::vec3(18.099, 0, 10.963));
     glm::mat4 mvp = _cam.camera->matrices().pv * m;
     qe::Cache::terrain->use();
@@ -332,35 +336,14 @@ void GameScreenImpl::render() {
     qe::Cache::terrain->setUniform<qe::UNICOLOR>(glm::vec3(0.0, 0.551, 0.8));
     _ground->render_sub(_ground_indices[WaterPlane_Plane_003]);
     _ground->render_sub(_ground_indices[WaterBlock_Cube_004]);
-
-    // render text
-    _ctxt->textcontext();
-    _ui->render();
-    _ctxt->meshcontext();
 }
 
-void GameScreenImpl::renderTile(gamespace::BoardTile *b, glm::vec3 ho) {
+void GameScreenImpl::renderUnitOf(gamespace::BoardTile *b) {
     glm::vec2 p = b->centerPos();
-    if(b->marked(ACTION_LAYER) || b->marked(MOVE_LAYER)) {
-        if(_selection.type == SelectionState::Type::SEL_NONE) {
-            _match.board().clearMarker(ACTION_LAYER);
-            _match.board().clearMarker(MOVE_LAYER);
-        }
-        else ho += glm::vec3(0.2, 0.2, 0.2);
-    }
-    glm::mat4 m = glm::translate(glm::vec3(p.x, -0.25, p.y));
-    glm::mat4 mvp = _cam.camera->matrices().pv * m;
-    qe::Cache::objv2->use();
-    qe::Cache::objv2->setUniform<qe::UNIMVP>(mvp);
-    qe::Cache::objv2->setUniform<qe::UNIM>(m);
-    qe::Cache::objv2->setUniform<qe::UNICOLOR>(ho);
-    _tile->render();
     // render unit
-    if(b->unit() != nullptr) {
-        m = glm::translate(glm::vec3(p.x, 0, p.y));
-        mvp = _cam.camera->matrices().pv * m;
-        b->unit()->render(*b, mvp, m);
-    }
+    glm::mat4 m = glm::translate(glm::vec3(p.x, 0, p.y));
+    glm::mat4 mvp = _cam.camera->matrices().pv * m;
+    b->unit()->render(*b, mvp, m);
 }
 void GameScreenImpl::__introspect(size_t off) {
     std::cout << std::string(off, ' ') << "GameScreenImpl" << std::endl;
