@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    qe::Context context(std::string(TOTNAME) + " - " + TONAME + " " + TOVERSION_STRING, 1920, 1080);
+    qe::Context context(std::string(TOTNAME) + " - " + TONAME + " " + TOVERSION_STRING, 800, 600);
     context.meshcontext();
     {
         Game g(&context);

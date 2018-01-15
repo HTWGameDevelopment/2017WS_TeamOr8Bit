@@ -49,6 +49,8 @@ namespace qe {
         glm::vec3 _pos; //!< Camera position
         glm::vec3 _dir; //!< lookAt direction
         glm::vec3 _right; //!< Right vector
+        glm::vec3 _forward; //!< Forward vector
+        glm::vec3 _down; //!< Down vecotr
         glm::vec3 _up; //!< Up vector
         glm::vec2 _angles; //!< View angles
         glm::vec3 _planecoord; //!<viewed plane
@@ -99,8 +101,12 @@ namespace qe {
             _right = glm::vec3(sin(_angles.x - M_PI / 2.0),
                                0,
                                cos(_angles.x - M_PI / 2.0));
+            _forward = glm::vec3(_dir.x, 0, _dir.z);
+            _down = glm::vec3(0, _dir.y, 0);
             _up = glm::cross(_right, _dir);
             _right = glm::normalize(_right);
+            _forward = glm::normalize(_forward);
+            _down = glm::normalize(_down);
             _up = glm::normalize(_up);
             _matrices.v = glm::lookAt(_pos, _pos + _dir, _up);
             _matrices.pv = _p * _matrices.v;
@@ -144,19 +150,27 @@ namespace qe {
             regenerate();
         }
         void moveForward(double deltaT) {
-            _pos += (float)deltaT * _dir;
+            _pos += (float)deltaT * _forward;
             regenerate();
         }
         void moveBackward(double deltaT) {
-            _pos -= (float)deltaT * _dir;
+            _pos -= (float)deltaT * _forward;
             regenerate();
         }
         void moveUp(double deltaT) {
-            _pos += (float)deltaT * _up;
+            _pos -= (float)deltaT * _down;
             regenerate();
         }
         void moveDown(double deltaT) {
-            _pos -= (float)deltaT * _up;
+            _pos += (float)deltaT * _down;
+            regenerate();
+        }
+        void scrollIn(double deltaT) {
+            _pos += (float)deltaT * _dir;
+            regenerate();
+        }
+        void scrollOut(double deltaT) {
+            _pos -= (float)deltaT * _dir;
             regenerate();
         }
     };
