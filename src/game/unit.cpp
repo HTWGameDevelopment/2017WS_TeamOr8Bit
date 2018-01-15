@@ -30,3 +30,14 @@ void Unit::render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m) {
     qe::Cache::objv3->setUniform<qe::UNICOLOR>(_player->color());
     _mesh->render();
 }
+
+void Unit::__introspect(size_t off) {
+    std::cout << std::string(off, ' ') << "Unit<" << _player->name() << ">[" << std::endl;
+    std::string os(off + 8 + _player->name().size(), ' ');
+    std::cout << os << "hp=" << hp << std::endl;
+    std::cout << os << "dp=" << dp << std::endl;
+    std::cout << os << "ap=" << ap << std::endl;
+    std::cout << os << "ar=" << ar << std::endl;
+    std::cout << os << "vr=" << vr << std::endl;
+    std::cout << os << "dpt=" << dpt << std::endl;
+}

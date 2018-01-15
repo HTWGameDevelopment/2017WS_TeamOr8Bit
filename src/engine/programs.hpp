@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Fabian Stiewitz
+// Copyright (c) 2017-2018 Fabian Stiewitz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -117,6 +117,9 @@ namespace qe {
         template<flag_t binding> void setUniform(glm::vec4 pos) {
             glUniform4fv(binding, 1, (float *)&pos);
             GLSERRORCHECK;
+        }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "Program[" << _initialized << "]" << std::endl;
         }
     };
 

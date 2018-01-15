@@ -49,9 +49,9 @@ namespace ui {
             if(*next == '\0') return _container.get();
             return _container->get(next + 1);
         }
-        void debug() {
-            std::cerr << "UI[" << _res.x << "," << _res.y << "]" << std::endl;
-            if(_container.get()) _container->debug(0);
+        void __introspect(size_t off = 0) {
+            std::cout << std::string(off, ' ') << "UI[" << _res.x << "," << _res.y << "]" << std::endl;
+            if(_container.get()) _container->__introspect(off + 2);
         }
         void click(defp_t pos) {
             if(_container.get()) _container->click(pos);

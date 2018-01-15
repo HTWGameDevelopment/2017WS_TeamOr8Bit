@@ -78,6 +78,7 @@ public:
         qe::Cache::objv1 = qe::mkProgram("assets/shaders/objv1.vsh"_p, "assets/shaders/objv1.fsh"_p);
         qe::Cache::objv2 = qe::mkProgram("assets/shaders/objv2.vsh"_p, "assets/shaders/objv2.fsh"_p);
         qe::Cache::objv3 = qe::mkProgram("assets/shaders/objv3.vsh"_p, "assets/shaders/objv3.fsh"_p);
+        qe::Cache::terrain = qe::mkProgram("assets/shaders/terrain.vsh"_p, "assets/shaders/terrain.fsh"_p);
         qe::Cache::texts = qe::mkProgram("assets/shaders/texts.vsh"_p, "assets/shaders/texts.fsh"_p);
         qe::Cache::sprite2d = qe::mkProgram("assets/shaders/s2d.vsh"_p, "assets/shaders/s2d.fsh"_p);
         qe::Cache::buttont = new qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>(qe::Loader<qe::PNGRGBA>("assets/textures/button.png"_p));
@@ -87,8 +88,16 @@ public:
         qe::Cache::objv2->setUniform<qe::UNIL>(glm::vec3(0.1, -1, 0.1));
         qe::Cache::objv3->use();
         qe::Cache::objv3->setUniform<qe::UNIL>(glm::vec3(0.1, -1, 0.1));
+        qe::Cache::terrain->use();
+        qe::Cache::terrain->setUniform<qe::UNIL>(glm::vec3(0.1, -1, 0.1));
         qe::Cache::texts->use();
         qe::Cache::texts->setUniform<qe::UNICOLOR>(qe::FONTMAPBIND);
+    }
+    void __introspect(size_t off) {
+        std::cout << std::string(off, ' ') << "Game" << std::endl;
+        _font->__introspect(off + 2);
+        _screens.__introspect(off + 2);
+        qe::Cache::__introspect(off + 2);
     }
 };
 
@@ -127,6 +136,8 @@ namespace qe {
 }
 
 int main(int argc, char *argv[]) {
+    bool introspect = false;
+
     for(int i = 1; i < argc; i++) {
         if(strcmp(argv[i], "--vsync") == 0) {
             qe::VSYNC() = 1;
@@ -135,6 +146,8 @@ int main(int argc, char *argv[]) {
             exit(0);
         } else if(strcmp(argv[i], "--bake") == 0) {
             qe::BAKEFONTS() = true;
+        } else if(strcmp(argv[i], "--introspect") == 0) {
+            introspect = true;
         }
     }
 
@@ -147,6 +160,11 @@ int main(int argc, char *argv[]) {
         if(qe::BAKEFONTS()) g.bakeAssets();
 
         g.run();
+
+        if(introspect) {
+            context.__introspect(0);
+            g.__introspect(0);
+        }
     }
     return 0;
 }

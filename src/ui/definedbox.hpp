@@ -46,10 +46,10 @@ namespace ui {
             if(*next == '\0') return operator[](i - 1);
             return operator[](i - 1)->get(next + 1);
         }
-        virtual void debug(unsigned int off) {
-            DefinedRenderable::debug(off);
+        virtual void __introspect(size_t off) {
+            DefinedRenderable::__introspect(off);
             for(unsigned int i = 0; i < count(); ++i)
-                operator[](i)->debug(off + 2);
+                operator[](i)->__introspect(off + 2);
         }
         virtual bool click(defp_t p) {
             for(unsigned int i = 0; i < count(); ++i) {

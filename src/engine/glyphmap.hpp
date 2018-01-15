@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Fabian Stiewitz
+// Copyright (c) 2017-2018 Fabian Stiewitz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -69,6 +69,9 @@ namespace qe {
             for(size_t i = 0; i < h; ++i) {
                 memcpy(_pixels.get() + (y + h - i) * _length + x, data + i * w, w);
             }
+        }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "Loader<TEXTG>[length=" << _length << "]" << std::endl;
         }
     };
 
@@ -166,6 +169,7 @@ namespace qe {
             return _glyphmap.get();
         }
         void bake();
+        void __introspect(size_t off);
     };
 
     /**
@@ -243,6 +247,9 @@ namespace qe {
             GLSERRORCHECK;
             glDrawArrays(GL_TRIANGLE_STRIP, 0, _size);
             GLSERRORCHECK;
+        }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "Mesh<TEXTG>" << std::endl;
         }
     };
 

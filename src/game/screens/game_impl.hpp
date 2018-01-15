@@ -21,12 +21,15 @@ namespace gamespace {
 
     class GameScreenImpl {
     private:
+        static const char* ground_names[16];
         qe::Context *_ctxt;
         gamespace::Match _match;
         std::shared_ptr<font::Font> _font;
         std::unique_ptr<qe::Mesh<qe::OBJV1>> _cube;
         std::unique_ptr<qe::Mesh<qe::OBJV2>> _tile;
         std::unique_ptr<qe::Mesh<qe::OBJV3>> _tank;
+        std::unique_ptr<qe::Mesh<qe::OBJV3>> _ground;
+        std::array<qe::subobj_t, 16> _ground_indices;
         struct CameraData {
             std::unique_ptr<qe::Camera> camera;
         } _cam;
@@ -63,6 +66,7 @@ namespace gamespace {
         qe::Context *context() {
             return _ctxt;
         }
+        void __introspect(size_t off);
     };
 }
 

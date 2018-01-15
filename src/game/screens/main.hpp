@@ -146,9 +146,10 @@ namespace gamespace {
             quit->payload(d);
             start->payload() = nullptr;
             quit->payload() = nullptr;
-#ifndef NDEBUG
-            _ui->debug();
-#endif
+        }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "MainScreen" << std::endl;
+            _ui->__introspect(off + 2);
         }
     };
 }

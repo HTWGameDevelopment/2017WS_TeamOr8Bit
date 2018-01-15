@@ -37,6 +37,15 @@ namespace gamespace {
             _on_player_change.push_back(f);
             f(currentPlayer());
         }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "Match" << std::endl;
+            _board.__introspect(off + 2);
+            for(size_t i = 0; i < _move.size(); ++i) {
+                _move[i].__introspect(off + 2);
+            }
+            _player1.__introspect(off + 2);
+            _player2.__introspect(off + 2);
+        }
     };
 }
 

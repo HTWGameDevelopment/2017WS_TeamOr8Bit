@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Fabian Stiewitz
+// Copyright (c) 2017-2018 Fabian Stiewitz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -307,6 +307,9 @@ namespace qe {
          */
         inline unsigned int height() {
             return _h;
+        }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "Context[" << _w << "," << _h << "]" << std::endl;
         }
     };
 }

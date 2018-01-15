@@ -7,7 +7,7 @@ using namespace gamespace;
 GameBoard::GameBoard(int x, int y): hextile::HexTile<BoardTile, 4>(x, y) {
     for(int i = 0; i < _x; ++i) {
         for(int j = 0; j < _y; ++j) {
-            _data[i][j].setBoard(this);
+            _data[i * _y + j].setBoard(this);
         }
     }
 }
@@ -15,7 +15,7 @@ GameBoard::GameBoard(int x, int y): hextile::HexTile<BoardTile, 4>(x, y) {
 GameBoard::GameBoard(GameBoard &&other): hextile::HexTile<BoardTile, 4>(std::move(other)) {
     for(int i = 0; i < _x; ++i) {
         for(int j = 0; j < _y; ++j) {
-            _data[i][j].setBoard(this);
+            _data[i * _y + j].setBoard(this);
         }
     }
 }
@@ -69,4 +69,9 @@ void GameBoard::attackUnit(hexpoint_t from, hexpoint_t to) {
     assert(ft.unit()->player() != tt.unit()->player());
     tt.unit()->attackedWith(*ft.unit());
     if(tt.unit()->dead()) tt.destroyUnit();
+}
+
+void BoardTile::__introspect(size_t off) {
+    std::cout << std::string(off, ' ') << "BoardTile[" << _p.x << "," << _p.y << "]" << std::endl;
+    if(_unit) _unit->__introspect(off + 2);
 }

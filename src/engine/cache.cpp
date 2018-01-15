@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Fabian Stiewitz
+// Copyright (c) 2017-2018 Fabian Stiewitz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,21 @@ GlyphmapLatin *Cache::glyphlatin;
 qe::Program *Cache::objv1;
 qe::Program *Cache::objv2;
 qe::Program *Cache::objv3;
+qe::Program *Cache::terrain;
 qe::Program *Cache::texts;
 qe::Program *Cache::sprite2d;
 qe::Mesh<TEXTG> *Cache::meshm;
 qe::Texture<PNGRGBA, DIFFTEXBIND_GL> *Cache::buttont;
+
+void Cache::__introspect(size_t off) {
+    std::cout << std::string(off, ' ') << "Cache" << std::endl;
+    glyphlatin->__introspect(off + 2);
+    objv1->__introspect(off + 2);
+    objv2->__introspect(off + 2);
+    objv3->__introspect(off + 2);
+    terrain->__introspect(off + 2);
+    texts->__introspect(off + 2);
+    sprite2d->__introspect(off + 2);
+    meshm->__introspect(off + 2);
+    buttont->__introspect(off + 2);
+}

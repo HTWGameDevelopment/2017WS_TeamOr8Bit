@@ -67,6 +67,7 @@ namespace gamespace {
             return 0;
         }
         void destroyUnit();
+        void __introspect(size_t off);
     };
 
 }
