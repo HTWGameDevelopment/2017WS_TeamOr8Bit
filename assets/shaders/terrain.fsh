@@ -43,7 +43,7 @@ void main() {
     else if(all(lessThanEqual(distances.zzzz, distances))) tcoord = vec2(xval.z, yval.z);
     else if(all(lessThanEqual(distances.wwww, distances))) tcoord = vec2(xval.w, yval.w);
 
-    if(tcoord.x < 0 || tcoord.y < 0)
+    if(tcoord.x < 0 || tcoord.y < 0 || tcoord.x >= 20 || tcoord.y >= 14)
         color = 0.1 * uni_color + cosTheta * uni_color + visvalue * uni_color;
     else
         color = vec3(tcoord.x * 0.1, tcoord.y * 0.1, 1) * uni_color;
