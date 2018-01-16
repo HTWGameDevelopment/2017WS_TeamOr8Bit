@@ -57,9 +57,9 @@ void GameBoard::moveUnit(hexpoint_t from, hexpoint_t to) {
     auto &tt = get(to);
     assert(ft.unit());
     assert(tt.unit() == nullptr);
-    unsinged int lastMoveId = ft.unit().getLastMoveId();
-    ft.unit().setLastMoveId(1);
-    if (lastMoveId != ft.unit().getLastMoveId()) {
+    unsigned int lastMoveId = ft.unit()->getLastTurnId();
+    ft.unit()->setLastTurnId(1);
+    if (lastMoveId != ft.unit()->getLastTurnId()) {
         tt.setUnit(ft.unit());
         ft.setUnit(nullptr);
     }
