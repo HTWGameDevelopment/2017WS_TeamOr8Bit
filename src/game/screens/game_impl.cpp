@@ -306,7 +306,7 @@ void GameScreenImpl::render() {
 }
 
 void GameScreenImpl::renderTerrain() {
-    glm::mat4 m = glm::translate(glm::vec3(18.099, 0, 10.963));
+    glm::mat4 m = glm::translate(glm::vec3(18.099, 0, 10.963) + glm::vec3(-2 * 0.866, 0, -1.0));
     glm::mat4 mvp = _cam.camera->matrices().pv * m;
     qe::Cache::terrain->use();
     qe::Cache::terrain->setUniform<qe::UNIMVP>(mvp);
