@@ -26,7 +26,7 @@ namespace gamespace {
         Unit *_unit;
         GameBoard *_board; // pointer to board
         hextile::hexpoint_t _p; // coordinate
-        std::array<hextile::marker_t, 3> _marker_layer;
+        std::array<hextile::marker_t, 4> _marker_layer;
     public:
         static constexpr float dim_x = 2 * 0.866; // dimension in X direction
         static constexpr float dim_y = 2 * 1.0; // dimension in Y direction

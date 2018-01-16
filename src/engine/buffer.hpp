@@ -29,22 +29,33 @@ namespace qe {
     /**
      * \brief Generic OpenGL buffer implementation
      */
-    template<GLenum target>
+    template<GLenum target, typename T = uint8_t>
     class Buffer {
     private:
         GLuint _buffer;
         size_t _size;
+        T *_map;
     public:
-        Buffer(): _size(0) {
+        Buffer(): _size(0), _map(nullptr) {
             glGenBuffers(1, &_buffer);
         }
         Buffer(const Buffer &other) = delete;
-        Buffer(Buffer &&other) = default;
+        Buffer(Buffer &&other): _buffer(other._buffer), _size(other._size), _map(other._map) {
+            other._map = nullptr;
+            other._buffer = 0;
+            other._size = 0;
+        }
         ~Buffer() {
             glDeleteBuffers(1, &_buffer);
+            delete [] _map;
         }
         Buffer &operator=(const Buffer &other) = delete;
-        Buffer &operator=(Buffer &&other) = default;
+        size_t size() {
+            return _size;
+        }
+        T *ptr() {
+            return _map;
+        }
         operator GLuint() {
             return _buffer;
         }
@@ -53,11 +64,32 @@ namespace qe {
             GLSERRORCHECK;
         }
         template<GLenum usage>
-        void data(void *data, size_t size) {
+        void data(void *data, size_t size, bool caching = false) {
             bind();
             glBufferData(target, size, data, usage);
             GLERRORCHECK;
             _size = size;
+            if(caching) {
+                if(_map) delete [] _map;
+                _map = new T[size / sizeof(T)];
+                if(data) {
+                    memcpy(_map, data, size);
+                }
+            }
+        }
+        void bindTo(GLuint index) {
+            glBindBufferBase(GL_UNIFORM_BUFFER, index, _buffer);
+            GLSERRORCHECK;
+        }
+        void update() {
+            assert(_map);
+            bind();
+            glBufferSubData(target, 0, _size, _map);
+            GLSERRORCHECK;
+        }
+        T &operator[](size_t i) {
+            assert(_map);
+            return ((T*)_map)[i];
         }
     };
 

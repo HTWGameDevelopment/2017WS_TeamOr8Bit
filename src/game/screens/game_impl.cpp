@@ -72,21 +72,34 @@ hextile::hexpoint_t getLookedAtTile(glm::vec2 pc) {
 }
 
 hextile::hexpoint_t getLookedAtTile(glm::vec3 pc) {
-    static hextile::hexpoint_t l = hextile::hexpoint_t {255, 255};
-    hextile::hexpoint_t t = getLookedAtTile(glm::vec2(pc.x, pc.z));
-    if(l != t) {
-        std::cout << GV2TOSTR(t) << std::endl;
-        l = t;
-    }
-    return t;
+    return getLookedAtTile(glm::vec2(pc.x, pc.z));
 }
 
 GameScreenImpl::GameScreenImpl(gamespace::Match &&match, qe::Context *ctxt, std::shared_ptr<font::Font> font)
 : _match(std::move(match)), _ctxt(ctxt), _font(font), _shouldClose(true) {
+    initializeBuffers();
+    initializeShaders();
     initializeSelection();
     initializeHUD();
     initializeAssets();
     initializeMap();
+}
+
+void GameScreenImpl::initializeBuffers() {
+    _marker_buffer.reset(new qe::Buffer<GL_UNIFORM_BUFFER, uint32_t>());
+    _marker_buffer->data<GL_DYNAMIC_DRAW>(nullptr, _match.board().x() * _match.board().y() * _match.board().marker_count * 4, true);
+    _marker_buffer->bindTo(1);
+}
+
+void GameScreenImpl::initializeShaders() {
+    qe::ShaderAssignments as;
+    as.assign("MARKERCOUNT", std::to_string(_match.board().marker_count));
+    as.assign("BOARDSIZE_X", std::to_string(_match.board().x()));
+    as.assign("BOARDSIZE_Y", std::to_string(_match.board().y()));
+    _terrain_shader.reset(qe::mkProgram("assets/shaders/terrain.vsh"_p, "assets/shaders/terrain.fsh"_p, as));
+    _terrain_shader->use();
+    _terrain_shader->setUniform<qe::UNIL>(glm::vec3(0.1, -1, 0.1));
+    _terrain_shader->bindUniformBlockBinding(_terrain_shader->getUniformBlockIndex("MarkerBlock"), 1);
 }
 
 void GameScreenImpl::initializeSelection() {
@@ -226,7 +239,9 @@ void GameScreenImpl::enableMoveMask() {
         _selection.selected = nullptr;
         _selection.hovering = nullptr;
         _match.board().clearMarker(MOVE_LAYER);
+        _match.board().clearMarker(ACTION_LAYER);
     } else {
+        _match.board().clearMarker(ACTION_LAYER);
         if(_selection.hovering->unit() == nullptr) return; // no unit to select
         if(_selection.hovering->unit()->player() != _match.currentPlayer()) return; // can only select own units
         GDBG("enable movement mask on " << _selection.hovering->coord().string());
@@ -249,7 +264,9 @@ void GameScreenImpl::enableAttackMask() {
         _selection.selected = nullptr;
         _selection.hovering = nullptr;
         _match.board().clearMarker(ACTION_LAYER);
+        _match.board().clearMarker(MOVE_LAYER);
     } else {
+        _match.board().clearMarker(MOVE_LAYER);
         if(_selection.hovering->unit() == nullptr) return; // no unit to select
         if(_selection.hovering->unit()->player() != _match.currentPlayer()) return; // can only select own units
         _selection.hovering->unit()->markAttack(*_selection.hovering);
@@ -272,8 +289,19 @@ void GameScreenImpl::run() {
 
     _textures.hextile_grass->bindTo();
 
+    const auto max_x = _match.board().x();
+    const auto max_y = _match.board().y();
+    const auto mc = _match.board().marker_count;
+    auto *ptr = _marker_buffer->ptr();
+
     while(!_ctxt->shouldClose() && _shouldClose == false) {
         // calculate lookat tile
+        auto pc = getLookedAtTile(_cam.camera->getPlaneCoord());
+        if(pc.x < 0 || pc.y < 0 || pc.x >= max_x || pc.y >= max_y)
+            _selection.hovering = nullptr;
+        else
+            _selection.hovering = &_match.board().get(pc);
+        // set matrices
         glm::mat4 mvp = _cam.camera->matrices().pv * m;
         qe::Cache::objv2->use();
         qe::Cache::objv2->setUniform<qe::UNIMVP>(mvp);
@@ -281,9 +309,23 @@ void GameScreenImpl::run() {
         qe::Cache::objv2->setUniform<qe::UNIV>(_cam.camera->matrices().v);
         qe::Cache::objv3->use();
         qe::Cache::objv3->setUniform<qe::UNIV>(_cam.camera->matrices().v);
+        // update marker buffer
+        {
+            auto b = _match.board().begin();
+            auto e = _match.board().end();
+            for(; b != e; ++b) {
+                auto coord = b->coord();
+                for(size_t i = 0; i < mc; ++i) {
+                    ptr[coord.x * max_y * mc + coord.y * mc + i] = b->marked(i) ? 1 : 0;
+                }
+            }
+            _marker_buffer->update();
+        }
+        // render
         _ctxt->start();
         render();
         _ctxt->swap();
+        // event handling
 
         if(fps != _ctxt->fps()) {
             fps = _ctxt->fps();
@@ -301,8 +343,6 @@ void GameScreenImpl::deactivate() {
 void GameScreenImpl::render() {
     auto b = _match.board().begin();
     auto e = _match.board().end();
-    std::array<gamespace::BoardTile*, 3> selected;
-    uint8_t len = 0;
 
     // render tiles and units
     for(; b != e; ++b) {
@@ -322,14 +362,14 @@ void GameScreenImpl::render() {
 void GameScreenImpl::renderTerrain() {
     glm::mat4 m = glm::translate(glm::vec3(18.099, 0, 10.963) + glm::vec3(-2 * 0.866, 0, -1.0));
     glm::mat4 mvp = _cam.camera->matrices().pv * m;
-    qe::Cache::terrain->use();
-    qe::Cache::terrain->setUniform<qe::UNIMVP>(mvp);
-    qe::Cache::terrain->setUniform<qe::UNIM>(m);
-    qe::Cache::terrain->setUniform<qe::UNIV>(_cam.camera->matrices().v);
-    qe::Cache::terrain->setUniform<qe::UNISEL>(to_uvec2(getLookedAtTile(_cam.camera->getPlaneCoord())));
+    _terrain_shader->use();
+    _terrain_shader->setUniform<qe::UNIMVP>(mvp);
+    _terrain_shader->setUniform<qe::UNIM>(m);
+    _terrain_shader->setUniform<qe::UNIV>(_cam.camera->matrices().v);
+    _terrain_shader->setUniform<qe::UNISEL>(to_uvec2(getLookedAtTile(_cam.camera->getPlaneCoord())));
     // qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.800, 0.567, 0.305));
     // render grey areas
-    qe::Cache::terrain->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.8, 0.8));
+    _terrain_shader->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.8, 0.8));
     _ground->render_sub(_ground_indices[DamMain_CUBezierCurve]);
     _ground->render_sub(_ground_indices[DamBaseBottom_Cube_001]);
     _ground->render_sub(_ground_indices[DamBaseBottom_001_Cube_002]);
@@ -345,10 +385,10 @@ void GameScreenImpl::renderTerrain() {
     _ground->render_sub(_ground_indices[DamBaseTop_001_Cone_001]);
     _ground->render_sub(_ground_indices[DamBaseTop_002_Cone_002]);
     // render ground areas
-    qe::Cache::terrain->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.567, 0.305));
+    _terrain_shader->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.567, 0.305));
     _ground->render_sub(_ground_indices[Ground_Plane_002]);
     // render water
-    qe::Cache::terrain->setUniform<qe::UNICOLOR>(glm::vec3(0.0, 0.551, 0.8));
+    _terrain_shader->setUniform<qe::UNICOLOR>(glm::vec3(0.0, 0.551, 0.8));
     _ground->render_sub(_ground_indices[WaterPlane_Plane_003]);
     _ground->render_sub(_ground_indices[WaterBlock_Cube_004]);
 }
@@ -367,4 +407,5 @@ void GameScreenImpl::__introspect(size_t off) {
     if(_tank.get()) _tank->__introspect(off + 2);
     if(_ground.get()) _ground->__introspect(off + 2);
     if(_ui.get()) _ui->__introspect(off + 2);
+    if(_terrain_shader.get()) _terrain_shader->__introspect(off + 2);
 }

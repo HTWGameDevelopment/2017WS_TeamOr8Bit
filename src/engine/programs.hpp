@@ -90,22 +90,22 @@ namespace qe {
             GLSERRORCHECK;
         }
         /**
-         * \brief Set uniform to 4x4 matrix
+         * \brief Return uniform block index
          */
+        GLuint getUniformBlockIndex(std::string name) {
+            return glGetUniformBlockIndex(_program, name.c_str());
+        }
+        void bindUniformBlockBinding(GLuint bindex, GLuint binding) {
+            glUniformBlockBinding(_program, bindex, binding);
+        }
         template<flag_t binding> void setUniform(glm::mat4 m) {
             glUniformMatrix4fv(binding, 1, GL_FALSE, (float *)(&m));
             GLSERRORCHECK;
         }
-        /**
-         * \brief Set uniform to int
-         */
         template<flag_t binding> void setUniform(int i) {
             glUniform1i(binding, i);
             GLSERRORCHECK;
         }
-        /**
-         * \brief Set uniform to 3-vector
-         */
         template<flag_t binding> void setUniform(glm::vec3 v) {
             glUniform3fv(binding, 1, (float *)&v);
             GLSERRORCHECK;
@@ -123,6 +123,33 @@ namespace qe {
         }
         void __introspect(size_t off) {
             std::cout << std::string(off, ' ') << "Program[" << _initialized << "]" << std::endl;
+        }
+    };
+
+    class ShaderAssignments {
+    private:
+        struct assigns_t {
+            std::string name;
+            std::string value;
+            bool operator==(const assigns_t &other) const {
+                return name == other.name;
+            }
+        };
+        std::vector<assigns_t> _assigns;
+    public:
+        void assign(std::string name, std::string value) {
+            _assigns.push_back(assigns_t {name, value});
+        }
+        const std::string process(std::string input) const {
+            std::string r = input;
+            size_t i = 0;
+            while((i = r.find("#assign ", i)) != std::string::npos) {
+                std::string name = r.substr(i + 8, strcspn(r.data() + i + 8, "\n"));
+                auto as = std::find(_assigns.begin(), _assigns.end(), assigns_t {name});
+                assert(as != _assigns.end());
+                r.replace(i, 8 + name.size(), "#define " + as->name + " "  + as->value);
+            }
+            return r;
         }
     };
 
@@ -144,11 +171,12 @@ namespace qe {
      * \brief Compile shader from source code string
      */
     template<flag_t type>
-    shader_t compileShader(std::string c) {
+    shader_t compileShader(std::string c, const ShaderAssignments &as = ShaderAssignments()) {
         shader_t s = glCreateShader(_createshadercall<type>());
         GLSERRORCHECK;
         const char *t[1];
-        t[0] = c.c_str();
+        std::string ps = as.process(c);
+        t[0] = ps.c_str();
         glShaderSource(s, 1, t, NULL);
         GLSERRORCHECK;
         glCompileShader(s);
@@ -163,7 +191,7 @@ namespace qe {
             std::unique_ptr<char[]> m(new char[p]);
             glGetShaderInfoLog(s, p, NULL, m.get());
             std::string st(m.get());
-            throw glshadererror(st);
+            throw glshadererror(st + "\n" + t[0]);
         }
 
         return s;
@@ -173,16 +201,16 @@ namespace qe {
      * \brief Compile shader from file path
      */
     template<flag_t type>
-    shader_t mkShader(std::string file) {
+    shader_t mkShader(std::string file, const ShaderAssignments &as = ShaderAssignments()) {
         std::string path = getPath(file);
         std::string contents = getFileContents(path);
-        return compileShader<type>(contents);
+        return compileShader<type>(contents, as);
     }
 
     /**
      * \brief Compile program from vertex and fragment shader file paths
      */
-    Program *mkProgram(std::string vsh, std::string fsh);
+    Program *mkProgram(std::string vsh, std::string fsh, const ShaderAssignments &as = ShaderAssignments());
 }
 
 #endif
