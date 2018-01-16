@@ -118,6 +118,9 @@ namespace qe {
             glUniform4fv(binding, 1, (float *)&pos);
             GLSERRORCHECK;
         }
+        template<flag_t binding> void setUniform(glm::uvec2 v) {
+            glUniform2uiv(binding, 1, (GLuint*)&v);
+        }
         void __introspect(size_t off) {
             std::cout << std::string(off, ' ') << "Program[" << _initialized << "]" << std::endl;
         }

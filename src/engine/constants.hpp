@@ -69,6 +69,7 @@ namespace qe {
     const flag_t UNITEXTUVS = 7; //!< text uv scale uniform
     const flag_t UNIORIGIN = 0; //!< 2D sprite origin
     const flag_t UNISIZE = 1; //!< 2D sprite size
+    const flag_t UNISEL = 8; //!< Selection coordinate
 
 // TEXTURE BINDING POINTS
     const flag_t DIFFTEXBIND = 0;

@@ -34,6 +34,12 @@ namespace hextile {
         std::string string() {
             return std::string("(") + std::to_string(x) + "," + std::to_string(y) + ")";
         }
+        bool operator==(hexpoint_t &other) {
+            return x == other.x && y == other.y;
+        }
+        bool operator!=(hexpoint_t &other) {
+            return x != other.x || y != other.y;
+        }
     };
 
     struct marker_t {

@@ -43,6 +43,10 @@ inline glm::ivec2 to_ivec2(ui::defp_t t) {
     return glm::ivec2(t.x, t.y);
 }
 
+inline glm::uvec2 to_uvec2(hextile::hexpoint_t t) {
+    return glm::uvec2(t.x, t.y);
+}
+
 hextile::hexpoint_t getLookedAtTile(glm::vec2 pc) {
     float yval1 = floor(pc.y / 1.5);
     float xval1 = floor((pc.x + (((int)yval1) % 2) * 0.5f * 2.0f * 0.866f) / (2.0f * 0.866f));
@@ -55,16 +59,26 @@ hextile::hexpoint_t getLookedAtTile(glm::vec2 pc) {
         2.0f * 0.866f * xval.w - ((int)yval.w % 2) * 0.5f * 2.0f * 0.866f);
     glm::vec4 ypoints(yval * 1.5f);
 
-    glm::vec4 distances(distance(pc, glm::vec2(xpoints.x, ypoints.x)),
-        distance(pc, glm::vec2(xpoints.y, ypoints.y)),
-        distance(pc, glm::vec2(xpoints.z, ypoints.z)),
-        distance(pc, glm::vec2(xpoints.w, ypoints.w)));
+    glm::vec4 distances(glm::distance(pc, glm::vec2(xpoints.x, ypoints.x)),
+        glm::distance(pc, glm::vec2(xpoints.y, ypoints.y)),
+        glm::distance(pc, glm::vec2(xpoints.z, ypoints.z)),
+        glm::distance(pc, glm::vec2(xpoints.w, ypoints.w)));
 
     float d = std::min(distances.x, std::min(distances.y, std::min(distances.z, distances.w)));
     if(d == distances.x) return hextile::hexpoint_t {(int)xval.x, (int)yval.x};
     else if(d == distances.y) return hextile::hexpoint_t {(int)xval.y, (int)yval.y};
     else if(d == distances.z) return hextile::hexpoint_t {(int)xval.z, (int)yval.z};
     else if(d == distances.w) return hextile::hexpoint_t {(int)xval.w, (int)yval.w};
+}
+
+hextile::hexpoint_t getLookedAtTile(glm::vec3 pc) {
+    static hextile::hexpoint_t l = hextile::hexpoint_t {255, 255};
+    hextile::hexpoint_t t = getLookedAtTile(glm::vec2(pc.x, pc.z));
+    if(l != t) {
+        std::cout << GV2TOSTR(t) << std::endl;
+        l = t;
+    }
+    return t;
 }
 
 GameScreenImpl::GameScreenImpl(gamespace::Match &&match, qe::Context *ctxt, std::shared_ptr<font::Font> font)
@@ -312,6 +326,7 @@ void GameScreenImpl::renderTerrain() {
     qe::Cache::terrain->setUniform<qe::UNIMVP>(mvp);
     qe::Cache::terrain->setUniform<qe::UNIM>(m);
     qe::Cache::terrain->setUniform<qe::UNIV>(_cam.camera->matrices().v);
+    qe::Cache::terrain->setUniform<qe::UNISEL>(to_uvec2(getLookedAtTile(_cam.camera->getPlaneCoord())));
     // qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.800, 0.567, 0.305));
     // render grey areas
     qe::Cache::terrain->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.8, 0.8));
