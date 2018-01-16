@@ -20,7 +20,7 @@ set(DISABLE_FREETYPE OFF CACHE BOOL "Disable freetype rendering and use baked fo
 
 set(QE_GLAD_PATH "${CMAKE_SOURCE_DIR}/extern/glad/include" CACHE PATH "" FORCE)
 set(QE_GLFW_PATH "${CMAKE_SOURCE_DIR}/extern/GLFW/include" CACHE PATH "" FORCE)
-set(QE_PNG_PATH "${CMAKE_SOURCE_DIR}/extern/libpng-1.6.32/include" CACHE PATH "" FORCE)
+set(QE_PNG_PATH "${CMAKE_SOURCE_DIR}/extern/libpng-1.6.32" CACHE PATH "" FORCE)
 set(QE_GLM_PATH "${CMAKE_SOURCE_DIR}/extern/glm" CACHE PATH "" FORCE)
 
 # program
@@ -49,7 +49,6 @@ add_subdirectory(extern/GLFW)
 add_subdirectory(src/engine)
 add_subdirectory(src/ui)
 add_subdirectory(src/savegame)
-add_definitions(${PNG_DEFINITIONS})
 
 # config header
 configure_file(src/config.h.in config.h)
