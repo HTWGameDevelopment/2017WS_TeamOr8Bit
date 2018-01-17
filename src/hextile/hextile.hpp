@@ -34,6 +34,12 @@ namespace hextile {
         std::string string() {
             return std::string("(") + std::to_string(x) + "," + std::to_string(y) + ")";
         }
+        bool operator==(const hexpoint_t &other) {
+            return x == other.x && y == other.y;
+        }
+        bool operator!=(const hexpoint_t &other) {
+            return x != other.x || y != other.y;
+        }
     };
 
     struct marker_t {
@@ -44,7 +50,7 @@ namespace hextile {
     /**
      * \brief A 2D board of hexagonal tiles of type T
      */
-    template<typename T, unsigned int L>
+    template<typename T, unsigned int L, typename C = std::array<unsigned int, L>>
     class HexTile {
     public:
         typedef T tile_type;
@@ -58,19 +64,20 @@ namespace hextile {
                 return _data[i];
             }
         };
+        const unsigned int marker_count = L;
     protected:
         size_t _x;
         size_t _y;
         std::vector<tile_type> _data;
-        std::array<unsigned int, L> _marker_ids;
+        C _marker_ids;
         unsigned int _current_layer;
         class edgeiterator {
         private:
-            HexTile<T, L> *_board;
+            HexTile<T, L, C> *_board;
             hexpoint_t _coord;
             unsigned int _step;
         public:
-            edgeiterator(HexTile<T, L> *board, hexpoint_t coord): _board(board), _coord(coord), _step(0) {}
+            edgeiterator(HexTile<T, L, C> *board, hexpoint_t coord): _board(board), _coord(coord), _step(0) {}
             T *next() {
                 auto step = _step++;
 
@@ -114,8 +121,7 @@ namespace hextile {
         }
     public:
         HexTile(size_t x, size_t y): _x(x), _y(y) {
-            for(int i = 0; i < L; ++i)
-                _marker_ids[i] = 0;
+            resetMarkers();
             for(int i = 0; i < _x; ++i) {
                 for(int j = 0; j < _y; ++j) {
                     _data.push_back(T(nullptr, hexpoint_t {i, j}));
@@ -123,12 +129,15 @@ namespace hextile {
             }
         }
         HexTile(const HexTile &other) = delete;
-        HexTile(HexTile &&other): _x(other._x), _y(other._y), _data(std::move(other._data)), _marker_ids(other._marker_ids) {}
+        HexTile(HexTile &&other): _x(other._x), _y(other._y), _data(std::move(other._data)), _marker_ids(std::move(other._marker_ids)) {}
         ssize_t x() {
             return _x;
         }
         ssize_t y() {
             return _y;
+        }
+        C &get_marker_container() {
+            return _marker_ids;
         }
         col_type operator[](size_t i) {
             return col_type(_data.data() + i * _y);
@@ -153,6 +162,10 @@ namespace hextile {
         }
         void clearMarker(unsigned int layer) {
             ++_marker_ids[layer];
+        }
+        void resetMarkers() {
+            for(int i = 0; i < L; ++i)
+                _marker_ids[i] = 0;
         }
         void __introspect(size_t off) {
             std::cout << std::string(off, ' ') << "HexTile[" << _x << "," << _y << "]" << std::endl;

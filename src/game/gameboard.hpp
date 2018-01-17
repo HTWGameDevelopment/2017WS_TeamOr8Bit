@@ -5,6 +5,8 @@
 
 #include<hextile/hextile.hpp>
 
+#include<engine/buffer.hpp>
+
 namespace gamespace {
     class GameBoard: public hextile::HexTile<BoardTile, 4> {
     public:

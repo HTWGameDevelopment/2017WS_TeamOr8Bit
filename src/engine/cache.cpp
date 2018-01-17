@@ -25,7 +25,6 @@ GlyphmapLatin *Cache::glyphlatin;
 qe::Program *Cache::objv1;
 qe::Program *Cache::objv2;
 qe::Program *Cache::objv3;
-qe::Program *Cache::terrain;
 qe::Program *Cache::texts;
 qe::Program *Cache::sprite2d;
 qe::Mesh<TEXTG> *Cache::meshm;
@@ -37,7 +36,6 @@ void Cache::__introspect(size_t off) {
     objv1->__introspect(off + 2);
     objv2->__introspect(off + 2);
     objv3->__introspect(off + 2);
-    terrain->__introspect(off + 2);
     texts->__introspect(off + 2);
     sprite2d->__introspect(off + 2);
     meshm->__introspect(off + 2);

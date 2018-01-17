@@ -5,12 +5,34 @@ layout(location = 3) uniform vec3 light_world;
 
 layout(location = 5) uniform vec3 uni_color;
 
+layout(location = 8) uniform uvec2 uni_sel;
+
 in vec3 pos_world;
 in vec3 camera_camera;
 in vec3 light_camera;
 in vec3 normal_camera;
 
 out vec3 color;
+
+#assign MARKERCOUNT
+#assign BOARDSIZE_X
+#assign BOARDSIZE_Y
+
+const uint BX = uint(BOARDSIZE_X);
+const uint BY = uint(BOARDSIZE_Y);
+const uint MC = uint(MARKERCOUNT);
+
+layout(std140) uniform MarkerBlock {
+    uvec4 array[BX * BY];
+};
+
+bool ismarked(uvec2 p, uint marker) {
+    uint index = uint(p.x * BY + p.y);
+    if(marker == uint(0)) return array[index].x == uint(1);
+    else if(marker == uint(1)) return array[index].y == uint(1);
+    else if(marker == uint(2)) return array[index].z == uint(1);
+    return array[index].w == uint(1);
+}
 
 void main() {
     vec3 n = normalize(normal_camera);
@@ -38,13 +60,41 @@ void main() {
                             distance(pos_world.xz, vec2(xpoints.w, ypoints.w)));
 
     vec2 tcoord;
-    if(all(lessThanEqual(distances.xxxx, distances))) tcoord = vec2(xval.x, yval.x);
-    else if(all(lessThanEqual(distances.yyyy, distances))) tcoord = vec2(xval.y, yval.y);
-    else if(all(lessThanEqual(distances.zzzz, distances))) tcoord = vec2(xval.z, yval.z);
-    else if(all(lessThanEqual(distances.wwww, distances))) tcoord = vec2(xval.w, yval.w);
+    if(all(lessThanEqual(distances.xxxx, distances))) {
+        tcoord = vec2(xval.x, yval.x);
+        if(any(lessThan(distances.yzw - distances.xxx, vec3(0.01, 0.01, 0.01)))) {
+            cosTheta = 0;
+        }
+    } else if(all(lessThanEqual(distances.yyyy, distances))) {
+        tcoord = vec2(xval.y, yval.y);
+        if(any(lessThan(distances.xzw - distances.yyy, vec3(0.01, 0.01, 0.01)))) {
+            cosTheta = 0;
+        }
+    } else if(all(lessThanEqual(distances.zzzz, distances))) {
+        tcoord = vec2(xval.z, yval.z);
+        if(any(lessThan(distances.xyw - distances.zzz, vec3(0.01, 0.01, 0.01)))) {
+            cosTheta = 0;
+        }
+    } else if(all(lessThanEqual(distances.wwww, distances))) {
+        tcoord = vec2(xval.w, yval.w);
+        if(any(lessThan(distances.xyz - distances.www, vec3(0.01, 0.01, 0.01)))) {
+            cosTheta = 0;
+        }
+    }
 
-    visvalue = 0.1;
+    if(tcoord.x >= 0 && tcoord.y >= 0 && tcoord.x < BX && tcoord.y < BY) {
+        if(uvec2(tcoord) == uni_sel) {
+            visvalue = 0.3;
+        }
+        if(ismarked(uvec2(tcoord), uint(2)) || ismarked(uvec2(tcoord), uint(1))) {
+            visvalue += 0.2;
+        }
+    }
 
     color = 0.1 * uni_color + cosTheta * uni_color + visvalue * uni_color;
-//    color = visvalue * uni_color;
+
+    //if(tcoord.x < 0 || tcoord.y < 0 || tcoord.x >= 20 || tcoord.y >= 14)
+    //    color = 0.1 * uni_color + cosTheta * uni_color + visvalue * uni_color;
+    //else
+    //    color = vec3(tcoord.x * 0.1, tcoord.y * 0.1, 1) * uni_color;
 }

@@ -21,12 +21,12 @@
 
 using namespace qe;
 
-Program *qe::mkProgram(std::string vsh, std::string fsh) {
+Program *qe::mkProgram(std::string vsh, std::string fsh, const ShaderAssignments &as) {
     Program *p = new Program(glCreateProgram());
     GLSERRORCHECK;
-    glAttachShader(*p, mkShader<VERTEX>(vsh));
+    glAttachShader(*p, mkShader<VERTEX>(vsh, as));
     GLSERRORCHECK;
-    glAttachShader(*p, mkShader<FRAGMENT>(fsh));
+    glAttachShader(*p, mkShader<FRAGMENT>(fsh, as));
     GLSERRORCHECK;
     glLinkProgram(*p);
     GLSERRORCHECK;

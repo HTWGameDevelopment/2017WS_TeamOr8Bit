@@ -29,6 +29,8 @@ namespace gamespace {
         std::unique_ptr<qe::Mesh<qe::OBJV2>> _tile;
         std::unique_ptr<qe::Mesh<qe::OBJV3>> _tank;
         std::unique_ptr<qe::Mesh<qe::OBJV3>> _ground;
+        std::unique_ptr<qe::Program> _terrain_shader;
+        std::unique_ptr<qe::Buffer<GL_UNIFORM_BUFFER, uint32_t>> _marker_buffer;
         std::array<qe::subobj_t, 16> _ground_indices;
         struct CameraData {
             std::unique_ptr<qe::Camera> camera;
@@ -52,6 +54,8 @@ namespace gamespace {
         void pre_run();
         void run();
         void deactivate();
+        void initializeShaders();
+        void initializeBuffers();
         void initializeAssets();
         void initializeMap();
         void initializeSelection();
