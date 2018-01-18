@@ -42,9 +42,10 @@ namespace qe {
         glyphmap *_glyphmap; //!< Glyphmap
         glm::ivec2 _baseline; //!< Starting position of baseline
         float _scale;
+        glm::vec3 _foreground; //!< text color
     public:
-        Text() {}
-        Text(glyphmap *g, glm::ivec2 baseline, PositionMode mode = BOTTOM): _glyphmap(g), _baseline(baseline), _scale(1) {
+        Text(): _foreground(glm::vec3(1, 1, 1)) {}
+        Text(glyphmap *g, glm::ivec2 baseline, PositionMode mode = BOTTOM): _glyphmap(g), _baseline(baseline), _scale(1), _foreground(glm::vec3(1, 1, 1)) {
             switch(mode) {
             case TOP:
                 _baseline.y = _glyphmap->getResolution().y - _glyphmap->highestGlyph() - _baseline.y;
@@ -54,8 +55,11 @@ namespace qe {
                 break; // ignore
             }
         }
-        Text(std::string text, glyphmap *g, glm::ivec2 baseline, int maxheight, int maxlength): _text(text), _glyphmap(g) {
+        Text(std::string text, glyphmap *g, glm::ivec2 baseline, int maxheight, int maxlength): _text(text), _glyphmap(g), _foreground(glm::vec3(1, 1, 1)) {
             scale_text(baseline, maxheight, maxlength);
+        }
+        glm::vec3 &foreground() {
+            return _foreground;
         }
         void render() {
             qe::Cache::texts->use();
@@ -70,6 +74,7 @@ namespace qe {
                     qe::Cache::texts->setUniform<UNIM>(_glyphmap->scalePosition(pos, metrics, _scale));
                     qe::Cache::texts->setUniform<UNITEXTUVP>(_glyphmap->scaleOrigin(metrics));
                     qe::Cache::texts->setUniform<UNITEXTUVS>(_glyphmap->scaleUVScale(metrics));
+                    qe::Cache::texts->setUniform<UNITEXTFG>(_foreground);
                     qe::Cache::meshm->render();
                     pos.x += metrics.adv_x * _scale;
                 }
@@ -91,7 +96,7 @@ namespace qe {
 
             glm::vec2 scale = glm::vec2(1.0 * maxlength / px, 1.0 * maxheight / yb);
             //_scale = std::min(scale.x, scale.y);
-            _scale = 1;
+            _scale = std::min(scale.y, 1.0f);
         }
         std::string &text() {
             return _text;

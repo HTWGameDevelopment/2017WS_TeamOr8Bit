@@ -27,6 +27,7 @@ qe::Program *Cache::objv2;
 qe::Program *Cache::objv3;
 qe::Program *Cache::texts;
 qe::Program *Cache::sprite2d;
+qe::Program *Cache::sprite2dcolor;
 qe::Mesh<TEXTG> *Cache::meshm;
 qe::Texture<PNGRGBA, DIFFTEXBIND_GL> *Cache::buttont;
 
@@ -38,6 +39,7 @@ void Cache::__introspect(size_t off) {
     objv3->__introspect(off + 2);
     texts->__introspect(off + 2);
     sprite2d->__introspect(off + 2);
+    sprite2dcolor->__introspect(off + 2);
     meshm->__introspect(off + 2);
     buttont->__introspect(off + 2);
 }

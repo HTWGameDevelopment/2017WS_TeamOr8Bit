@@ -38,7 +38,10 @@ namespace ui {
         defp_t _res;
     public:
         DefinedUI(DefinedNumber resx, DefinedNumber resy): _active_context_menu{nullptr}, _res{resx, resy} {}
-        void set_container(DefinedRenderable *r) {_container.reset(r);}
+        void set_container(DefinedRenderable *r) {
+            _container.reset(r);
+            _container->set_root(_container.get());
+        }
         void add_context_menu(DefinedContextUI *r) {
             _context_menus.emplace_back(r);
             r->recalculate_dimension();
@@ -47,7 +50,7 @@ namespace ui {
         defp_t resolution() {return _res;}
         void recalculate();
         void render() {
-            if(_container.get()) _container->render(ui::defp_t {0, 0});
+            if(_container.get()) _container->render();
             if(_active_context_menu) _active_context_menu->render();
         }
         DefinedRenderable *get(const char* coord) {
@@ -68,12 +71,12 @@ namespace ui {
             if(_active_context_menu == ui) return;
             if(_active_context_menu && _active_context_menu != ui) _active_context_menu->hide();
             _active_context_menu = ui;
-            _active_context_menu->show();
+            _active_context_menu->on_show();
         }
         void hide_context_menu(DefinedContextUI *ui) {
             assert(ui);
             if(ui != _active_context_menu) return;
-            _active_context_menu->hide();
+            _active_context_menu->on_hide();
             _active_context_menu = nullptr;
         }
         void click(defp_t pos) {

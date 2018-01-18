@@ -53,6 +53,7 @@ add_subdirectory(src/savegame)
 
 # config header
 configure_file(src/config.h.in config.h)
+target_include_directories(Or8Bit PUBLIC src)
 
 # link program
 target_link_libraries(Or8Bit png_static zlibstatic glfw libquarterengine_static libuior8bit_static libsavegameor8bit_static)

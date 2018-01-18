@@ -12,14 +12,22 @@ namespace gamespace {
     class CoordinateMenu: public ui::ContextUIModel {
     private:
         ui::DefinedContextUI *_ui;
+        ui::DefinedRenderable *_titlebar;
         ui::DefinedText *_coordinates;
         ui::DefinedText *_unit_text;
         ui::DefinedText *_hp_text;
         ui::DefinedText *_unit_hp;
         Unit *_last_u;
     public:
+        ui::DefinedContextUI *view() {
+            return _ui;
+        }
+        ui::DefinedRenderable *titlebar() {
+            return _titlebar;
+        }
         void init(ui::DefinedContextUI *ui) {
             _ui = ui;
+            _titlebar = ui->get("1");
             _coordinates = (ui::DefinedText*)ui->get("1.1");
             _unit_text = (ui::DefinedText*)ui->get("1.2");
             _hp_text = (ui::DefinedText*)ui->get("2.1");
@@ -53,8 +61,7 @@ namespace gamespace {
         void on_hide() {
 
         }
-        void show(glm::ivec2 center) {
-            _ui->origin() = ui::defp_t {center.x, center.y};
+        void show() {
             _ui->ui()->show_context_menu(_ui);
         }
         void hide() {

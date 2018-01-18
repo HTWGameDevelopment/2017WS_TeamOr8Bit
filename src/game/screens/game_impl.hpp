@@ -75,6 +75,9 @@ namespace gamespace {
         qe::Context *context() {
             return _ctxt;
         }
+        CoordinateMenu *coordinatemenu() {
+            return _coordinate_menu.get();
+        }
         void __introspect(size_t off);
     };
 }

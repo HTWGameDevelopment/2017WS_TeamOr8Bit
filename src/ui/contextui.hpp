@@ -46,6 +46,7 @@ namespace ui {
         DefinedContextUI() {}
         void set_inner(DefinedRenderable *r) {
             _inner.reset(r);
+            _inner->set_root(this);
         }
         void set_model(ContextUIModel *model) {
             assert(model);
@@ -69,7 +70,10 @@ namespace ui {
             _inner->recalculate_origin();
         }
         virtual void render() {
-            _inner->render(origin());
+            _inner->render();
+        }
+        DefinedRenderable *get_inner() {
+            return _inner.get();
         }
         virtual DefinedRenderable *get(const char* str) {
             return _inner->get(str);

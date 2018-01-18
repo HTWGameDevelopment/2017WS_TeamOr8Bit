@@ -47,6 +47,22 @@ inline glm::uvec2 to_uvec2(hextile::hexpoint_t t) {
     return glm::uvec2(t.x, t.y);
 }
 
+void render_button(glm::vec2 origin, glm::vec2 size, glm::vec3 bg) {
+    qe::Cache::sprite2dcolor->use();
+    // set shader
+    qe::Cache::sprite2dcolor->setUniform<qe::UNIORIGIN>(origin);
+    qe::Cache::sprite2dcolor->setUniform<qe::UNISIZE>(size);
+    qe::Cache::sprite2dcolor->setUniform<qe::UNITEXTBG>(bg);
+    // set vao
+    qe::Cache::meshm->render();
+}
+
+void render_rectangle(ui::defp_t a, ui::defp_t b, glm::vec3 bg, glm::vec2 res) {
+    glm::vec2 origin = glm::vec2(a.x, a.y) * glm::vec2(2, 2) / res;
+    glm::vec2 dimension = glm::vec2(b.x, b.y) * glm::vec2(2, 2) / res;
+    render_button(origin - glm::vec2(1, 1), dimension, bg);
+}
+
 hextile::hexpoint_t getLookedAtTile(glm::vec2 pc) {
     float yval1 = floor(pc.y / 1.5);
     float xval1 = floor((pc.x + (((int)yval1) % 2) * 0.5f * 2.0f * 0.866f) / (2.0f * 0.866f));
@@ -134,15 +150,15 @@ void GameScreenImpl::initializeHUD() {
     std::unique_ptr<ui::AbstractText> ct3(new ui::AbstractText());
     std::unique_ptr<ui::AbstractText> ct4(new ui::AbstractText());
 
-    contextui->dimension() = ui::absp_t {0.1, 0.1};
-    ct1->dimension() = ui::absp_t {0.04, 0.03};
-    ct2->dimension() = ui::absp_t {0.04, 0.03};
-    ct3->dimension() = ui::absp_t {0.04, 0.03};
-    ct4->dimension() = ui::absp_t {0.04, 0.03};
-    ct1->margin() = ui::absp_t {0.01, 0.01};
-    ct2->margin() = ui::absp_t {0.01, 0.01};
-    ct3->margin() = ui::absp_t {0.01, 0.01};
-    ct4->margin() = ui::absp_t {0.01, 0.01};
+    contextui->dimension() = ui::absp_t {0.65, 0.6};
+    ct1->dimension() = ui::absp_t {0.025, 0.03};
+    ct2->dimension() = ui::absp_t {0.045, 0.03};
+    ct3->dimension() = ui::absp_t {0.025, 0.03};
+    ct4->dimension() = ui::absp_t {0.045, 0.03};
+    ct1->margin() = ui::absp_t {0.005, 0.005};
+    ct2->margin() = ui::absp_t {0.005, 0.005};
+    ct3->margin() = ui::absp_t {0.005, 0.005};
+    ct4->margin() = ui::absp_t {0.005, 0.005};
     cb1->set_orientation(ui::AbstractBox::VERTICAL);
     cb11->set_orientation(ui::AbstractBox::HORIZONTAL);
     cb2->set_orientation(ui::AbstractBox::HORIZONTAL);
@@ -153,10 +169,10 @@ void GameScreenImpl::initializeHUD() {
     cb11->set_align_inner(ui::AbstractBox::BEGINNING, ui::AbstractBox::BEGINNING);
     cb2->set_align_inner(ui::AbstractBox::BEGINNING, ui::AbstractBox::BEGINNING);
 
-    cb11->append(ct1.release());
     cb11->append(ct2.release());
-    cb2->append(ct3.release());
+    cb11->append(ct1.release());
     cb2->append(ct4.release());
+    cb2->append(ct3.release());
     cb1->append(cb11.release());
     cb1->append(cb2.release());
     contextui->set_inner(cb1.release());
@@ -165,9 +181,28 @@ void GameScreenImpl::initializeHUD() {
     c->set_model(_coordinate_menu.get());
     c->set_ui(_ui.get());
     _ui->add_context_menu(c);
+    auto center = _ctxt->getCenterCoordinate();
+    c->origin() = ui::defp_t {(int)center.x, (int)center.y};
     // set callbacks
     auto *t = _ui->get("1.1");
+    c->get_inner()->render_with([this](ui::DefinedRenderable *t) mutable {
+        render_rectangle(t->origin(), t->dimension(), glm::vec3(0.8, 0.8, 0.8), _ctxt->getResolution());
+    }); // TODO Various text rendering issues
     auto text_renderer = [this](ui::DefinedRenderable *t) mutable {
+        if(t->payload() == nullptr) {
+            t->payload() = new text_t(
+                ((ui::DefinedText*)t)->text(),
+                qe::Cache::glyphlatin,
+                // to_ivec2(t->origin() + t->margin() + t->padding() + ui::absp_t {0, 0.5} * (t->dimension() - t->margin() - t->padding())),
+                to_ivec2(t->origin() + t->margin() + t->padding()),
+                (int)(0.5 * (t->dimension().y - t->margin().y - t->padding().y)),
+                (int)(t->dimension().x - t->margin().x - t->padding().x));
+        }
+        text_t *pl = (text_t*)t->payload();
+        pl->foreground() = glm::vec3(0, 0, 0);
+        pl->render();
+    };
+    t->render_with([this](ui::DefinedRenderable *t) mutable {
         if(t->payload() == nullptr) {
             t->payload() = new text_t(
                 ((ui::DefinedText*)t)->text(),
@@ -176,9 +211,10 @@ void GameScreenImpl::initializeHUD() {
                 (int)(0.5 * (t->dimension().y - t->margin().y - t->padding().y)),
                 (int)(t->dimension().x - t->margin().x - t->padding().x));
         }
-        ((text_t*)(t->payload()))->render();
-    };
-    t->render_with(text_renderer);
+        text_t *pl = (text_t*)t->payload();
+        pl->foreground() = glm::vec3(1, 1, 1);
+        pl->render();
+    });
     _coordinate_menu->set_renderer_payload(text_renderer, [](void *t){delete (text_t*)t;});
     t->payload([](void* t){delete (text_t*)t;});
     _match.observe_player_change([this, t](auto np) {
@@ -356,7 +392,7 @@ void GameScreenImpl::run() {
                 _selection.hovering = &_match.board().get(pc);
                 _coordinate_menu->set_coords(pc.x, pc.y);
                 _coordinate_menu->set_unit(_selection.hovering->unit());
-                _coordinate_menu->show(_ctxt->getCenterCoordinate());
+                _coordinate_menu->show();
             }
         } else {
             _coordinate_menu->hide();

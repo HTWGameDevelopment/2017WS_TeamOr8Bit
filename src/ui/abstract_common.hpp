@@ -127,6 +127,7 @@ namespace ui {
         std::function<void(DefinedRenderable*)> _click;
         std::function<void(void*)> _deleter;
         void *_payload;
+        DefinedRenderable *_root;
     public:
         virtual ~DefinedRenderable() {
             if(_deleter) _deleter(_payload);
@@ -151,10 +152,13 @@ namespace ui {
         virtual DefinedRenderable *get(const char* str) {
             return this;
         }
-        virtual void render(ui::defp_t offset) {
-            origin() += offset;
-            _render(this);
-            origin() -= offset;
+        virtual void set_root(DefinedRenderable *r) {
+            _root = r;
+        }
+        virtual void render() {
+            origin() += _root->origin();
+            if(_render) _render(this);
+            origin() -= _root->origin();
         }
         virtual void __introspect(size_t off) {
             std::cout << std::string(off, ' ')
@@ -169,10 +173,16 @@ namespace ui {
                 << (_render ? "R" : "")
                 << std::endl;
         }
+        bool hovers(defp_t p) {
+            defp_t t = p - (origin() + _root->origin());
+            if(t >= defp_t {0, 0} && t <= dimension()) {
+                return true;
+            }
+            return false;
+        }
         virtual bool click(defp_t p) {
             if(!_click) return false;
-            defp_t t = p - origin();
-            if(t >= defp_t {0, 0} && t <= dimension()) {
+            if(hovers(p)) {
                 _click(this);
                 return true;
             }
@@ -181,6 +191,8 @@ namespace ui {
         // CONTEXT MENU FUNCTIONS
         virtual void show() {}
         virtual void hide() {}
+        virtual void on_show() {}
+        virtual void on_hide() {}
     };
 
     class AbstractRenderable {

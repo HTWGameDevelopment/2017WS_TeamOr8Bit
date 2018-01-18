@@ -28,9 +28,17 @@ DefinedBox::DefinedBox(AbstractBox::Orientation o, AbstractBox::Growth g, Abstra
     dimension() = defp_t {0, 0};
 }
 
-void DefinedBox::render(defp_t offset) {
+void DefinedBox::set_root(DefinedRenderable *r) {
+    DefinedRenderable::set_root(r);
     for(unsigned int i = 0; i < count(); ++i) {
-        operator[](i)->render(offset);
+        operator[](i)->set_root(r);
+    }
+}
+
+void DefinedBox::render() {
+    DefinedRenderable::render();
+    for(unsigned int i = 0; i < count(); ++i) {
+        operator[](i)->render();
     }
 }
 
