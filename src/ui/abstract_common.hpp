@@ -185,6 +185,7 @@ namespace ui {
 
     class AbstractRenderable {
     public:
+        virtual ~AbstractRenderable() {}
         virtual DefinedRenderable *buildDefined(defp_t res) = 0;
     };
 
@@ -193,6 +194,7 @@ namespace ui {
     private:
         std::vector<std::unique_ptr<T>> _items;
     public:
+        virtual ~Container() {}
         void append(T *item) {_items.emplace_back(item);}
         T *operator[](unsigned int i) {return _items[i].get();}
         unsigned int count() {return _items.size();}
