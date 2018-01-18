@@ -23,7 +23,7 @@ namespace gamespace {
             _coordinates = (ui::DefinedText*)ui->get("1.1");
             _unit_text = (ui::DefinedText*)ui->get("1.2");
             _hp_text = (ui::DefinedText*)ui->get("2.1");
-            _hp_text->text() = "HP";
+            _hp_text->text() = "";
             _unit_hp = (ui::DefinedText*)ui->get("2.2");
             _last_u = nullptr;
         }
@@ -33,11 +33,14 @@ namespace gamespace {
             if(u) {
                 _unit_text->text() = u->name();
                 _unit_hp->text() = std::to_string(u->hp()) + "/" + std::to_string(u->max_hp());
+                _hp_text->text() = "HP";
             } else {
+                _hp_text->text() = "";
                 _unit_text->text() = "";
                 _unit_hp->text() = "";
             }
             _unit_text->delete_payload();
+            _hp_text->delete_payload();
             _unit_hp->delete_payload();
         }
         void set_coords(int x, int y) {

@@ -25,7 +25,7 @@ using namespace ui;
 
 DefinedBox::DefinedBox(AbstractBox::Orientation o, AbstractBox::Growth g, AbstractBox::Align x, AbstractBox::Align y)
 : _orientation(o), _growth(g), _x(x), _y(y) {
-
+    dimension() = defp_t {0, 0};
 }
 
 void DefinedBox::render(defp_t offset) {

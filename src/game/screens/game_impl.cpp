@@ -220,9 +220,11 @@ void GameScreenImpl::initializeAssets() {
     }
     // TEXTURES
     _textures.hextile_grass.reset(new qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>(qe::Loader<qe::PNGRGBA>("assets/textures/hextile-grass.png"_p)));
+    _cam.controlling = false;
     _cam.camera.reset(new qe::Camera(
                           glm::vec3(4, 4, 4),
                           glm::vec2(-45, -45),
+                          _ctxt->getResolution(),
                           0.1,
                           30,
                           _ctxt->getAR(),
@@ -320,8 +322,12 @@ void GameScreenImpl::enableAttackMask() {
     }
 }
 
+void GameScreenImpl::inCameraMode(bool mode) {
+    _cam.controlling = mode;
+}
+
 void GameScreenImpl::pre_run() {
-    _ctxt->hideCursor();
+    //_ctxt->hideCursor();
     _ctxt->events();
 }
 
@@ -341,15 +347,19 @@ void GameScreenImpl::run() {
 
     while(!_ctxt->shouldClose() && _shouldClose == false) {
         // calculate lookat tile
-        auto pc = getLookedAtTile(_cam.camera->getPlaneCoord());
-        if(pc.x < 0 || pc.y < 0 || pc.x >= max_x || pc.y >= max_y) {
-            _selection.hovering = nullptr;
-            _coordinate_menu->hide();
+        if(_cam.controlling == false) {
+            auto pc = getLookedAtTile(_cam.camera->getPlaneCoord());
+            if(pc.x < 0 || pc.y < 0 || pc.x >= max_x || pc.y >= max_y) {
+                _selection.hovering = nullptr;
+                _coordinate_menu->hide();
+            } else {
+                _selection.hovering = &_match.board().get(pc);
+                _coordinate_menu->set_coords(pc.x, pc.y);
+                _coordinate_menu->set_unit(_selection.hovering->unit());
+                _coordinate_menu->show(_ctxt->getCenterCoordinate());
+            }
         } else {
-            _selection.hovering = &_match.board().get(pc);
-            _coordinate_menu->set_coords(pc.x, pc.y);
-            _coordinate_menu->set_unit(_selection.hovering->unit());
-            _coordinate_menu->show(_ctxt->getCenterCoordinate());
+            _coordinate_menu->hide();
         }
         // set matrices
         glm::mat4 mvp = _cam.camera->matrices().pv * m;
@@ -416,7 +426,10 @@ void GameScreenImpl::renderTerrain() {
     _terrain_shader->setUniform<qe::UNIMVP>(mvp);
     _terrain_shader->setUniform<qe::UNIM>(m);
     _terrain_shader->setUniform<qe::UNIV>(_cam.camera->matrices().v);
-    _terrain_shader->setUniform<qe::UNISEL>(to_uvec2(getLookedAtTile(_cam.camera->getPlaneCoord())));
+    if(_cam.controlling)
+        _terrain_shader->setUniform<qe::UNISEL>(glm::uvec2(9999, 9999));
+    else
+        _terrain_shader->setUniform<qe::UNISEL>(to_uvec2(getLookedAtTile(_cam.camera->getPlaneCoord())));
     // qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.800, 0.567, 0.305));
     // render grey areas
     _terrain_shader->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.8, 0.8));

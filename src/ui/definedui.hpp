@@ -65,7 +65,8 @@ namespace ui {
                 i->__introspect(off + 2);
         }
         void show_context_menu(DefinedContextUI *ui) {
-            if(_active_context_menu) _active_context_menu->hide();
+            if(_active_context_menu == ui) return;
+            if(_active_context_menu && _active_context_menu != ui) _active_context_menu->hide();
             _active_context_menu = ui;
             _active_context_menu->show();
         }

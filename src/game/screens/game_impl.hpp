@@ -35,6 +35,7 @@ namespace gamespace {
         std::array<qe::subobj_t, 16> _ground_indices;
         struct CameraData {
             std::unique_ptr<qe::Camera> camera;
+            bool controlling;
         } _cam;
         struct Textures {
             std::unique_ptr<qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>> hextile_grass;
@@ -64,6 +65,7 @@ namespace gamespace {
         void initializeHUD();
         void enableMoveMask();
         void enableAttackMask();
+        void inCameraMode(bool mode);
         gamespace::Match &match() {
             return _match;
         }

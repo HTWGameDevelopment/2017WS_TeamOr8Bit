@@ -31,17 +31,33 @@ void GameScreenInputState::key(int key, int action) {
     else if(key == GLFW_KEY_LEFT_SHIFT) _movementmask[MOVEDOWN] = action == GLFW_PRESS;
 }
 
+static bool mouse_toggle = false;
+
 void GameScreenInputState::mouse(double x, double y) {
-    _impl->camera()->mouseMoved(_impl->context()->deltaT(), x, y);
-    _impl->context()->resetMouse();
+    _impl->camera()->mouseMoved(_impl->context()->deltaT(), x, y, mouse_toggle);
+    if(mouse_toggle) {
+        _impl->context()->resetMouse();
+    }
 }
 
 void GameScreenInputState::button(int button, int action, int mods) {
+    if(action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_RIGHT) {
+        _impl->context()->hideCursor();
+        _impl->context()->resetMouse();
+        _impl->inCameraMode(true);
+        mouse_toggle = true;
+        return;
+    }
     if(action != GLFW_RELEASE) return;
     if(button == GLFW_MOUSE_BUTTON_LEFT)
         _impl->enableMoveMask();
-    else if(button == GLFW_MOUSE_BUTTON_RIGHT)
-        _impl->enableAttackMask();
+    else if(button == GLFW_MOUSE_BUTTON_RIGHT) {
+        _impl->context()->displayCursor();
+        _impl->context()->resetMouseToCenter();
+        _impl->inCameraMode(false);
+        mouse_toggle = false;
+    }
+        //_impl->enableAttackMask();
 }
 
 void GameScreenInputState::idle() {

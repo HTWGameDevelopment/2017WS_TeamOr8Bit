@@ -142,6 +142,9 @@ namespace qe {
         void resetMouse() {
             glfwSetCursorPos(_window, 0, 0);
         }
+        void resetMouseToCenter() {
+            glfwSetCursorPos(_window, _w / 2, _h / 2);
+        }
         /**
          * \brief Return mouse position
          */
@@ -217,9 +220,12 @@ namespace qe {
         /**
          * \brief Display cursor
          */
-        void displayCursor(glm::dvec2 pos = glm::dvec2(0, 0)) {
+        void displayCursor(glm::dvec2 pos) {
             glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             glfwSetCursorPos(_window, pos.x, pos.y);
+        }
+        void displayCursor() {
+            glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
         /**
          * \brief Hide cursor (FPS mode)
