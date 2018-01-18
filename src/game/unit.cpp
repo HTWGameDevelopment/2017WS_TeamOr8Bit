@@ -34,6 +34,7 @@ void Unit::render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m) {
 void Unit::__introspect(size_t off) {
     std::cout << std::string(off, ' ') << "Unit<" << _player->name() << ">[" << std::endl;
     std::string os(off + 8 + _player->name().size(), ' ');
+    std::cout << os << "maxhp=" << _max_hp << std::endl;
     std::cout << os << "hp=" << _hp << std::endl;
     std::cout << os << "dp=" << _dp << std::endl;
     std::cout << os << "ap=" << _ap << std::endl;

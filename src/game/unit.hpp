@@ -36,7 +36,7 @@ namespace gamespace {
         relation _v; //!< visibility relation
     public:
         Unit(qe::Mesh<qe::OBJV3> *m, Player *p, std::string name, unsigned int h, unsigned int d, unsigned int a, unsigned int r, unsigned int v, unsigned int t, relation are, relation dr, relation tr, relation vre)
-            : _mesh(m), _player(p), _name(name), _hp(h), _dp(d), _ap(a), _ar(r), _vr(v), _dpt(t), _a(are), _d(dr), _t(tr), _v(vre) {}
+            : _mesh(m), _player(p), _name(name), _max_hp(h), _hp(h), _dp(d), _ap(a), _ar(r), _vr(v), _dpt(t), _a(are), _d(dr), _t(tr), _v(vre) {}
         void render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m);
         void markVisibility(BoardTile &tile);
         void markMovement(BoardTile &tile);
