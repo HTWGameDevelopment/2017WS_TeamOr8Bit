@@ -111,15 +111,15 @@ namespace gamespace {
             box->set_growth(ui::AbstractBox::Growth::FILL);
             box->set_align_inner(ui::AbstractBox::Align::CENTER, ui::AbstractBox::Align::CENTER);
 
-            box->append(text2.release());
             box->append(text1.release());
+            box->append(text2.release());
             ui.set_container(box.release());
 
             _ui.reset(new ui::DefinedUI(ui::UIFactory(ui, _ctxt->width(), _ctxt->height()).release()));
-            auto *quit = _ui->get("1.1");
-            auto *start = _ui->get("1.2");
+            auto *quit = _ui->get("1.2");
+            auto *start = _ui->get("1.1");
             start->on_click([this](void*) mutable {
-                _gamescreen->newGame(glm::ivec2(15, 8),
+                _gamescreen->newGame(glm::ivec2(15, 13),
                     gamespace::Player(glm::vec3(0.448, 0.884, 1), "Blue"),
                     gamespace::Player(glm::vec3(1, 0.448, 0.448), "Red"));
                 _manager->changeActiveScreen(*_gamescreen);

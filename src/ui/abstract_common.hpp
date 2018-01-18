@@ -111,7 +111,8 @@ namespace ui {
         defp_t &padding() {
             return _padding;
         }
-        virtual void recalculate() {}
+        virtual void recalculate_origin() {}
+        virtual void recalculate_dimension() {}
         virtual bool is_dynamic() {return false;}
     };
 
@@ -170,6 +171,9 @@ namespace ui {
             }
             return false;
         }
+        // CONTEXT MENU FUNCTIONS
+        virtual void show() {}
+        virtual void hide() {}
     };
 
     class AbstractRenderable {

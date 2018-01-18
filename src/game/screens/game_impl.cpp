@@ -109,6 +109,7 @@ void GameScreenImpl::initializeSelection() {
 }
 
 void GameScreenImpl::initializeHUD() {
+    // fixed UI
     ui::AbstractUI ui;
     std::unique_ptr<ui::AbstractBox> box(new ui::AbstractBox());
     std::unique_ptr<ui::AbstractText> text(new ui::AbstractText());
@@ -123,8 +124,50 @@ void GameScreenImpl::initializeHUD() {
     ui.set_container(box.release());
 
     _ui.reset(new ui::DefinedUI(ui::UIFactory(ui, _ctxt->width(), _ctxt->height()).release()));
+    // context menus
+    std::unique_ptr<ui::AbstractContextUI> contextui(new ui::AbstractContextUI());
+    std::unique_ptr<ui::AbstractBox> cb1(new ui::AbstractBox());
+    std::unique_ptr<ui::AbstractBox> cb11(new ui::AbstractBox());
+    std::unique_ptr<ui::AbstractBox> cb2(new ui::AbstractBox());
+    std::unique_ptr<ui::AbstractText> ct1(new ui::AbstractText());
+    std::unique_ptr<ui::AbstractText> ct2(new ui::AbstractText());
+    std::unique_ptr<ui::AbstractText> ct3(new ui::AbstractText());
+    std::unique_ptr<ui::AbstractText> ct4(new ui::AbstractText());
+
+    contextui->dimension() = ui::absp_t {0.1, 0.1};
+    ct1->dimension() = ui::absp_t {0.04, 0.03};
+    ct2->dimension() = ui::absp_t {0.04, 0.03};
+    ct3->dimension() = ui::absp_t {0.04, 0.03};
+    ct4->dimension() = ui::absp_t {0.04, 0.03};
+    ct1->margin() = ui::absp_t {0.01, 0.01};
+    ct2->margin() = ui::absp_t {0.01, 0.01};
+    ct3->margin() = ui::absp_t {0.01, 0.01};
+    ct4->margin() = ui::absp_t {0.01, 0.01};
+    cb1->set_orientation(ui::AbstractBox::VERTICAL);
+    cb11->set_orientation(ui::AbstractBox::HORIZONTAL);
+    cb2->set_orientation(ui::AbstractBox::HORIZONTAL);
+    cb1->set_growth(ui::AbstractBox::MINIMUM);
+    cb11->set_growth(ui::AbstractBox::MINIMUM);
+    cb2->set_growth(ui::AbstractBox::MINIMUM);
+    cb1->set_align_inner(ui::AbstractBox::BEGINNING, ui::AbstractBox::BEGINNING);
+    cb11->set_align_inner(ui::AbstractBox::BEGINNING, ui::AbstractBox::BEGINNING);
+    cb2->set_align_inner(ui::AbstractBox::BEGINNING, ui::AbstractBox::BEGINNING);
+
+    cb11->append(ct1.release());
+    cb11->append(ct2.release());
+    cb2->append(ct3.release());
+    cb2->append(ct4.release());
+    cb1->append(cb11.release());
+    cb1->append(cb2.release());
+    contextui->set_inner(cb1.release());
+    _coordinate_menu.reset(new CoordinateMenu());
+    auto *c = contextui->buildDefined(_ui->resolution());
+    c->set_model(_coordinate_menu.get());
+    c->set_ui(_ui.get());
+    _ui->add_context_menu(c);
+    // set callbacks
     auto *t = _ui->get("1.1");
-    t->render_with([this](ui::DefinedRenderable *t) mutable {
+    auto text_renderer = [this](ui::DefinedRenderable *t) mutable {
         if(t->payload() == nullptr) {
             t->payload() = new text_t(
                 ((ui::DefinedText*)t)->text(),
@@ -134,7 +177,9 @@ void GameScreenImpl::initializeHUD() {
                 (int)(t->dimension().x - t->margin().x - t->padding().x));
         }
         ((text_t*)(t->payload()))->render();
-    });
+    };
+    t->render_with(text_renderer);
+    _coordinate_menu->set_renderer_payload(text_renderer, [](void *t){delete (text_t*)t;});
     t->payload([](void* t){delete (text_t*)t;});
     _match.observe_player_change([this, t](auto np) {
         ((ui::DefinedText*)t)->text() = "Or8Bit - (c) 2017-2018 Team Or8Bit\n"s
@@ -191,7 +236,7 @@ void GameScreenImpl::initializeMap() {
     for(; b != e; ++b) {
         b->setUnit(nullptr);
     }
-    auto *u1 = new gamespace::Unit(_tank.get(), &_match.player1(),
+    auto *u1 = new gamespace::Unit(_tank.get(), &_match.player1(), "Tank",
         100,
         50,
         50,
@@ -202,7 +247,7 @@ void GameScreenImpl::initializeMap() {
         gamespace::defaultFalloff,
         gamespace::defaultFalloff,
         gamespace::defaultFalloff);
-    auto *u2 = new gamespace::Unit(_tank.get(), &_match.player2(),
+    auto *u2 = new gamespace::Unit(_tank.get(), &_match.player2(), "Tank",
         100,
         50,
         50,
@@ -297,10 +342,15 @@ void GameScreenImpl::run() {
     while(!_ctxt->shouldClose() && _shouldClose == false) {
         // calculate lookat tile
         auto pc = getLookedAtTile(_cam.camera->getPlaneCoord());
-        if(pc.x < 0 || pc.y < 0 || pc.x >= max_x || pc.y >= max_y)
+        if(pc.x < 0 || pc.y < 0 || pc.x >= max_x || pc.y >= max_y) {
             _selection.hovering = nullptr;
-        else
+            _coordinate_menu->hide();
+        } else {
             _selection.hovering = &_match.board().get(pc);
+            _coordinate_menu->set_coords(pc.x, pc.y);
+            _coordinate_menu->set_unit(_selection.hovering->unit());
+            _coordinate_menu->show();
+        }
         // set matrices
         glm::mat4 mvp = _cam.camera->matrices().pv * m;
         qe::Cache::objv2->use();

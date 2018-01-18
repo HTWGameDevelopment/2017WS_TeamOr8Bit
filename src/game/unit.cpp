@@ -11,15 +11,15 @@ std::function<bool(BoardTile&,unsigned int&)> gamespace::getEdgeRelation(unsigne
 }
 
 void Unit::markVisibility(BoardTile &tile) {
-    tile.board().markByEdge(tile.coord(), vr, VISIBILITY_LAYER, getEdgeRelation(VISIBILITY_LAYER, _v));
+    tile.board().markByEdge(tile.coord(), _vr, VISIBILITY_LAYER, getEdgeRelation(VISIBILITY_LAYER, _v));
 }
 
 void Unit::markMovement(BoardTile &tile) {
-    tile.board().markByEdge(tile.coord(), vr, MOVE_LAYER, getEdgeRelation(MOVE_LAYER, _t));
+    tile.board().markByEdge(tile.coord(), _dpt, MOVE_LAYER, getEdgeRelation(MOVE_LAYER, _t));
 }
 
 void Unit::markAttack(BoardTile &tile) {
-    tile.board().markByEdge(tile.coord(), vr, ACTION_LAYER, getEdgeRelation(ACTION_LAYER, _a));
+    tile.board().markByEdge(tile.coord(), _ar, ACTION_LAYER, getEdgeRelation(ACTION_LAYER, _a));
 }
 
 void Unit::render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m) {
@@ -34,10 +34,10 @@ void Unit::render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m) {
 void Unit::__introspect(size_t off) {
     std::cout << std::string(off, ' ') << "Unit<" << _player->name() << ">[" << std::endl;
     std::string os(off + 8 + _player->name().size(), ' ');
-    std::cout << os << "hp=" << hp << std::endl;
-    std::cout << os << "dp=" << dp << std::endl;
-    std::cout << os << "ap=" << ap << std::endl;
-    std::cout << os << "ar=" << ar << std::endl;
-    std::cout << os << "vr=" << vr << std::endl;
-    std::cout << os << "dpt=" << dpt << std::endl;
+    std::cout << os << "hp=" << _hp << std::endl;
+    std::cout << os << "dp=" << _dp << std::endl;
+    std::cout << os << "ap=" << _ap << std::endl;
+    std::cout << os << "ar=" << _ar << std::endl;
+    std::cout << os << "vr=" << _vr << std::endl;
+    std::cout << os << "dpt=" << _dpt << std::endl;
 }

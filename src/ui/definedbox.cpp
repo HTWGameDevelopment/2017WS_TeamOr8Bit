@@ -38,7 +38,48 @@ bool DefinedBox::is_dynamic() {
     return _growth == AbstractBox::FILL;
 }
 
-void DefinedBox::recalculate() {
+void DefinedBox::recalculate_dimension() {
+    defp_t dold = dimension();
+    dimension() = defp_t {0, 0};
+    DefinedRenderable *filling = nullptr;
+    for(unsigned int i = 0; i < count(); ++i) {
+        auto *it = operator[](i);
+        if(it->is_dynamic()) {
+            assert(filling == nullptr);
+            filling = it;
+        } else {
+            it->recalculate_dimension();
+            if(_orientation == AbstractBox::VERTICAL) {
+                auto d = it->dimension();
+                dimension().x = std::max(dimension().x, d.x);
+                dimension().y += d.y;
+            } else {
+                auto d = it->dimension();
+                dimension().y = std::max(dimension().y, d.y);
+                dimension().x += d.x;
+            }
+        }
+    }
+    if(filling != nullptr) {
+        if(_orientation == AbstractBox::VERTICAL) {
+            filling->dimension().x = std::max(dold.x, dimension().x);
+            assert(dold.y >= dimension().y);
+            filling->dimension().y = dold.y - dimension().y;
+            dimension().y = dold.y;
+        } else {
+            filling->dimension().y = std::max(dold.y, dimension().y);
+            assert(dold.x >= dimension().x);
+            filling->dimension().x = dold.x - dimension().x;
+            dimension().x = dold.x;
+        }
+        filling->recalculate_dimension();
+    } else {
+        dimension().x = std::max(dimension().x, dold.x);
+        dimension().y = std::max(dimension().y, dold.y);
+    }
+}
+
+void DefinedBox::recalculate_origin() {
     defp_t current_origin = origin();
     DefinedRenderable *filling = nullptr;
     defp_t center_offset = defp_t {0, 0};
@@ -55,26 +96,8 @@ void DefinedBox::recalculate() {
             else current_origin.x += it->dimension().x;
             center_offset += it->dimension();
         }
+        it->recalculate_origin();
     }
-
-    if(filling != nullptr) {
-        // offset by filling
-        bool past_filling = false;
-        for(unsigned int i = 0; i < count(); ++i) {
-            auto *it = operator[](i);
-            if(it->is_dynamic()) {
-                past_filling = true;
-                if(_orientation == AbstractBox::VERTICAL) it->dimension() = dimension() - defp_t {0, current_origin.y};
-                else it->dimension() = dimension() - defp_t {current_origin.x, 0};
-                center_offset += it->dimension();
-            } else if(past_filling) {
-                if(_orientation == AbstractBox::VERTICAL) it->origin().y += filling->dimension().y;
-                else it->origin().x += filling->dimension().x;
-            }
-        }
-    }
-
-    center_offset = (dimension() - center_offset ) / defp_t {2, 2};
 
     if(_orientation == AbstractBox::VERTICAL) {
         int xcenter;
