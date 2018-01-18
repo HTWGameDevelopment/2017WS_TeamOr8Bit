@@ -35,8 +35,6 @@ namespace ui {
         virtual void init(DefinedContextUI *ui) = 0;
         virtual void on_show() = 0;
         virtual void on_hide() = 0;
-        virtual void show() = 0;
-        virtual void hide() = 0;
     };
 
     class DefinedContextUI: public DefinedRenderable {
@@ -71,7 +69,7 @@ namespace ui {
             _inner->recalculate_origin();
         }
         virtual void render() {
-            _inner->render();
+            _inner->render(origin());
         }
         virtual DefinedRenderable *get(const char* str) {
             return _inner->get(str);

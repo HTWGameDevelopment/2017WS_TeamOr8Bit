@@ -47,7 +47,7 @@ namespace ui {
         defp_t resolution() {return _res;}
         void recalculate();
         void render() {
-            if(_container.get()) _container->render();
+            if(_container.get()) _container->render(ui::defp_t {0, 0});
             if(_active_context_menu) _active_context_menu->render();
         }
         DefinedRenderable *get(const char* coord) {

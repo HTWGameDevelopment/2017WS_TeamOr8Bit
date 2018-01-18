@@ -28,9 +28,9 @@ DefinedBox::DefinedBox(AbstractBox::Orientation o, AbstractBox::Growth g, Abstra
 
 }
 
-void DefinedBox::render() {
+void DefinedBox::render(defp_t offset) {
     for(unsigned int i = 0; i < count(); ++i) {
-        operator[](i)->render();
+        operator[](i)->render(offset);
     }
 }
 

@@ -35,7 +35,7 @@ namespace ui {
         AbstractBox::Align _y;
     public:
         DefinedBox(AbstractBox::Orientation o, AbstractBox::Growth g, AbstractBox::Align x, AbstractBox::Align y);
-        void render();
+        void render(defp_t offset);
         virtual void recalculate_origin();
         virtual void recalculate_dimension();
         virtual bool is_dynamic();

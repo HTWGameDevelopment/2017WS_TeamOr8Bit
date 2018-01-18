@@ -349,7 +349,7 @@ void GameScreenImpl::run() {
             _selection.hovering = &_match.board().get(pc);
             _coordinate_menu->set_coords(pc.x, pc.y);
             _coordinate_menu->set_unit(_selection.hovering->unit());
-            _coordinate_menu->show();
+            _coordinate_menu->show(_ctxt->getCenterCoordinate());
         }
         // set matrices
         glm::mat4 mvp = _cam.camera->matrices().pv * m;

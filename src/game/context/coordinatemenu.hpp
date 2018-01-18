@@ -50,7 +50,8 @@ namespace gamespace {
         void on_hide() {
 
         }
-        void show() {
+        void show(glm::ivec2 center) {
+            _ui->origin() = ui::defp_t {center.x, center.y};
             _ui->ui()->show_context_menu(_ui);
         }
         void hide() {

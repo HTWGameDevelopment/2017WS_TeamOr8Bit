@@ -59,6 +59,11 @@ namespace ui {
             y += a.y;
             return *this;
         }
+        Point<T> &operator-=(const Point<T> &a) {
+            x -= a.x;
+            y -= a.y;
+            return *this;
+        }
     };
 
     typedef Point<AbstractNumber> absp_t;
@@ -146,8 +151,10 @@ namespace ui {
         virtual DefinedRenderable *get(const char* str) {
             return this;
         }
-        virtual void render() {
+        virtual void render(ui::defp_t offset) {
+            origin() += offset;
             _render(this);
+            origin() -= offset;
         }
         virtual void __introspect(size_t off) {
             std::cout << std::string(off, ' ')
