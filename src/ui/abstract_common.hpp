@@ -142,6 +142,7 @@ namespace ui {
             return _payload;
         }
         void delete_payload() {
+            if(_payload == nullptr) return;
             assert(_deleter);
             _deleter(_payload);
             _payload = nullptr;
@@ -191,8 +192,6 @@ namespace ui {
         // CONTEXT MENU FUNCTIONS
         virtual void show() {}
         virtual void hide() {}
-        virtual void on_show() {}
-        virtual void on_hide() {}
     };
 
     class AbstractRenderable {

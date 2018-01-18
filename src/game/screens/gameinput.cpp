@@ -37,7 +37,9 @@ void GameScreenInputState::mouse(double x, double y) {
     _last_x = x;
     _last_y = y;
     if(_mouse_mode == UIINTERACTION) {
-        _impl->coordinatemenu()->view()->origin() = _origin_save + ui::defp_t {(int)x, (int)(_resy-y)} - _mouse_save;
+        assert(_selected_menu);
+        _selected_menu->origin() = _origin_save + ui::defp_t {(int)x, (int)(_resy-y)} - _mouse_save;
+        _selected_menu->get_model()->invalidate();
     } else {
         _impl->camera()->mouseMoved(_impl->context()->deltaT(), x, y, _mouse_mode == LOCKED);
         if(_mouse_mode == LOCKED) {
@@ -47,7 +49,7 @@ void GameScreenInputState::mouse(double x, double y) {
 }
 
 void GameScreenInputState::button(int button, int action, int mods) {
-    if(action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_RIGHT && _mouse_mode == FREE) {
+    if(action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_MIDDLE && _mouse_mode == FREE) {
         _impl->context()->hideCursor();
         _impl->context()->resetMouse();
         _impl->inCameraMode(true);
@@ -57,8 +59,9 @@ void GameScreenInputState::button(int button, int action, int mods) {
     }
     if(action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT && _mouse_mode == FREE) {
         ui::defp_t s{(int)_last_x, (int)(_resy-_last_y)};
-        if(_impl->coordinatemenu()->titlebar()->hovers(s)) {
-            _origin_save = _impl->coordinatemenu()->view()->origin();
+        _selected_menu = _impl->ui()->hovers(s);
+        if(_selected_menu) {
+            _origin_save = _selected_menu->origin();
             _mouse_save = s;
             _mouse_mode = UIINTERACTION;
             GDBG("new mouse mode: UIINTERACTION");
@@ -69,14 +72,17 @@ void GameScreenInputState::button(int button, int action, int mods) {
     if(button == GLFW_MOUSE_BUTTON_LEFT) {
         if(_mouse_mode == UIINTERACTION) {
             _mouse_mode = FREE;
+            _selected_menu = nullptr;
             GDBG("new mouse mode: FREE");
         } else if(_mouse_mode == FREE) _impl->enableMoveMask();
-    } else if(button == GLFW_MOUSE_BUTTON_RIGHT && _mouse_mode == LOCKED) {
+    } else if(button == GLFW_MOUSE_BUTTON_MIDDLE && _mouse_mode == LOCKED) {
         _impl->context()->displayCursor();
         _impl->context()->resetMouseToCenter();
         _impl->inCameraMode(false);
         _mouse_mode = FREE;
         GDBG("new mouse mode: FREE");
+    } else if(button == GLFW_MOUSE_BUTTON_RIGHT && _mouse_mode == FREE) {
+        _impl->createContextForLookAt();
     }
 }
 

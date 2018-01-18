@@ -29,6 +29,7 @@ add_executable(Or8Bit
     src/game/board.cpp
     src/game/match.cpp
     src/game/unit.cpp
+    src/game/context/coordinatemenu.cpp
     src/game/screens/game_impl.cpp
     src/game/screens/gameinput.cpp
     src/logger.cpp

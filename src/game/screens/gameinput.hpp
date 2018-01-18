@@ -21,6 +21,7 @@ namespace gamespace {
         ui::defp_t _mouse_save;
         double _resy;
         movement_mode _mouse_mode;
+        ui::DefinedContextUI *_selected_menu;
         GameScreenImpl *_impl;
     public:
         GameScreenInputState(GameScreenImpl &impl);

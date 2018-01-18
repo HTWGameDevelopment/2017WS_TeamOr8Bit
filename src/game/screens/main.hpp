@@ -15,9 +15,6 @@
 #include<ui/uifactory.hpp>
 #include<screenmanager/screen.hpp>
 
-inline glm::ivec2 to_ivec2(ui::defp_t t) {
-    return glm::ivec2(t.x, t.y);
-}
 
 namespace gamespace {
 

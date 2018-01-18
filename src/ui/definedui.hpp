@@ -34,10 +34,9 @@ namespace ui {
     private:
         std::unique_ptr<DefinedRenderable> _container;
         std::vector<std::unique_ptr<DefinedContextUI>> _context_menus;
-        DefinedContextUI *_active_context_menu;
         defp_t _res;
     public:
-        DefinedUI(DefinedNumber resx, DefinedNumber resy): _active_context_menu{nullptr}, _res{resx, resy} {}
+        DefinedUI(DefinedNumber resx, DefinedNumber resy): _res{resx, resy} {}
         void set_container(DefinedRenderable *r) {
             _container.reset(r);
             _container->set_root(_container.get());
@@ -46,12 +45,15 @@ namespace ui {
             _context_menus.emplace_back(r);
             r->recalculate_dimension();
             r->recalculate_origin();
+            r->show();
         }
         defp_t resolution() {return _res;}
         void recalculate();
         void render() {
             if(_container.get()) _container->render();
-            if(_active_context_menu) _active_context_menu->render();
+            for(auto &i : _context_menus) {
+                if(i->active()) i->render();
+            }
         }
         DefinedRenderable *get(const char* coord) {
             char* next;
@@ -67,21 +69,26 @@ namespace ui {
             for(auto &i : _context_menus)
                 i->__introspect(off + 2);
         }
-        void show_context_menu(DefinedContextUI *ui) {
-            if(_active_context_menu == ui) return;
-            if(_active_context_menu && _active_context_menu != ui) _active_context_menu->hide();
-            _active_context_menu = ui;
-            _active_context_menu->on_show();
-        }
         void hide_context_menu(DefinedContextUI *ui) {
             assert(ui);
-            if(ui != _active_context_menu) return;
-            _active_context_menu->on_hide();
-            _active_context_menu = nullptr;
+            for(auto i = _context_menus.begin(); i != _context_menus.end(); ++i) {
+                if(i->get() == ui) {
+                    ui->hide();
+                    _context_menus.erase(i);
+                }
+            }
         }
         void click(defp_t pos) {
-            if(_active_context_menu && _active_context_menu->click(pos)) return;
+            for(auto &i : _context_menus) {
+                if(i->click(pos)) return;
+            }
             if(_container.get()) _container->click(pos);
+        }
+        DefinedContextUI *hovers(defp_t pos) {
+            for(auto &i : _context_menus) {
+                if(i->get_inner()->hovers(pos)) return i.get();
+            }
+            return nullptr;
         }
     };
 

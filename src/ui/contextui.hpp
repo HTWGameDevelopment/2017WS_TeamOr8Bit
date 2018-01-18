@@ -33,28 +33,44 @@ namespace ui {
     class ContextUIModel {
     public:
         virtual void init(DefinedContextUI *ui) = 0;
-        virtual void on_show() = 0;
-        virtual void on_hide() = 0;
+        virtual void invalidate() = 0;
     };
 
     class DefinedContextUI: public DefinedRenderable {
     private:
         std::unique_ptr<DefinedRenderable> _inner;
-        ContextUIModel *_model;
+        std::unique_ptr<ContextUIModel> _model;
         DefinedUI *_ui;
+        bool _active;
     public:
-        DefinedContextUI() {}
+        DefinedContextUI() {
+            _active = false;
+            set_root(this);
+        }
+        virtual ~DefinedContextUI() {}
         void set_inner(DefinedRenderable *r) {
             _inner.reset(r);
             _inner->set_root(this);
         }
         void set_model(ContextUIModel *model) {
             assert(model);
-            _model = model;
+            _model.reset(model);
             model->init(this);
+        }
+        ContextUIModel *get_model() {
+            return _model.get();
         }
         void set_ui(DefinedUI *ui) {
             _ui = ui;
+        }
+        bool active() {
+            return _active;
+        }
+        virtual void show() {
+            _active = true;
+        }
+        virtual void hide() {
+            _active = false;
         }
         DefinedUI *ui() {
             return _ui;

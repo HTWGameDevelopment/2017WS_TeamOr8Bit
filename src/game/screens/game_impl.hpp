@@ -41,7 +41,6 @@ namespace gamespace {
             std::unique_ptr<qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>> hextile_grass;
         } _textures;
         std::unique_ptr<ui::DefinedUI> _ui;
-        std::unique_ptr<CoordinateMenu> _coordinate_menu;
         struct SelectionState {
             enum Type { SEL_TO_MOVE, SEL_TO_ATTACK, SEL_NONE };
             Type type;
@@ -66,6 +65,7 @@ namespace gamespace {
         void enableMoveMask();
         void enableAttackMask();
         void inCameraMode(bool mode);
+        void createContextForLookAt();
         gamespace::Match &match() {
             return _match;
         }
@@ -75,8 +75,8 @@ namespace gamespace {
         qe::Context *context() {
             return _ctxt;
         }
-        CoordinateMenu *coordinatemenu() {
-            return _coordinate_menu.get();
+        ui::DefinedUI *ui() {
+            return _ui.get();
         }
         void __introspect(size_t off);
     };

@@ -39,28 +39,8 @@ const char* GameScreenImpl::ground_names[16] = {
 #define DamMain_CUBezierCurve 14
 #define Ground_Plane_002 15
 
-inline glm::ivec2 to_ivec2(ui::defp_t t) {
-    return glm::ivec2(t.x, t.y);
-}
-
 inline glm::uvec2 to_uvec2(hextile::hexpoint_t t) {
     return glm::uvec2(t.x, t.y);
-}
-
-void render_button(glm::vec2 origin, glm::vec2 size, glm::vec3 bg) {
-    qe::Cache::sprite2dcolor->use();
-    // set shader
-    qe::Cache::sprite2dcolor->setUniform<qe::UNIORIGIN>(origin);
-    qe::Cache::sprite2dcolor->setUniform<qe::UNISIZE>(size);
-    qe::Cache::sprite2dcolor->setUniform<qe::UNITEXTBG>(bg);
-    // set vao
-    qe::Cache::meshm->render();
-}
-
-void render_rectangle(ui::defp_t a, ui::defp_t b, glm::vec3 bg, glm::vec2 res) {
-    glm::vec2 origin = glm::vec2(a.x, a.y) * glm::vec2(2, 2) / res;
-    glm::vec2 dimension = glm::vec2(b.x, b.y) * glm::vec2(2, 2) / res;
-    render_button(origin - glm::vec2(1, 1), dimension, bg);
 }
 
 hextile::hexpoint_t getLookedAtTile(glm::vec2 pc) {
@@ -140,54 +120,9 @@ void GameScreenImpl::initializeHUD() {
     ui.set_container(box.release());
 
     _ui.reset(new ui::DefinedUI(ui::UIFactory(ui, _ctxt->width(), _ctxt->height()).release()));
-    // context menus
-    std::unique_ptr<ui::AbstractContextUI> contextui(new ui::AbstractContextUI());
-    std::unique_ptr<ui::AbstractBox> cb1(new ui::AbstractBox());
-    std::unique_ptr<ui::AbstractBox> cb11(new ui::AbstractBox());
-    std::unique_ptr<ui::AbstractBox> cb2(new ui::AbstractBox());
-    std::unique_ptr<ui::AbstractText> ct1(new ui::AbstractText());
-    std::unique_ptr<ui::AbstractText> ct2(new ui::AbstractText());
-    std::unique_ptr<ui::AbstractText> ct3(new ui::AbstractText());
-    std::unique_ptr<ui::AbstractText> ct4(new ui::AbstractText());
-
-    contextui->dimension() = ui::absp_t {0.65, 0.6};
-    ct1->dimension() = ui::absp_t {0.025, 0.03};
-    ct2->dimension() = ui::absp_t {0.045, 0.03};
-    ct3->dimension() = ui::absp_t {0.025, 0.03};
-    ct4->dimension() = ui::absp_t {0.045, 0.03};
-    ct1->margin() = ui::absp_t {0.005, 0.005};
-    ct2->margin() = ui::absp_t {0.005, 0.005};
-    ct3->margin() = ui::absp_t {0.005, 0.005};
-    ct4->margin() = ui::absp_t {0.005, 0.005};
-    cb1->set_orientation(ui::AbstractBox::VERTICAL);
-    cb11->set_orientation(ui::AbstractBox::HORIZONTAL);
-    cb2->set_orientation(ui::AbstractBox::HORIZONTAL);
-    cb1->set_growth(ui::AbstractBox::MINIMUM);
-    cb11->set_growth(ui::AbstractBox::MINIMUM);
-    cb2->set_growth(ui::AbstractBox::MINIMUM);
-    cb1->set_align_inner(ui::AbstractBox::BEGINNING, ui::AbstractBox::BEGINNING);
-    cb11->set_align_inner(ui::AbstractBox::BEGINNING, ui::AbstractBox::BEGINNING);
-    cb2->set_align_inner(ui::AbstractBox::BEGINNING, ui::AbstractBox::BEGINNING);
-
-    cb11->append(ct2.release());
-    cb11->append(ct1.release());
-    cb2->append(ct4.release());
-    cb2->append(ct3.release());
-    cb1->append(cb11.release());
-    cb1->append(cb2.release());
-    contextui->set_inner(cb1.release());
-    _coordinate_menu.reset(new CoordinateMenu());
-    auto *c = contextui->buildDefined(_ui->resolution());
-    c->set_model(_coordinate_menu.get());
-    c->set_ui(_ui.get());
-    _ui->add_context_menu(c);
-    auto center = _ctxt->getCenterCoordinate();
-    c->origin() = ui::defp_t {(int)center.x, (int)center.y};
     // set callbacks
     auto *t = _ui->get("1.1");
-    c->get_inner()->render_with([this](ui::DefinedRenderable *t) mutable {
-        render_rectangle(t->origin(), t->dimension(), glm::vec3(0.8, 0.8, 0.8), _ctxt->getResolution());
-    }); // TODO Various text rendering issues
+    // TODO Various text rendering issues
     auto text_renderer = [this](ui::DefinedRenderable *t) mutable {
         if(t->payload() == nullptr) {
             t->payload() = new text_t(
@@ -215,7 +150,6 @@ void GameScreenImpl::initializeHUD() {
         pl->foreground() = glm::vec3(1, 1, 1);
         pl->render();
     });
-    _coordinate_menu->set_renderer_payload(text_renderer, [](void *t){delete (text_t*)t;});
     t->payload([](void* t){delete (text_t*)t;});
     _match.observe_player_change([this, t](auto np) {
         ((ui::DefinedText*)t)->text() = "Or8Bit - (c) 2017-2018 Team Or8Bit\n"s
@@ -305,6 +239,7 @@ void GameScreenImpl::initializeMap() {
     _match.board()[1][5].setUnit(new gamespace::Unit(*u2));
     _match.board()[0][6].setUnit(new gamespace::Unit(*u2));
     _match.board()[1][6].setUnit(new gamespace::Unit(*u2));
+    _match.board().synchronize();
     delete u1;
     delete u2;
     // _match.board()[0][0].unit()->markVisibility(_match.board()[0][0]);
@@ -367,6 +302,11 @@ void GameScreenImpl::pre_run() {
     _ctxt->events();
 }
 
+void GameScreenImpl::createContextForLookAt() {
+    if(_selection.hovering && _selection.hovering->unit())
+        CoordinateMenu::createForTile(_selection.hovering, _ui.get(), _ctxt->getResolution());
+}
+
 void GameScreenImpl::run() {
     GDBG("activating game screen");
     _shouldClose = false;
@@ -387,15 +327,11 @@ void GameScreenImpl::run() {
             auto pc = getLookedAtTile(_cam.camera->getPlaneCoord());
             if(pc.x < 0 || pc.y < 0 || pc.x >= max_x || pc.y >= max_y) {
                 _selection.hovering = nullptr;
-                _coordinate_menu->hide();
             } else {
                 _selection.hovering = &_match.board().get(pc);
-                _coordinate_menu->set_coords(pc.x, pc.y);
-                _coordinate_menu->set_unit(_selection.hovering->unit());
-                _coordinate_menu->show();
             }
         } else {
-            _coordinate_menu->hide();
+            _selection.hovering = nullptr;
         }
         // set matrices
         glm::mat4 mvp = _cam.camera->matrices().pv * m;

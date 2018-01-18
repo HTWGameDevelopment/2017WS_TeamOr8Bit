@@ -34,15 +34,20 @@ namespace gamespace {
         relation _d; //!< attack damage relation
         relation _t; //!< travel distance relation
         relation _v; //!< visibility relation
+        BoardTile *_tile; //!< Board tile
     public:
         Unit(qe::Mesh<qe::OBJV3> *m, Player *p, std::string name, unsigned int h, unsigned int d, unsigned int a, unsigned int r, unsigned int v, unsigned int t, relation are, relation dr, relation tr, relation vre)
             : _mesh(m), _player(p), _name(name), _max_hp(h), _hp(h), _dp(d), _ap(a), _ar(r), _vr(v), _dpt(t), _a(are), _d(dr), _t(tr), _v(vre) {}
+        virtual ~Unit() {}
         void render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m);
         void markVisibility(BoardTile &tile);
         void markMovement(BoardTile &tile);
         void markAttack(BoardTile &tile);
         Player &player() {
             return *_player;
+        }
+        BoardTile *&tile() {
+            return _tile;
         }
         void attackedWith(Unit &o) {
             unsigned int off = o._ap;
