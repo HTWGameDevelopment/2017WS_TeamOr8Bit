@@ -119,7 +119,7 @@ namespace gamespace {
             auto *quit = _ui->get("1.2");
             auto *start = _ui->get("1.1");
             start->on_click([this](void*) mutable {
-                _gamescreen->newGame(glm::ivec2(15, 13),
+                _gamescreen->newGame(glm::ivec2(20, 14),
                     gamespace::Player(glm::vec3(0.448, 0.884, 1), "Blue"),
                     gamespace::Player(glm::vec3(1, 0.448, 0.448), "Red"));
                 _manager->changeActiveScreen(*_gamescreen);

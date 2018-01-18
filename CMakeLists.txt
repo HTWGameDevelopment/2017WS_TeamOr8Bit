@@ -27,6 +27,7 @@ set(QE_GLM_PATH "${CMAKE_SOURCE_DIR}/extern/glm" CACHE PATH "" FORCE)
 add_executable(Or8Bit
     src/game/main.cpp
     src/game/board.cpp
+    src/game/match.cpp
     src/game/unit.cpp
     src/game/screens/game_impl.cpp
     src/game/screens/gameinput.cpp
