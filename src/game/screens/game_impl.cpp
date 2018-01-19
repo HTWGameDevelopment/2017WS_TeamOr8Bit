@@ -109,19 +109,24 @@ void GameScreenImpl::initializeHUD() {
     ui::AbstractUI ui;
     std::unique_ptr<ui::AbstractBox> box(new ui::AbstractBox());
     std::unique_ptr<ui::AbstractText> text(new ui::AbstractText());
+    std::unique_ptr<ui::AbstractText> absmm(new ui::AbstractText());
     text->dimension() = ui::absp_t {1, 0.25};
     text->margin() = ui::absp_t {0.02, 0.02};
+    absmm->dimension() = ui::absp_t {0.2, 0.2};
 
-    box->set_orientation(ui::AbstractBox::VERTICAL);
-    box->set_growth(ui::AbstractBox::MINIMUM);
+    text->set_fill(true);
+    box->set_orientation(ui::AbstractBox::HORIZONTAL);
+    box->set_growth(ui::AbstractBox::FILL);
     box->set_align_inner(ui::AbstractBox::BEGINNING, ui::AbstractBox::END);
 
     box->append(text.release());
+    box->append(absmm.release());
     ui.set_container(box.release());
 
     _ui.reset(new ui::DefinedUI(ui::UIFactory(ui, _ctxt->width(), _ctxt->height()).release()));
     // set callbacks
     auto *t = _ui->get("1.1");
+    auto *m = _ui->get("1.2");
     // TODO Various text rendering issues
     auto text_renderer = [this](ui::DefinedRenderable *t) mutable {
         if(t->payload() == nullptr) {
@@ -158,6 +163,12 @@ void GameScreenImpl::initializeHUD() {
         ((ui::DefinedText*)t)->delete_payload();
     });
     t->payload() = nullptr;
+    m->render_with([this](ui::DefinedRenderable *t) mutable {
+        assert(t->payload());
+        render_sprite(t->origin(), t->dimension(), _ctxt->getResolution(), (GLuint)((qe::FramebufferOrtho*)t->payload())->get_color());
+    });
+    m->payload([](void* t){delete (qe::Framebuffer*)t;});
+    m->payload() = _mmfbo = new qe::FramebufferOrtho(to_ivec2(m->dimension()));
 }
 
 void GameScreenImpl::initializeAssets() {
@@ -307,6 +318,26 @@ void GameScreenImpl::createContextForLookAt() {
         CoordinateMenu::createForTile(_selection.hovering, _ui.get(), _ctxt->getResolution());
 }
 
+void GameScreenImpl::renderToMM() {
+    _cam.camera->setOrtho(glm::vec3(0, 0, 0), glm::vec3(19, 7, 11));
+    _cam.camera->setToOrtho();
+    _mmfbo->bind();
+    auto b = _match.board().begin();
+    auto e = _match.board().end();
+
+    // render tiles and units
+    for(; b != e; ++b) {
+        if(b->unit())
+            renderUnitOf(&*b);
+    }
+
+    // render terrain
+    renderTerrain();
+
+    _mmfbo->unbind();
+    _cam.camera->setToPerspective();
+}
+
 void GameScreenImpl::run() {
     GDBG("activating game screen");
     _shouldClose = false;
@@ -320,6 +351,8 @@ void GameScreenImpl::run() {
     const auto max_y = _match.board().y();
     const auto mc = _match.board().marker_count;
     auto *ptr = _marker_buffer->ptr();
+
+    renderToMM();
 
     while(!_ctxt->shouldClose() && _shouldClose == false) {
         // calculate lookat tile

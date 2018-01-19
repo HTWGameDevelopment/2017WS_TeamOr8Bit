@@ -123,14 +123,22 @@ namespace ui {
 
     class DefinedRenderable: public DefinedArea {
     private:
+        bool _self_fill;
         std::function<void(DefinedRenderable*)> _render;
         std::function<void(DefinedRenderable*)> _click;
         std::function<void(void*)> _deleter;
         void *_payload;
         DefinedRenderable *_root;
     public:
+        DefinedRenderable(): _self_fill(false) {}
         virtual ~DefinedRenderable() {
             if(_deleter) _deleter(_payload);
+        }
+        void set_fill(bool t) {
+            _self_fill = t;
+        }
+        virtual bool is_dynamic() {
+            return _self_fill;
         }
         template<typename F> void render_with(F &&r) {
             _render = std::move(r);
@@ -195,9 +203,14 @@ namespace ui {
     };
 
     class AbstractRenderable {
+    private:
+        bool _self_fill;
     public:
+        AbstractRenderable(): _self_fill(false) {}
         virtual ~AbstractRenderable() {}
         virtual DefinedRenderable *buildDefined(defp_t res) = 0;
+        void set_fill(bool t) {_self_fill = t;}
+        bool is_fill() {return _self_fill;}
     };
 
     template<typename T>

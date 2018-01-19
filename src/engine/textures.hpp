@@ -43,6 +43,10 @@ namespace qe {
         switch(flag) {
         case qe::TEXTG:
             return qe::GLFlagSet {GL_TEXTURE_2D, GL_R8, GL_RED, GL_UNSIGNED_BYTE};
+        case qe::TEXD:
+            return qe::GLFlagSet {GL_TEXTURE_2D, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_FLOAT};
+        case qe::RGB:
+            return qe::GLFlagSet {GL_TEXTURE_2D, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE};
         }
 
         return qe::GLFlagSet {GL_TEXTURE_2D, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
@@ -60,8 +64,10 @@ namespace qe {
          * \brief Intialize texture and load from _source
          */
         void initTexture() {
-            if(T == PNGRGBA) return initTextureAsRGBA();
-            else if(T == TEXTG) return initTextureAsGlyphmap();
+            if(T == PNGRGBA) return initTextureLinear();
+            else if(T == TEXTG) return initTextureNearest();
+            else if(T == RGB) return initTextureLinear();
+            else if(T == TEXD) return initTextureNearest();
 
             assert(false);
         }
@@ -70,7 +76,7 @@ namespace qe {
          *
          * \todo necessary?
          */
-        void initTextureAsRGBA() {
+        void initTextureLinear() {
             glGenTextures(1, &_texture);
             GLSERRORCHECK;
             bindTo();
@@ -86,7 +92,7 @@ namespace qe {
          *
          * \todo necessary?
          */
-        void initTextureAsGlyphmap() {
+        void initTextureNearest() {
             glGenTextures(1, &_texture);
             GLSERRORCHECK;
             bindTo();
@@ -137,6 +143,9 @@ namespace qe {
         void __introspect(size_t off) {
             std::cout << std::string(off, ' ') << "Texture<" << constantToString(T) << "," << U << ">[" << std::endl;
             _source.__introspect(off + 2);
+        }
+        operator GLuint() {
+            return _texture;
         }
     };
 

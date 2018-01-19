@@ -100,6 +100,47 @@ namespace qe {
         objv2_point_t(glm::vec3 v, glm::vec2 u, glm::vec3 n): vertex(v), uv(u), normal(n) {}
     };
 
+    template<typename T>
+    class LoaderContainer {
+    protected:
+        std::unique_ptr<T> _pixels;
+        size_t _width;
+        size_t _height;
+    public:
+        LoaderContainer(glm::ivec2 size): _width(size.x), _height(size.y) {
+            _pixels.reset(new T[_width * _height]);
+        }
+        LoaderContainer(LoaderContainer &&other): _width(other._width), _height(other._height), _pixels(std::move(other._pixels)) {}
+        virtual ~LoaderContainer() {}
+        T *parse() {
+            return _pixels.get();
+        }
+        size_t width() {
+            return _width;
+        }
+        size_t height() {
+            return _height;
+        }
+    };
+
+    struct rgbpixel_t {
+        unsigned char r;
+        unsigned char g;
+        unsigned char b;
+    };
+
+    template<> class Loader<TEXD>: public LoaderContainer<float> {
+    public:
+        Loader(glm::ivec2 s): LoaderContainer(s) {}
+        Loader(Loader &&other): LoaderContainer(std::move(other)) {}
+    };
+
+    template<> class Loader<RGB>: public LoaderContainer<rgbpixel_t> {
+    public:
+        Loader(glm::ivec2 s): LoaderContainer(s) {}
+        Loader(Loader &&other): LoaderContainer(std::move(other)) {}
+    };
+
     /**
      * \brief Loader for RGBA png files
      */

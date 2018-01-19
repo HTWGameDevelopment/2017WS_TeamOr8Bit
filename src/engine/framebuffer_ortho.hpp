@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Fabian Stiewitz
+// Copyright (c) 2017-2018 Fabian Stiewitz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -17,18 +17,30 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#include "abstracttext.hpp"
+#ifndef QE_FRAMEBUFFER_ORTHO_HPP
+#define QE_FRAMEBUFFER_ORTHO_HPP
 
-#include "definedtext.hpp"
+#include<engine/framebuffer.hpp>
+#include<engine/textures.hpp>
 
-using namespace ui;
+namespace qe {
 
-DefinedRenderable *AbstractText::buildDefined(defp_t res) {
-    auto *i = new DefinedText();
-    i->dimension() = res * dimension();
-    i->margin() = res * margin();
-    i->padding() = res * padding();
-    i->text() = text();
-    i->set_fill(is_fill());
-    return i;
+    class FramebufferOrtho: public Framebuffer {
+    private:
+        Texture<TEXD, DIFFTEXBIND_GL> _depth;
+        Texture<RGB, DIFFTEXBIND_GL> _color;
+    public:
+        FramebufferOrtho(glm::ivec2 size): Framebuffer(), _depth(Loader<TEXD>(size)), _color(Loader<RGB>(size)) {
+            attach(GL_COLOR_ATTACHMENT0, _color);
+            attach(GL_DEPTH_ATTACHMENT, _depth);
+            valid();
+        }
+        virtual ~FramebufferOrtho() {}
+        Texture<RGB, DIFFTEXBIND_GL> &get_color() {
+            return _color;
+        }
+    };
+
 }
+
+#endif
