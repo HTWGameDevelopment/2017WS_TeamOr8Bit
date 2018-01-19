@@ -4,7 +4,6 @@
 #include<font/font.hpp>
 
 #include<engine/qe.hpp>
-#include<engine/framebuffer_ortho.hpp>
 
 #include<game/context/coordinatemenu.hpp>
 #include<game/match.hpp>
@@ -42,7 +41,6 @@ namespace gamespace {
             std::unique_ptr<qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>> hextile_grass;
         } _textures;
         std::unique_ptr<ui::DefinedUI> _ui;
-        qe::FramebufferOrtho *_mmfbo;
         struct SelectionState {
             enum Type { SEL_TO_MOVE, SEL_TO_ATTACK, SEL_NONE };
             Type type;
@@ -68,7 +66,6 @@ namespace gamespace {
         void enableAttackMask();
         void inCameraMode(bool mode);
         void createContextForLookAt();
-        void renderToMM();
         gamespace::Match &match() {
             return _match;
         }

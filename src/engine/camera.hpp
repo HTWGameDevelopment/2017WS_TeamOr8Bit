@@ -40,16 +40,12 @@ namespace qe {
          * \brief PV and V matrix
          */
         struct Matrices {
-            glm::mat4 op; //!< orthogonal perspective
-            glm::mat4 ov; //!< orthogonal view
-            glm::mat4 opv; //!< orthogonal P * V
             glm::mat4 ip; //!< inverse of P
             glm::mat4 iv; //!< inverse of V
             glm::mat4 pv; //!< P * V
             glm::mat4 v; //!< V
         };
     private:
-        enum CameraMode { PERSPECTIVE, ORTHO } _mode;
         Matrices _matrices; //!< Final matrices
         glm::mat4 _p; //!< P matrix
         glm::vec3 _pos; //!< Camera position
@@ -75,7 +71,7 @@ namespace qe {
          * \param fov Field of view
          */
         Camera(glm::vec3 pos, glm::vec2 angles, glm::vec2 res, float near, float far, float ar, float fov)
-            : _mode(PERSPECTIVE), _pos(pos), _angles(angles), _res(res), _locked(false), _save(0, 0) {
+            : _pos(pos), _angles(angles), _res(res), _locked(false), _save(0, 0) {
             _p = glm::perspective<float>(2 * fov * M_PI / 360.0, ar, near, far);
             regenerate();
         }
@@ -181,18 +177,6 @@ namespace qe {
         void moveDown(double deltaT) {
             _pos -= (float)deltaT * _up;
             regenerate();
-        }
-        void setOrtho(glm::vec3 o, glm::vec3 d) {
-            _matrices.op = _matrices.opv = glm::ortho(o.x, o.x + d.x,
-                                                      o.y, o.y + d.y,
-                                                      o.z, o.z + d.z);
-            _matrices.v = glm::translate(glm::vec3(0, 0, 0));
-        }
-        void setToOrtho() {
-            // TODO
-        }
-        void setToPerspective() {
-            // TODO
         }
     };
 

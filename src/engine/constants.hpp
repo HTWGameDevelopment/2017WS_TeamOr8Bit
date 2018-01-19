@@ -41,11 +41,8 @@ namespace qe {
     const flag_t OBJV2 = 3;
     const flag_t OBJV3 = 7;
     const flag_t PNGRGBA = 4;
-    const flag_t RGB = 8;
-    const flag_t TEXD = 9;
     const flag_t TEXTG = 5; //!< Glyphmap/Glyph mesh
     const flag_t LATIN = 6; //!< Latin (ASCII) character set
-    const flag_t NONE = 99;
 
     inline const char* constantToString(flag_t cons) {
         switch(cons) {

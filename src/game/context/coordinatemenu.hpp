@@ -26,22 +26,6 @@ inline void render_rectangle(ui::defp_t a, ui::defp_t b, glm::vec3 bg, glm::vec2
     render_button(origin - glm::vec2(1, 1), dimension, bg);
 }
 
-inline void render_sprite(glm::vec2 origin, glm::vec2 size, GLuint tex) {
-    qe::Cache::sprite2d->use();
-    // set shader
-    qe::Cache::sprite2d->setUniform<qe::UNIORIGIN>(origin);
-    qe::Cache::sprite2d->setUniform<qe::UNISIZE>(size);
-    qe::Cache::sprite2d->setUniform<qe::TEXTG>(tex);
-    // set vao
-    qe::Cache::meshm->render();
-}
-
-inline void render_sprite(ui::defp_t a, ui::defp_t b, glm::vec2 res, GLuint tex) {
-    glm::vec2 origin = glm::vec2(a.x, a.y) * glm::vec2(2, 2) / res;
-    glm::vec2 dimension = glm::vec2(b.x, b.y) * glm::vec2(2, 2) / res;
-    render_sprite(origin - glm::vec2(1, 1), dimension, tex);
-}
-
 inline glm::ivec2 to_ivec2(ui::defp_t t) {
     return glm::ivec2(t.x, t.y);
 }

@@ -29,6 +29,5 @@ DefinedRenderable *AbstractText::buildDefined(defp_t res) {
     i->margin() = res * margin();
     i->padding() = res * padding();
     i->text() = text();
-    i->set_fill(is_fill());
     return i;
 }
