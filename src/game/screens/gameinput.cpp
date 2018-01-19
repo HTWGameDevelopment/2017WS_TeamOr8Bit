@@ -38,8 +38,8 @@ void GameScreenInputState::mouse(double x, double y) {
     _last_y = y;
     if(_mouse_mode == UIINTERACTION) {
         assert(_selected_menu);
-        _selected_menu->origin() = _origin_save + ui::defp_t {(int)x, (int)(_resy-y)} - _mouse_save;
-        _selected_menu->get_model()->invalidate();
+        _selected_menu->origin() = _origin_save + ui::Point {x, _resy - y} - _mouse_save;
+        ((CoordinateMenu*)_selected_menu->payload())->invalidate();
     } else {
         _impl->camera()->mouseMoved(_impl->context()->deltaT(), x, y, _mouse_mode == LOCKED);
         if(_mouse_mode == LOCKED) {
@@ -58,7 +58,7 @@ void GameScreenInputState::button(int button, int action, int mods) {
         return;
     }
     if(action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT && _mouse_mode == FREE) {
-        ui::defp_t s{(int)_last_x, (int)(_resy-_last_y)};
+        ui::Point s{_last_x, _resy-_last_y};
         _selected_menu = _impl->ui()->hovers(s);
         if(_selected_menu) {
             _origin_save = _selected_menu->origin();

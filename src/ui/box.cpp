@@ -17,47 +17,172 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#include "definedbox.hpp"
-
-#include<assert.h>
+#include "box.hpp"
 
 using namespace ui;
 
-DefinedBox::DefinedBox(AbstractBox::Orientation o, AbstractBox::Growth g, AbstractBox::Align x, AbstractBox::Align y)
-: _orientation(o), _growth(g), _x(x), _y(y) {
-    dimension() = defp_t {0, 0};
-}
-
-void DefinedBox::set_root(DefinedRenderable *r) {
-    DefinedRenderable::set_root(r);
-    for(unsigned int i = 0; i < count(); ++i) {
-        operator[](i)->set_root(r);
-    }
-}
-
-void DefinedBox::render() {
-    DefinedRenderable::render();
-    for(unsigned int i = 0; i < count(); ++i) {
+void Box::render() {
+    Renderable::render();
+    for(size_t i = 0; i < count(); ++i) {
         operator[](i)->render();
     }
 }
 
-bool DefinedBox::is_dynamic() {
-    return _growth == AbstractBox::FILL;
+void Box::set_root(Renderable *r) {
+    Renderable::set_root(r);
+    for(size_t i = 0; i < count(); ++i) {
+        operator[](i)->set_root(r);
+    }
 }
 
-void DefinedBox::recalculate_dimension() {
-    defp_t dold = dimension();
-    dimension() = defp_t {0, 0};
-    DefinedRenderable *filling = nullptr;
+Renderable *Box::get(const char* coord) {
+    char* next;
+    int i = strtol(coord, &next, 10);
+    assert(i > 0);
+    assert(*next == '\0' || *next == '.');
+    if(_orientation == VERTICAL) i = count() - i + 1;
+    if(*next == '\0') return operator[](i - 1);
+    return operator[](i - 1)->get(next + 1);
+}
+
+void Box::show() {
+    Renderable::show();
+    for(size_t i = 0; i < count(); ++i) {
+        operator[](i)->show();
+    }
+}
+
+void Box::hide() {
+    Renderable::show();
+    for(size_t i = 0; i < count(); ++i) {
+        operator[](i)->hide();
+    }
+}
+
+bool Box::click(Point p) {
+    for(size_t i = 0; i < count(); ++i) {
+        if(operator[](i)->click(p)) return true;
+    }
+    return false;
+}
+
+void Box::convert_coords(Point mul) {
+    Area::convert_coords(mul);
+    for(size_t i = 0; i < count(); ++i) {
+        operator[](i)->convert_coords(mul);
+    }
+}
+
+void Box::__introspect(size_t off) {
+    Renderable::__introspect(off);
+    for(unsigned int i = 0; i < count(); ++i) {
+        operator[](i)->__introspect(off + 2);
+    }
+}
+
+void Box::recalculate_origin() {
+    Point current_origin = origin();
+    Renderable *filling = nullptr;
+    Point center_offset = Point {0, 0};
+    // set all except filling
     for(unsigned int i = 0; i < count(); ++i) {
         auto *it = operator[](i);
-        if(it->is_dynamic()) {
+        if(it->expand()) {
+            assert(filling == nullptr);
+            filling = it;
+            it->origin() = current_origin;
+        } else {
+            it->origin() = current_origin;
+            if(_orientation == VERTICAL) current_origin.y += it->dimension().y;
+            else current_origin.x += it->dimension().x;
+            center_offset += it->dimension();
+        }
+        it->recalculate_origin();
+    }
+
+    if(_orientation == VERTICAL) {
+        int xcenter;
+        switch(_x) {
+            case BEGINNING: break; // nothing to do here
+            case CENTER:
+                xcenter = (origin() + dimension() / Point {2, 2}).x;
+                for(unsigned int i = 0; i < count(); ++i) {
+                    auto *it = operator[](i);
+                    it->origin().x = xcenter - it->dimension().x / 2;
+                }
+                break;
+            case END:
+                for(unsigned int i = 0; i < count(); ++i) {
+                    auto *it = operator[](i);
+                    it->origin().x = dimension().x - it->origin().x - it->dimension().x;
+                }
+                break;
+        }
+        switch(_y) {
+            case BEGINNING: break; // nothing to do here
+            case CENTER:
+                if(filling != nullptr) break; // nothing to do if entire length is occupied
+                for(unsigned int i = 0; i < count(); ++i) {
+                    auto *it = operator[](i);
+                    it->origin().y += center_offset.y;
+                }
+                break;
+            case END:
+                for(unsigned int i = 0; i < count(); ++i) {
+                    auto *it = operator[](i);
+                    it->origin().y = dimension().y - it->origin().y - it->dimension().y;
+                }
+                break;
+        }
+    } else { // == HORIZONTAL
+        int ycenter;
+        switch(_y) {
+            case BEGINNING: break; // nothing to do here
+            case CENTER:
+                ycenter = (origin() + dimension() / Point {2, 2}).y;
+                for(unsigned int i = 0; i < count(); ++i) {
+                    auto *it = operator[](i);
+                    it->origin().y = ycenter - it->dimension().y / 2;
+                }
+                break;
+            case END:
+                for(unsigned int i = 0; i < count(); ++i) {
+                    auto *it = operator[](i);
+                    it->origin().y = dimension().y - it->origin().y - it->dimension().y;
+                }
+                break;
+        }
+        switch(_x) {
+            case BEGINNING: break; // nothing to do here
+            case CENTER:
+                if(filling != nullptr) break; // nothing to do if entire length is occupied
+                for(unsigned int i = 0; i < count(); ++i) {
+                    auto *it = operator[](i);
+                    it->origin().x += center_offset.x;
+                }
+                break;
+            case END:
+                for(unsigned int i = 0; i < count(); ++i) {
+                    auto *it = operator[](i);
+                    it->origin().x = dimension().x - it->origin().x - it->dimension().x;
+                }
+                break;
+        }
+    }
+}
+
+void Box::recalculate_dimension() {
+    Point dold = dimension() - padding();
+    dimension() = Point {0, 0};
+    Renderable *filling = nullptr;
+    for(unsigned int i = 0; i < count(); ++i) {
+        auto *it = operator[](i);
+        if(it->expand()) {
             assert(filling == nullptr);
             filling = it;
         } else {
             it->recalculate_dimension();
-            if(_orientation == AbstractBox::VERTICAL) {
+            if(_orientation == VERTICAL) {
                 auto d = it->dimension();
                 dimension().x = std::max(dimension().x, d.x);
                 dimension().y += d.y;
@@ -69,113 +194,20 @@ void DefinedBox::recalculate_dimension() {
         }
     }
     if(filling != nullptr) {
-        if(_orientation == AbstractBox::VERTICAL) {
+        if(_orientation == VERTICAL) {
             filling->dimension().x = std::max(dold.x, dimension().x);
             assert(dold.y >= dimension().y);
             filling->dimension().y = dold.y - dimension().y;
-            dimension().y = dold.y;
+            dimension().y = dold.y + padding().y;
         } else {
             filling->dimension().y = std::max(dold.y, dimension().y);
             assert(dold.x >= dimension().x);
             filling->dimension().x = dold.x - dimension().x;
-            dimension().x = dold.x;
+            dimension().x = dold.x + padding().x;
         }
         filling->recalculate_dimension();
     } else {
-        dimension().x = std::max(dimension().x, dold.x);
-        dimension().y = std::max(dimension().y, dold.y);
+        dimension().x = std::max(dimension().x, dold.x) + padding().x;
+        dimension().y = std::max(dimension().y, dold.y) + padding().y;
     }
-}
-
-void DefinedBox::recalculate_origin() {
-    defp_t current_origin = origin();
-    DefinedRenderable *filling = nullptr;
-    defp_t center_offset = defp_t {0, 0};
-    // set all except filling
-    for(unsigned int i = 0; i < count(); ++i) {
-        auto *it = operator[](i);
-        if(it->is_dynamic()) {
-            assert(filling == nullptr);
-            filling = it;
-            it->origin() = current_origin;
-        } else {
-            it->origin() = current_origin;
-            if(_orientation == AbstractBox::VERTICAL) current_origin.y += it->dimension().y;
-            else current_origin.x += it->dimension().x;
-            center_offset += it->dimension();
-        }
-        it->recalculate_origin();
-    }
-
-    if(_orientation == AbstractBox::VERTICAL) {
-        int xcenter;
-        switch(_x) {
-            case AbstractBox::BEGINNING: break; // nothing to do here
-            case AbstractBox::CENTER:
-                xcenter = (origin() + dimension() / defp_t {2, 2}).x;
-                for(unsigned int i = 0; i < count(); ++i) {
-                    auto *it = operator[](i);
-                    it->origin().x = xcenter - it->dimension().x / 2;
-                }
-                break;
-            case AbstractBox::END:
-                for(unsigned int i = 0; i < count(); ++i) {
-                    auto *it = operator[](i);
-                    it->origin().x = dimension().x - it->origin().x - it->dimension().x;
-                }
-                break;
-        }
-        switch(_y) {
-            case AbstractBox::BEGINNING: break; // nothing to do here
-            case AbstractBox::CENTER:
-                if(filling != nullptr) break; // nothing to do if entire length is occupied
-                for(unsigned int i = 0; i < count(); ++i) {
-                    auto *it = operator[](i);
-                    it->origin().y += center_offset.y;
-                }
-                break;
-            case AbstractBox::END:
-                for(unsigned int i = 0; i < count(); ++i) {
-                    auto *it = operator[](i);
-                    it->origin().y = dimension().y - it->origin().y - it->dimension().y;
-                }
-                break;
-        }
-    } else { // == HORIZONTAL
-        int ycenter;
-        switch(_y) {
-            case AbstractBox::BEGINNING: break; // nothing to do here
-            case AbstractBox::CENTER:
-                ycenter = (origin() + dimension() / defp_t {2, 2}).y;
-                for(unsigned int i = 0; i < count(); ++i) {
-                    auto *it = operator[](i);
-                    it->origin().y = ycenter - it->dimension().y / 2;
-                }
-                break;
-            case AbstractBox::END:
-                for(unsigned int i = 0; i < count(); ++i) {
-                    auto *it = operator[](i);
-                    it->origin().y = dimension().y - it->origin().y - it->dimension().y;
-                }
-                break;
-        }
-        switch(_x) {
-            case AbstractBox::BEGINNING: break; // nothing to do here
-            case AbstractBox::CENTER:
-                if(filling != nullptr) break; // nothing to do if entire length is occupied
-                for(unsigned int i = 0; i < count(); ++i) {
-                    auto *it = operator[](i);
-                    it->origin().x += center_offset.x;
-                }
-                break;
-            case AbstractBox::END:
-                for(unsigned int i = 0; i < count(); ++i) {
-                    auto *it = operator[](i);
-                    it->origin().x = dimension().x - it->origin().x - it->dimension().x;
-                }
-                break;
-        }
-    }
-
-    return;
 }

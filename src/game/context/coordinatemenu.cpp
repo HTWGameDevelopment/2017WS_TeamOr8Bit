@@ -5,12 +5,12 @@
 
 using namespace gamespace;
 
-CoordinateMenu::CoordinateMenu(BoardTile *b): _b(b), _u(b->unit()) {
+CoordinateMenu::CoordinateMenu(BoardTile *b, ui::UI *ui): _top(ui), _b(b), _u(b->unit()) {
     assert(_u);
 }
 
 void CoordinateMenu::destroy() {
-    _ui->ui()->hide_context_menu(_ui);
+    _top->hide_context_menu(_ui);
 }
 
 void CoordinateMenu::update() {

@@ -17,22 +17,20 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef UI_UIFACTORY_HPP
-#define UI_UIFACTORY_HPP
+#ifndef UI_TEXT_HPP
+#define UI_TEXT_HPP
 
-#include<ui/abstractui.hpp>
-#include<ui/definedui.hpp>
-#include<ui/abstract_common.hpp>
+#include<ui/common.hpp>
 
 namespace ui {
 
-    class UIFactory {
+    class Text: public Renderable {
     private:
-        DefinedUI _ui;
+        std::string _text;
     public:
-        UIFactory(AbstractUI &ui, DefinedNumber resx, DefinedNumber resy);
-        DefinedUI &get() {return _ui;}
-        DefinedUI &&release() {return std::move(_ui);}
+        std::string &text() {
+            return _text;
+        }
     };
 
 }

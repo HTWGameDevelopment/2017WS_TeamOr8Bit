@@ -17,19 +17,41 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef UI_ABSTRACT_UI_HPP
-#define UI_ABSTRACT_UI_HPP
+#ifndef UI_BOX_HPP
+#define UI_BOX_HPP
 
-#include<ui/abstract_common.hpp>
+#include<ui/common.hpp>
 
 namespace ui {
 
-    class AbstractUI {
-    private:
-        std::unique_ptr<AbstractRenderable> _container;
+    class Box: public Renderable, public Container {
     public:
-        void set_container(AbstractRenderable *r) {_container.reset(r);}
-        AbstractRenderable *get() {return _container.get();}
+        enum Orientation { HORIZONTAL, VERTICAL };
+        enum Align { BEGINNING, CENTER, END };
+    private:
+        Orientation _orientation;
+        Align _x;
+        Align _y;
+    public:
+        Orientation &orientation() {
+            return _orientation;
+        }
+        Align &align_x() {
+            return _x;
+        }
+        Align &align_y() {
+            return _y;
+        }
+        virtual void render();
+        virtual void set_root(Renderable *r);
+        virtual Renderable *get(const char* str);
+        virtual void show();
+        virtual void hide();
+        virtual bool click(Point p);
+        virtual void recalculate_origin();
+        virtual void recalculate_dimension();
+        virtual void convert_coords(Point mul);
+        virtual void __introspect(size_t off);
     };
 
 }
