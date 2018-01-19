@@ -5,6 +5,7 @@
 
 #include<engine/qe.hpp>
 
+#include<game/context/coordinatemenu.hpp>
 #include<game/match.hpp>
 
 #include<ui/abstractbox.hpp>
@@ -21,14 +22,20 @@ namespace gamespace {
 
     class GameScreenImpl {
     private:
+        static const char* ground_names[16];
         qe::Context *_ctxt;
         gamespace::Match _match;
         std::shared_ptr<font::Font> _font;
         std::unique_ptr<qe::Mesh<qe::OBJV1>> _cube;
         std::unique_ptr<qe::Mesh<qe::OBJV2>> _tile;
         std::unique_ptr<qe::Mesh<qe::OBJV3>> _tank;
+        std::unique_ptr<qe::Mesh<qe::OBJV3>> _ground;
+        std::unique_ptr<qe::Program> _terrain_shader;
+        std::unique_ptr<qe::Buffer<GL_UNIFORM_BUFFER, uint32_t>> _marker_buffer;
+        std::array<qe::subobj_t, 16> _ground_indices;
         struct CameraData {
             std::unique_ptr<qe::Camera> camera;
+            bool controlling;
         } _cam;
         struct Textures {
             std::unique_ptr<qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>> hextile_grass;
@@ -42,18 +49,23 @@ namespace gamespace {
         } _selection;
         bool _shouldClose;
         void render();
-        void renderTile(gamespace::BoardTile *b, glm::vec3 ho);
+        void renderTerrain();
+        void renderUnitOf(gamespace::BoardTile *b);
     public:
         GameScreenImpl(gamespace::Match &&match, qe::Context *ctxt, std::shared_ptr<font::Font> font);
         void pre_run();
         void run();
         void deactivate();
+        void initializeShaders();
+        void initializeBuffers();
         void initializeAssets();
         void initializeMap();
         void initializeSelection();
         void initializeHUD();
         void enableMoveMask();
         void enableAttackMask();
+        void inCameraMode(bool mode);
+        void createContextForLookAt();
         gamespace::Match &match() {
             return _match;
         }
@@ -63,6 +75,10 @@ namespace gamespace {
         qe::Context *context() {
             return _ctxt;
         }
+        ui::DefinedUI *ui() {
+            return _ui.get();
+        }
+        void __introspect(size_t off);
     };
 }
 

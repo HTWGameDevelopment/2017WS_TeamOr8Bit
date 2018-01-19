@@ -7,7 +7,7 @@ using namespace gamespace;
 GameBoard::GameBoard(int x, int y): hextile::HexTile<BoardTile, 4>(x, y) {
     for(int i = 0; i < _x; ++i) {
         for(int j = 0; j < _y; ++j) {
-            _data[i][j].setBoard(this);
+            _data[i * _y + j].setBoard(this);
         }
     }
 }
@@ -15,11 +15,20 @@ GameBoard::GameBoard(int x, int y): hextile::HexTile<BoardTile, 4>(x, y) {
 GameBoard::GameBoard(GameBoard &&other): hextile::HexTile<BoardTile, 4>(std::move(other)) {
     for(int i = 0; i < _x; ++i) {
         for(int j = 0; j < _y; ++j) {
-            _data[i][j].setBoard(this);
+            _data[i * _y + j].setBoard(this);
         }
     }
 }
 
+void GameBoard::synchronize() {
+    for(int i = 0; i < x(); ++i) {
+        for(int j = 0; j < y(); ++j) {
+            if(operator[](i)[j].unit()) {
+                operator[](i)[j].unit()->tile() = &operator[](i)[j];
+            }
+        }
+    }
+}
 BoardTile::~BoardTile() {
     delete _unit;
 }
@@ -59,6 +68,8 @@ void GameBoard::moveUnit(hexpoint_t from, hexpoint_t to) {
     assert(tt.unit() == nullptr);
     tt.setUnit(ft.unit());
     ft.setUnit(nullptr);
+    tt.unit()->tile() = &tt;
+    // TODO Map events
 }
 
 void GameBoard::attackUnit(hexpoint_t from, hexpoint_t to) {
@@ -69,4 +80,9 @@ void GameBoard::attackUnit(hexpoint_t from, hexpoint_t to) {
     assert(ft.unit()->player() != tt.unit()->player());
     tt.unit()->attackedWith(*ft.unit());
     if(tt.unit()->dead()) tt.destroyUnit();
+}
+
+void BoardTile::__introspect(size_t off) {
+    std::cout << std::string(off, ' ') << "BoardTile[" << _p.x << "," << _p.y << "]" << std::endl;
+    if(_unit) _unit->__introspect(off + 2);
 }

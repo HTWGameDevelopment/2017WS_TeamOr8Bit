@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Fabian Stiewitz
+// Copyright (c) 2017-2018 Fabian Stiewitz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -110,4 +110,26 @@ void GlyphmapLatin::bake() {
     uint32_t linespace = _linespace;
     sg.storeDataBlock("linespace", 4, (unsigned char*)&linespace);
     sg.save();
+}
+
+void GlyphmapLatin::__introspect(size_t off) {
+    std::cout << std::string(off, ' ') << "GlyphmapLatin" << std::endl;
+    std::string os(off + 2, ' ');
+    std::cout << os << "path=" << _path << std::endl;
+    std::cout << os << "res=" << GV2TOSTR(_res) << std::endl;
+    _glyphmap->__introspect(off + 2);
+    std::cout << os << "offsets=" << std::endl;
+    for(size_t i = 0; i < _metrics.size(); ++i) {
+        std::cout << os << "  ";
+        printf("%04zu %04zu %04zu %04zu %04zu %04zi %04zi %04zi %04zi\n",
+            i,
+            _metrics[i].x,
+            _metrics[i].y,
+            _metrics[i].w,
+            _metrics[i].h,
+            _metrics[i].off_x,
+            _metrics[i].off_y,
+            _metrics[i].adv_x,
+            _metrics[i].adv_y);
+    }
 }

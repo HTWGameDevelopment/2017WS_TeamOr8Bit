@@ -5,6 +5,8 @@
 
 #include<hextile/hextile.hpp>
 
+#include<engine/buffer.hpp>
+
 namespace gamespace {
     class GameBoard: public hextile::HexTile<BoardTile, 4> {
     public:
@@ -13,6 +15,7 @@ namespace gamespace {
         GameBoard(GameBoard &&other);
         void moveUnit(hexpoint_t from, hexpoint_t to);
         void attackUnit(hexpoint_t from, hexpoint_t to);
+        void synchronize();
     };
 }
 #endif

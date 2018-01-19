@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Fabian Stiewitz
+// Copyright (c) 2017-2018 Fabian Stiewitz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -142,6 +142,9 @@ namespace qe {
         void resetMouse() {
             glfwSetCursorPos(_window, 0, 0);
         }
+        void resetMouseToCenter() {
+            glfwSetCursorPos(_window, _w / 2, _h / 2);
+        }
         /**
          * \brief Return mouse position
          */
@@ -217,9 +220,12 @@ namespace qe {
         /**
          * \brief Display cursor
          */
-        void displayCursor(glm::dvec2 pos = glm::dvec2(0, 0)) {
+        void displayCursor(glm::dvec2 pos) {
             glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             glfwSetCursorPos(_window, pos.x, pos.y);
+        }
+        void displayCursor() {
+            glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
         /**
          * \brief Hide cursor (FPS mode)
@@ -307,6 +313,9 @@ namespace qe {
          */
         inline unsigned int height() {
             return _h;
+        }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "Context[" << _w << "," << _h << "]" << std::endl;
         }
     };
 }

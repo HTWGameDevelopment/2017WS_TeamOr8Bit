@@ -3,6 +3,7 @@
 
 #include<glm/glm.hpp>
 
+#include<logger.h>
 #include<string>
 
 namespace gamespace {
@@ -19,6 +20,9 @@ namespace gamespace {
         }
         std::string name() {
             return _name;
+        }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "Player[" << _name << "," << GV3TOSTR(_color) << "]" << std::endl;
         }
     };
 }

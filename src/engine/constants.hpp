@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Fabian Stiewitz
+// Copyright (c) 2017-2018 Fabian Stiewitz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,20 @@ namespace qe {
     const flag_t TEXTG = 5; //!< Glyphmap/Glyph mesh
     const flag_t LATIN = 6; //!< Latin (ASCII) character set
 
+    inline const char* constantToString(flag_t cons) {
+        switch(cons) {
+            case VERTEX: return "VERTEX";
+            case FRAGMENT: return "FRAGMENT";
+            case OBJV1: return "OBJV1";
+            case OBJV2: return "OBJV2";
+            case OBJV3: return "OBJV3";
+            case PNGRGBA: return "PNGRGBA";
+            case TEXTG: return "TEXTG";
+            case LATIN: return "LATIN";
+            default: return "lolwhat?";
+        }
+    }
+
 // UNIFORMS
     const flag_t UNIMVP = 0;
     const flag_t UNIM = 1;
@@ -53,8 +67,11 @@ namespace qe {
     const flag_t UNICOLOR = 5; //!< color uniform
     const flag_t UNITEXTUVP = 6; //!< text uv position uniform
     const flag_t UNITEXTUVS = 7; //!< text uv scale uniform
+    const flag_t UNITEXTBG = 8; //!< text background
+    const flag_t UNITEXTFG = 9; //!< text foreground
     const flag_t UNIORIGIN = 0; //!< 2D sprite origin
     const flag_t UNISIZE = 1; //!< 2D sprite size
+    const flag_t UNISEL = 8; //!< Selection coordinate
 
 // TEXTURE BINDING POINTS
     const flag_t DIFFTEXBIND = 0;

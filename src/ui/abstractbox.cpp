@@ -26,6 +26,7 @@ using namespace ui;
 DefinedRenderable *AbstractBox::buildDefined(defp_t res) {
     DefinedBox *defb = new DefinedBox(_orientation, _growth, _x, _y);
     for(auto i = 0; i < count(); ++i)
-        defb->append(operator[](i)->buildDefined(res));
+            defb->append(operator[](count() - 1 - i)->buildDefined(res));
+
     return defb;
 }

@@ -40,6 +40,8 @@ namespace qe {
          * \brief PV and V matrix
          */
         struct Matrices {
+            glm::mat4 ip; //!< inverse of P
+            glm::mat4 iv; //!< inverse of V
             glm::mat4 pv; //!< P * V
             glm::mat4 v; //!< V
         };
@@ -51,8 +53,11 @@ namespace qe {
         glm::vec3 _right; //!< Right vector
         glm::vec3 _up; //!< Up vector
         glm::vec2 _angles; //!< View angles
+        glm::vec2 _res; //!< Screen resolution
         glm::vec3 _planecoord; //!<viewed plane
         CameraBounds _bounds; //!<Extern Camera Bounds
+        bool _locked; //!< Matrices locked?
+        glm::vec2 _save; //!< Holds mouse position for movement
     public:
         /**
          * Constructs a new camera object
@@ -65,8 +70,8 @@ namespace qe {
          * \param ar Aspect ratio
          * \param fov Field of view
          */
-        Camera(glm::vec3 pos, glm::vec2 angles, float near, float far, float ar, float fov)
-            : _pos(pos), _angles(angles) {
+        Camera(glm::vec3 pos, glm::vec2 angles, glm::vec2 res, float near, float far, float ar, float fov)
+            : _pos(pos), _angles(angles), _res(res), _locked(false), _save(0, 0) {
             _p = glm::perspective<float>(2 * fov * M_PI / 360.0, ar, near, far);
             regenerate();
         }
@@ -77,14 +82,25 @@ namespace qe {
          * \param x X coord of pointer
          * \param y Y coord of pointer
          */
-        void mouseMoved(double deltaT, double x, double y) {
-            _angles.x -= deltaT * x;
-            _angles.y -= deltaT * y;
+        void mouseMoved(double deltaT, double x, double y, bool unlocked_matrix = true) {
+            _locked = !unlocked_matrix;
+            _save.x = x;
+            _save.y = y;
+            if(unlocked_matrix) {
+                _angles.x -= deltaT * x;
+                _angles.y -= deltaT * y;
 
-            if(_angles.y >= M_PI / 2.0) _angles.y = M_PI / 2.0;
-            else if(_angles.y <= -M_PI / 2.0) _angles.y = -M_PI / 2.0;
+                if(_angles.y >= M_PI / 2.0) _angles.y = M_PI / 2.0;
+                else if(_angles.y <= -M_PI / 2.0) _angles.y = -M_PI / 2.0;
 
-            regenerate();
+                regenerate();
+            } else {
+                glm::vec2 rf = (glm::vec2(x, _res.y - y) - (_res / 2.0f)) / (_res / 2.0f);
+                glm::vec4 r = _matrices.ip * glm::vec4(rf.x, rf.y, -1, 1);
+                r = _matrices.iv * glm::vec4(r.x, r.y, -1, 1);
+                _dir = glm::normalize(glm::vec3(r.x, r.y, r.z) - _pos);
+                _planecoord = getPlaneCoord();
+            }
         }
         /**
          * \brief Regenerate matrices
@@ -104,7 +120,10 @@ namespace qe {
             _up = glm::normalize(_up);
             _matrices.v = glm::lookAt(_pos, _pos + _dir, _up);
             _matrices.pv = _p * _matrices.v;
+            _matrices.ip = glm::inverse(_p);
+            _matrices.iv = glm::inverse(_matrices.v);
             _planecoord = getPlaneCoord();
+            if(_locked) mouseMoved(0, _save.x, _save.y, false);
         }
         inline glm::vec3 generateDirection() {
             return glm::vec3(cos(_angles.y) * sin(_angles.x),

@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Fabian Stiewitz
+// Copyright (c) 2017-2018 Fabian Stiewitz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -36,8 +36,10 @@ namespace qe {
         static qe::Program *objv3; //!< OBJv3 shader
         static qe::Program *texts; //!< text shader
         static qe::Program *sprite2d; //!< 2D sprite shader
+        static qe::Program *sprite2dcolor; //!< 2D sprite color shader
         static qe::Mesh<TEXTG> *meshm; //!< glyph rendering mesh
         static qe::Texture<PNGRGBA, DIFFTEXBIND_GL> *buttont; //!< 2D button texture
+        static void __introspect(size_t off);
         /**
          * \brief Destroy all objects
          */
@@ -48,6 +50,7 @@ namespace qe {
             delete objv3;
             delete texts;
             delete sprite2d;
+            delete sprite2dcolor;
             delete meshm;
             delete buttont;
         }

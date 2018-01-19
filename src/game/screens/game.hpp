@@ -56,6 +56,10 @@ namespace gamespace {
             if(_block_input) return;
             _input->idle();
         }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "GameScreen" << std::endl;
+            if(_impl.get()) _impl->__introspect(off + 2);
+        }
     };
 }
 

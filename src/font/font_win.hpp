@@ -20,6 +20,7 @@
 #ifndef _FONT_LINUX_HPP
 #define _FONT_LINUX_HPP
 
+#include<iostream>
 #include<string>
 #include<stdexcept>
 #include<assert.h>
@@ -43,6 +44,9 @@ namespace font {
         }
         std::string bpath() {
             return _bpath;
+        }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "Font<Baked>[" << _bpath << "]" << std::endl;
         }
     };
 

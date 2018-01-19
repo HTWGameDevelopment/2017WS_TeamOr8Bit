@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Fabian Stiewitz
+// Copyright (c) 2017-2018 Fabian Stiewitz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +20,7 @@
 #ifndef HEXTILE_HPP
 #define HEXTILE_HPP
 
+#include<iostream>
 #include<functional>
 #include<memory>
 #include<string>
@@ -33,6 +34,12 @@ namespace hextile {
         std::string string() {
             return std::string("(") + std::to_string(x) + "," + std::to_string(y) + ")";
         }
+        bool operator==(const hexpoint_t &other) {
+            return x == other.x && y == other.y;
+        }
+        bool operator!=(const hexpoint_t &other) {
+            return x != other.x || y != other.y;
+        }
     };
 
     struct marker_t {
@@ -43,43 +50,34 @@ namespace hextile {
     /**
      * \brief A 2D board of hexagonal tiles of type T
      */
-    template<typename T, unsigned int L>
+    template<typename T, unsigned int L, typename C = std::array<unsigned int, L>>
     class HexTile {
     public:
         typedef T tile_type;
-        /**
-         * \brief Sub-class representing one row of tiles
-         */
-        struct col_type {
-            std::vector<tile_type> rows;
-            col_type() {}
-            col_type(const col_type &other) = delete;
-            col_type(col_type &&other): rows(std::move(other.rows)) {}
-            col_type &operator=(const col_type &other) = delete;
-            col_type &operator=(col_type &&other) {
-                rows = std::move(other.rows);
-                return *this;
-            }
+        typedef typename std::vector<tile_type>::iterator hexiterator;
+        class col_type {
+        private:
+            tile_type *_data;
+        public:
+            col_type(tile_type *d): _data(d) {}
             tile_type &operator[](size_t i) {
-                return rows[i];
-            }
-            void push_back(tile_type &&t) {
-                rows.push_back(std::move(t));
+                return _data[i];
             }
         };
+        const unsigned int marker_count = L;
     protected:
         size_t _x;
         size_t _y;
-        std::vector<col_type> _data;
-        std::array<unsigned int, L> _marker_ids;
+        std::vector<tile_type> _data;
+        C _marker_ids;
         unsigned int _current_layer;
         class edgeiterator {
         private:
-            HexTile<T, L> *_board;
+            HexTile<T, L, C> *_board;
             hexpoint_t _coord;
             unsigned int _step;
         public:
-            edgeiterator(HexTile<T, L> *board, hexpoint_t coord): _board(board), _coord(coord), _step(0) {}
+            edgeiterator(HexTile<T, L, C> *board, hexpoint_t coord): _board(board), _coord(coord), _step(0) {}
             T *next() {
                 auto step = _step++;
 
@@ -123,83 +121,35 @@ namespace hextile {
         }
     public:
         HexTile(size_t x, size_t y): _x(x), _y(y) {
-            for(int i = 0; i < L; ++i)
-                _marker_ids[i] = 0;
+            resetMarkers();
             for(int i = 0; i < _x; ++i) {
-                col_type t;
                 for(int j = 0; j < _y; ++j) {
-                    t.push_back(T(nullptr, hexpoint_t {i, j}));
+                    _data.push_back(T(nullptr, hexpoint_t {i, j}));
                 }
-                _data.push_back(std::move(t));
             }
         }
         HexTile(const HexTile &other) = delete;
-        HexTile(HexTile &&other): _x(other._x), _y(other._y), _data(std::move(other._data)), _marker_ids(other._marker_ids) {}
+        HexTile(HexTile &&other): _x(other._x), _y(other._y), _data(std::move(other._data)), _marker_ids(std::move(other._marker_ids)) {}
         ssize_t x() {
             return _x;
         }
         ssize_t y() {
             return _y;
         }
-        col_type &operator[](size_t i) {
-            return _data[i];
+        C &get_marker_container() {
+            return _marker_ids;
+        }
+        col_type operator[](size_t i) {
+            return col_type(_data.data() + i * _y);
         }
         T &get(hexpoint_t i) {
-            return _data[i.x][i.y];
+            return _data[i.x * _y + i.y];
         }
-        /**
-         * \brief Iterator over all tiles
-         */
-        class hexiterator {
-        private:
-            typedef typename std::vector<col_type>::iterator bigiter;
-            typedef typename std::vector<tile_type>::iterator smalliter;
-            bigiter _bigiter;
-            smalliter _smalliter;
-            bigiter _bigend;
-            smalliter _smallend;
-        public:
-            hexiterator(HexTile<T, L> &cont): _bigiter(cont._data.begin()), _smalliter(_bigiter->rows.begin()), _bigend(cont._data.end()), _smallend(_bigiter->rows.end()) {}
-            bool operator==(hexiterator &other) {
-                if(_bigend != other._bigend) return false; // wrong iterator pair
-
-                if(other._bigiter == _bigiter && _bigiter == _bigend) return true; // iter == end()?
-
-                return (other._bigiter == _bigiter) && (other._smalliter == _smalliter);
-            }
-            bool operator!=(hexiterator &other) {
-                return !(*this == other);
-            }
-            hexiterator &operator++() {
-                ++_smalliter;
-
-                if(_smalliter == _smallend) {
-                    ++_bigiter;
-
-                    if(_bigiter == _bigend) return *this;
-
-                    _smalliter = _bigiter->rows.begin();
-                    _smallend = _bigiter->rows.end();
-                }
-
-                return *this;
-            }
-            T *operator->() {
-                return _smalliter.operator->();
-            }
-            T &operator*() {
-                return *_smalliter;
-            }
-            hexiterator &end() {
-                _bigiter = _bigend;
-                return *this;
-            }
-        };
         hexiterator begin() {
-            return hexiterator(*this);
+            return _data.begin();
         }
         hexiterator end() {
-            return hexiterator(*this).end();
+            return _data.end();
         }
         unsigned int currentMarker(unsigned int layer) {
             return _marker_ids[layer];
@@ -212,6 +162,15 @@ namespace hextile {
         }
         void clearMarker(unsigned int layer) {
             ++_marker_ids[layer];
+        }
+        void resetMarkers() {
+            for(int i = 0; i < L; ++i)
+                _marker_ids[i] = 0;
+        }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "HexTile[" << _x << "," << _y << "]" << std::endl;
+            for(size_t i = 0; i < _x * _y; ++i)
+                _data[i].__introspect(off + 2);
         }
     };
 

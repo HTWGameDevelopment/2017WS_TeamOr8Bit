@@ -21,6 +21,7 @@
 #define UI_DEFINED_UI_HPP
 
 #include<ui/abstract_common.hpp>
+#include<ui/contextui.hpp>
 
 #include<iostream>
 
@@ -32,14 +33,27 @@ namespace ui {
     class DefinedUI {
     private:
         std::unique_ptr<DefinedRenderable> _container;
+        std::vector<std::unique_ptr<DefinedContextUI>> _context_menus;
         defp_t _res;
     public:
         DefinedUI(DefinedNumber resx, DefinedNumber resy): _res{resx, resy} {}
-        void set_container(DefinedRenderable *r) {_container.reset(r);}
+        void set_container(DefinedRenderable *r) {
+            _container.reset(r);
+            _container->set_root(_container.get());
+        }
+        void add_context_menu(DefinedContextUI *r) {
+            _context_menus.emplace_back(r);
+            r->recalculate_dimension();
+            r->recalculate_origin();
+            r->show();
+        }
         defp_t resolution() {return _res;}
         void recalculate();
         void render() {
             if(_container.get()) _container->render();
+            for(auto &i : _context_menus) {
+                if(i->active()) i->render();
+            }
         }
         DefinedRenderable *get(const char* coord) {
             char* next;
@@ -49,12 +63,32 @@ namespace ui {
             if(*next == '\0') return _container.get();
             return _container->get(next + 1);
         }
-        void debug() {
-            std::cerr << "UI[" << _res.x << "," << _res.y << "]" << std::endl;
-            if(_container.get()) _container->debug(0);
+        void __introspect(size_t off = 0) {
+            std::cout << std::string(off, ' ') << "UI[" << _res.x << "," << _res.y << "]" << std::endl;
+            if(_container.get()) _container->__introspect(off + 2);
+            for(auto &i : _context_menus)
+                i->__introspect(off + 2);
+        }
+        void hide_context_menu(DefinedContextUI *ui) {
+            assert(ui);
+            for(auto i = _context_menus.begin(); i != _context_menus.end(); ++i) {
+                if(i->get() == ui) {
+                    ui->hide();
+                    _context_menus.erase(i);
+                }
+            }
         }
         void click(defp_t pos) {
+            for(auto &i : _context_menus) {
+                if(i->click(pos)) return;
+            }
             if(_container.get()) _container->click(pos);
+        }
+        DefinedContextUI *hovers(defp_t pos) {
+            for(auto &i : _context_menus) {
+                if(i->get_inner()->hovers(pos)) return i.get();
+            }
+            return nullptr;
         }
     };
 

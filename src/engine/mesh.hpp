@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Fabian Stiewitz
+// Copyright (c) 2017-2018 Fabian Stiewitz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -39,114 +39,13 @@ namespace qe {
         GLuint _vao; //!< OpenGL VAO handle
         size_t _size; //!< Vertex count
         size_t _elementsize; //!< Size per vertex in bytes
-        /**
-         * \brief Initialize VAO
-         */
-        void initVAO() {
-            if(T == OBJV1) return initVAOAsOBJV1();
-            else if(T == OBJV2) return initVAOAsOBJV2();
-            else if(T == OBJV3) return initVAOAsOBJV3();
-
-            assert(false);
-        }
-        /**
-         * \brief Initialize VAO for an OBJV1 mesh
-         */
-        void initVAOAsOBJV1() {
-            glGenVertexArrays(1, &_vao);
-            GLSERRORCHECK;
-            glBindVertexArray(_vao);
-            GLSERRORCHECK;
-            glEnableVertexAttribArray(0);
-            GLSERRORCHECK;
-            _buffer.bind();
-            glVertexAttribPointer(
-                (GLuint)0,
-                3,
-                GL_FLOAT,
-                GL_FALSE,
-                0,
-                (void *)0
-            );
-            GLSERRORCHECK;
-            glBindVertexArray(0);
-        }
-        /**
-         * \brief Initialize VAO for an OBJV2 mesh
-         */
-        void initVAOAsOBJV2() {
-            glGenVertexArrays(1, &_vao);
-            GLSERRORCHECK;
-            glBindVertexArray(_vao);
-            GLSERRORCHECK;
-            glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(1);
-            glEnableVertexAttribArray(2);
-            GLSERRORCHECK;
-            _buffer.bind();
-            glVertexAttribPointer(
-                (GLuint)0, // vertex
-                3,
-                GL_FLOAT,
-                GL_FALSE,
-                _elementsize,
-                (void *)0
-            );
-            glVertexAttribPointer(
-                (GLuint)1, // uv
-                2,
-                GL_FLOAT,
-                GL_FALSE,
-                _elementsize,
-                (void *)12 // 3 * float
-            );
-            glVertexAttribPointer(
-                (GLuint)2, // normal
-                3,
-                GL_FLOAT,
-                GL_FALSE,
-                _elementsize,
-                (void *)20 // 5 * float
-            );
-            GLSERRORCHECK;
-            glBindVertexArray(0);
-        }
-        /**
-         * \brief Initialize VAO for an OBJV3 mesh
-         */
-        void initVAOAsOBJV3() {
-            glGenVertexArrays(1, &_vao);
-            GLSERRORCHECK;
-            glBindVertexArray(_vao);
-            GLSERRORCHECK;
-            glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(2);
-            GLSERRORCHECK;
-            _buffer.bind();
-            glVertexAttribPointer(
-                (GLuint)0, // vertex
-                3,
-                GL_FLOAT,
-                GL_FALSE,
-                _elementsize,
-                (void *)0
-            );
-            glVertexAttribPointer(
-                (GLuint)2, // normal
-                3,
-                GL_FLOAT,
-                GL_FALSE,
-                _elementsize,
-                (void *)12 // 3 * float
-            );
-            GLSERRORCHECK;
-            glBindVertexArray(0);
-        }
+        std::vector<subobj_t> _objects; //!< Sub-objects in buffer
+        void initVAO();
     public:
         /**
          * \brief Construct mesh from Loader
          */
-        Mesh(Loader<T> &&l): _size(l.size()), _elementsize(l.elementSize()) {
+        Mesh(Loader<T> &&l): _size(l.size()), _elementsize(l.elementSize()), _objects(std::move(l.objects())) {
             _buffer.data<GL_STATIC_DRAW>(l.parse().data(), _elementsize * _size);
             initVAO();
         }
@@ -168,6 +67,25 @@ namespace qe {
             GLSERRORCHECK;
             glDrawArrays(GL_TRIANGLES, 0, _size);
             GLSERRORCHECK;
+        }
+        void render_sub(subobj_t &obj) {
+            glBindVertexArray(_vao);
+            GLSERRORCHECK;
+            glDrawArrays(GL_TRIANGLES, obj.index, obj.size);
+            GLSERRORCHECK;
+        }
+        subobj_t get_object(std::string name) {
+            for(size_t i = 0; i < _objects.size(); ++i) {
+                if(_objects[i].name == name) return _objects[i];
+            }
+            throw loader_error("could not find sub-object " + name, __FILE__, __LINE__);
+        }
+        void __introspect(size_t off) {
+            std::cout << std::string(off, ' ') << "Mesh<" << constantToString(T) << ">[" << _size << " of " << _elementsize  << " bytes]"<< std::endl;
+            for(size_t i = 0; i < _objects.size(); ++i) {
+                auto &o = _objects[i];
+                std::cout << std::string(off + 2, ' ') << "subobj[" << o.name << " of " << o.size << "@" << o.index << "]" << std::endl;
+            }
         }
     };
 

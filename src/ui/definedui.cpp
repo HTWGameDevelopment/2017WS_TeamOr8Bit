@@ -24,5 +24,6 @@ using namespace ui;
 void DefinedUI::recalculate() {
     _container->dimension() = _res;
     _container->origin() = defp_t {0, 0};
-    _container->recalculate();
+    _container->recalculate_dimension();
+    _container->recalculate_origin();
 }
