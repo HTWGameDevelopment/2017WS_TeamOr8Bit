@@ -39,10 +39,6 @@ const char* GameScreenImpl::ground_names[16] = {
 #define DamMain_CUBezierCurve 14
 #define Ground_Plane_002 15
 
-inline glm::ivec2 to_ivec2(ui::defp_t t) {
-    return glm::ivec2(t.x, t.y);
-}
-
 inline glm::uvec2 to_uvec2(hextile::hexpoint_t t) {
     return glm::uvec2(t.x, t.y);
 }
@@ -109,6 +105,7 @@ void GameScreenImpl::initializeSelection() {
 }
 
 void GameScreenImpl::initializeHUD() {
+    // fixed UI
     ui::AbstractUI ui;
     std::unique_ptr<ui::AbstractBox> box(new ui::AbstractBox());
     std::unique_ptr<ui::AbstractText> text(new ui::AbstractText());
@@ -123,7 +120,23 @@ void GameScreenImpl::initializeHUD() {
     ui.set_container(box.release());
 
     _ui.reset(new ui::DefinedUI(ui::UIFactory(ui, _ctxt->width(), _ctxt->height()).release()));
+    // set callbacks
     auto *t = _ui->get("1.1");
+    // TODO Various text rendering issues
+    auto text_renderer = [this](ui::DefinedRenderable *t) mutable {
+        if(t->payload() == nullptr) {
+            t->payload() = new text_t(
+                ((ui::DefinedText*)t)->text(),
+                qe::Cache::glyphlatin,
+                // to_ivec2(t->origin() + t->margin() + t->padding() + ui::absp_t {0, 0.5} * (t->dimension() - t->margin() - t->padding())),
+                to_ivec2(t->origin() + t->margin() + t->padding()),
+                (int)(0.5 * (t->dimension().y - t->margin().y - t->padding().y)),
+                (int)(t->dimension().x - t->margin().x - t->padding().x));
+        }
+        text_t *pl = (text_t*)t->payload();
+        pl->foreground() = glm::vec3(0, 0, 0);
+        pl->render();
+    };
     t->render_with([this](ui::DefinedRenderable *t) mutable {
         if(t->payload() == nullptr) {
             t->payload() = new text_t(
@@ -133,7 +146,9 @@ void GameScreenImpl::initializeHUD() {
                 (int)(0.5 * (t->dimension().y - t->margin().y - t->padding().y)),
                 (int)(t->dimension().x - t->margin().x - t->padding().x));
         }
-        ((text_t*)(t->payload()))->render();
+        text_t *pl = (text_t*)t->payload();
+        pl->foreground() = glm::vec3(1, 1, 1);
+        pl->render();
     });
     t->payload([](void* t){delete (text_t*)t;});
     _match.observe_player_change([this, t](auto np) {
@@ -175,9 +190,11 @@ void GameScreenImpl::initializeAssets() {
     }
     // TEXTURES
     _textures.hextile_grass.reset(new qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>(qe::Loader<qe::PNGRGBA>("assets/textures/hextile-grass.png"_p)));
+    _cam.controlling = false;
     _cam.camera.reset(new qe::Camera(
                           glm::vec3(4, 4, 4),
                           glm::vec2(-45, -45),
+                          _ctxt->getResolution(),
                           0.1,
                           30,
                           _ctxt->getAR(),
@@ -191,7 +208,7 @@ void GameScreenImpl::initializeMap() {
     for(; b != e; ++b) {
         b->setUnit(nullptr);
     }
-    auto *u1 = new gamespace::Unit(_tank.get(), &_match.player1(),
+    auto *u1 = new gamespace::Unit(_tank.get(), &_match.player1(), "Tank",
         100,
         50,
         50,
@@ -202,7 +219,7 @@ void GameScreenImpl::initializeMap() {
         gamespace::defaultFalloff,
         gamespace::defaultFalloff,
         gamespace::defaultFalloff);
-    auto *u2 = new gamespace::Unit(_tank.get(), &_match.player2(),
+    auto *u2 = new gamespace::Unit(_tank.get(), &_match.player2(), "Tank",
         100,
         50,
         50,
@@ -222,6 +239,7 @@ void GameScreenImpl::initializeMap() {
     _match.board()[1][5].setUnit(new gamespace::Unit(*u2));
     _match.board()[0][6].setUnit(new gamespace::Unit(*u2));
     _match.board()[1][6].setUnit(new gamespace::Unit(*u2));
+    _match.board().synchronize();
     delete u1;
     delete u2;
     // _match.board()[0][0].unit()->markVisibility(_match.board()[0][0]);
@@ -275,9 +293,18 @@ void GameScreenImpl::enableAttackMask() {
     }
 }
 
+void GameScreenImpl::inCameraMode(bool mode) {
+    _cam.controlling = mode;
+}
+
 void GameScreenImpl::pre_run() {
-    _ctxt->hideCursor();
+    //_ctxt->hideCursor();
     _ctxt->events();
+}
+
+void GameScreenImpl::createContextForLookAt() {
+    if(_selection.hovering && _selection.hovering->unit())
+        CoordinateMenu::createForTile(_selection.hovering, _ui.get(), _ctxt->getResolution());
 }
 
 void GameScreenImpl::run() {
@@ -296,11 +323,16 @@ void GameScreenImpl::run() {
 
     while(!_ctxt->shouldClose() && _shouldClose == false) {
         // calculate lookat tile
-        auto pc = getLookedAtTile(_cam.camera->getPlaneCoord());
-        if(pc.x < 0 || pc.y < 0 || pc.x >= max_x || pc.y >= max_y)
+        if(_cam.controlling == false) {
+            auto pc = getLookedAtTile(_cam.camera->getPlaneCoord());
+            if(pc.x < 0 || pc.y < 0 || pc.x >= max_x || pc.y >= max_y) {
+                _selection.hovering = nullptr;
+            } else {
+                _selection.hovering = &_match.board().get(pc);
+            }
+        } else {
             _selection.hovering = nullptr;
-        else
-            _selection.hovering = &_match.board().get(pc);
+        }
         // set matrices
         glm::mat4 mvp = _cam.camera->matrices().pv * m;
         qe::Cache::objv2->use();
@@ -366,7 +398,10 @@ void GameScreenImpl::renderTerrain() {
     _terrain_shader->setUniform<qe::UNIMVP>(mvp);
     _terrain_shader->setUniform<qe::UNIM>(m);
     _terrain_shader->setUniform<qe::UNIV>(_cam.camera->matrices().v);
-    _terrain_shader->setUniform<qe::UNISEL>(to_uvec2(getLookedAtTile(_cam.camera->getPlaneCoord())));
+    if(_cam.controlling)
+        _terrain_shader->setUniform<qe::UNISEL>(glm::uvec2(9999, 9999));
+    else
+        _terrain_shader->setUniform<qe::UNISEL>(to_uvec2(getLookedAtTile(_cam.camera->getPlaneCoord())));
     // qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.800, 0.567, 0.305));
     // render grey areas
     _terrain_shader->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.8, 0.8));

@@ -82,6 +82,8 @@ void main() {
         }
     }
 
+    color = 0.1 * uni_color + cosTheta * uni_color;
+
     if(tcoord.x >= 0 && tcoord.y >= 0 && tcoord.x < BX && tcoord.y < BY) {
         if(uvec2(tcoord) == uni_sel) {
             visvalue = 0.3;
@@ -89,12 +91,11 @@ void main() {
         if(ismarked(uvec2(tcoord), uint(2)) || ismarked(uvec2(tcoord), uint(1))) {
             visvalue += 0.2;
         }
+        if(ismarked(uvec2(tcoord), uint(3))) {
+            if(floor(mod(dot(pos_world.xz, glm::vec2(-1, 1)) / 0.4, 2)) == 1)
+                color = vec3(0, 0.551, 0.8) * (0.1 + cosTheta);
+        }
+        color += visvalue * uni_color;
     }
 
-    color = 0.1 * uni_color + cosTheta * uni_color + visvalue * uni_color;
-
-    //if(tcoord.x < 0 || tcoord.y < 0 || tcoord.x >= 20 || tcoord.y >= 14)
-    //    color = 0.1 * uni_color + cosTheta * uni_color + visvalue * uni_color;
-    //else
-    //    color = vec3(tcoord.x * 0.1, tcoord.y * 0.1, 1) * uni_color;
 }

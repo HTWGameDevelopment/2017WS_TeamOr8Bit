@@ -26,7 +26,7 @@ extern GLenum _logger_e;
 #define GERR(x)  std::cerr << "GERROR " << x << std::endl;
 #define GWARN(x)  std::cerr << "GWARN " << x << std::endl;
 #define GINFO(x)  std::cerr << "GINFO " << x << std::endl;
-#define GDBG(x)
+#define GDBG(x) std::cerr << "GDBG " << x << std::endl;
 #define GLSERRORCHECK
 #endif
 struct glerror: public std::runtime_error {

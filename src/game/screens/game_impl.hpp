@@ -5,6 +5,7 @@
 
 #include<engine/qe.hpp>
 
+#include<game/context/coordinatemenu.hpp>
 #include<game/match.hpp>
 
 #include<ui/abstractbox.hpp>
@@ -34,6 +35,7 @@ namespace gamespace {
         std::array<qe::subobj_t, 16> _ground_indices;
         struct CameraData {
             std::unique_ptr<qe::Camera> camera;
+            bool controlling;
         } _cam;
         struct Textures {
             std::unique_ptr<qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>> hextile_grass;
@@ -62,6 +64,8 @@ namespace gamespace {
         void initializeHUD();
         void enableMoveMask();
         void enableAttackMask();
+        void inCameraMode(bool mode);
+        void createContextForLookAt();
         gamespace::Match &match() {
             return _match;
         }
@@ -70,6 +74,9 @@ namespace gamespace {
         }
         qe::Context *context() {
             return _ctxt;
+        }
+        ui::DefinedUI *ui() {
+            return _ui.get();
         }
         void __introspect(size_t off);
     };

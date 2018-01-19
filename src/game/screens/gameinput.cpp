@@ -1,8 +1,10 @@
 #include "gameinput.hpp"
 
+#include<logger.h>
+
 using namespace gamespace;
 
-GameScreenInputState::GameScreenInputState(GameScreenImpl &impl): _impl(&impl) {
+GameScreenInputState::GameScreenInputState(GameScreenImpl &impl): _mouse_mode(FREE), _resy(impl.context()->getResolution().y), _impl(&impl) {
     _movementmask[0] = false;
     _movementmask[1] = false;
     _movementmask[2] = false;
@@ -32,16 +34,56 @@ void GameScreenInputState::key(int key, int action) {
 }
 
 void GameScreenInputState::mouse(double x, double y) {
-    _impl->camera()->mouseMoved(_impl->context()->deltaT(), x, y);
-    _impl->context()->resetMouse();
+    _last_x = x;
+    _last_y = y;
+    if(_mouse_mode == UIINTERACTION) {
+        assert(_selected_menu);
+        _selected_menu->origin() = _origin_save + ui::defp_t {(int)x, (int)(_resy-y)} - _mouse_save;
+        _selected_menu->get_model()->invalidate();
+    } else {
+        _impl->camera()->mouseMoved(_impl->context()->deltaT(), x, y, _mouse_mode == LOCKED);
+        if(_mouse_mode == LOCKED) {
+            _impl->context()->resetMouse();
+        }
+    }
 }
 
 void GameScreenInputState::button(int button, int action, int mods) {
+    if(action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_MIDDLE && _mouse_mode == FREE) {
+        _impl->context()->hideCursor();
+        _impl->context()->resetMouse();
+        _impl->inCameraMode(true);
+        _mouse_mode = LOCKED;
+        GDBG("new mouse mode: LOCKED");
+        return;
+    }
+    if(action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT && _mouse_mode == FREE) {
+        ui::defp_t s{(int)_last_x, (int)(_resy-_last_y)};
+        _selected_menu = _impl->ui()->hovers(s);
+        if(_selected_menu) {
+            _origin_save = _selected_menu->origin();
+            _mouse_save = s;
+            _mouse_mode = UIINTERACTION;
+            GDBG("new mouse mode: UIINTERACTION");
+        }
+        return;
+    }
     if(action != GLFW_RELEASE) return;
-    if(button == GLFW_MOUSE_BUTTON_LEFT)
-        _impl->enableMoveMask();
-    else if(button == GLFW_MOUSE_BUTTON_RIGHT)
-        _impl->enableAttackMask();
+    if(button == GLFW_MOUSE_BUTTON_LEFT) {
+        if(_mouse_mode == UIINTERACTION) {
+            _mouse_mode = FREE;
+            _selected_menu = nullptr;
+            GDBG("new mouse mode: FREE");
+        } else if(_mouse_mode == FREE) _impl->enableMoveMask();
+    } else if(button == GLFW_MOUSE_BUTTON_MIDDLE && _mouse_mode == LOCKED) {
+        _impl->context()->displayCursor();
+        _impl->context()->resetMouseToCenter();
+        _impl->inCameraMode(false);
+        _mouse_mode = FREE;
+        GDBG("new mouse mode: FREE");
+    } else if(button == GLFW_MOUSE_BUTTON_RIGHT && _mouse_mode == FREE) {
+        _impl->createContextForLookAt();
+    }
 }
 
 void GameScreenInputState::idle() {

@@ -17,7 +17,9 @@ namespace gamespace {
         gamespace::Player *_currentPlayer;
     public:
         Match(glm::ivec2 dim, Player player1, Player player2)
-        : _board(dim.x, dim.y), _player1(player1), _player2(player2), _currentPlayer(&_player1) {}
+        : _board(dim.x, dim.y), _player1(player1), _player2(player2), _currentPlayer(&_player1) {
+            setMarkers();
+        }
         Match(const Match &other) = delete;
         Match(Match &&other): _board(std::move(other._board)), _move(std::move(other._move)), _player1(std::move(other._player1)), _player2(std::move(other._player2)), _currentPlayer(&_player1) {
             other._currentPlayer = nullptr;
@@ -46,6 +48,7 @@ namespace gamespace {
             _player1.__introspect(off + 2);
             _player2.__introspect(off + 2);
         }
+        void setMarkers();
     };
 }
 

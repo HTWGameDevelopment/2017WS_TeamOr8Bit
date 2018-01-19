@@ -59,6 +59,11 @@ namespace ui {
             y += a.y;
             return *this;
         }
+        Point<T> &operator-=(const Point<T> &a) {
+            x -= a.x;
+            y -= a.y;
+            return *this;
+        }
     };
 
     typedef Point<AbstractNumber> absp_t;
@@ -111,7 +116,8 @@ namespace ui {
         defp_t &padding() {
             return _padding;
         }
-        virtual void recalculate() {}
+        virtual void recalculate_origin() {}
+        virtual void recalculate_dimension() {}
         virtual bool is_dynamic() {return false;}
     };
 
@@ -121,6 +127,7 @@ namespace ui {
         std::function<void(DefinedRenderable*)> _click;
         std::function<void(void*)> _deleter;
         void *_payload;
+        DefinedRenderable *_root;
     public:
         virtual ~DefinedRenderable() {
             if(_deleter) _deleter(_payload);
@@ -135,6 +142,7 @@ namespace ui {
             return _payload;
         }
         void delete_payload() {
+            if(_payload == nullptr) return;
             assert(_deleter);
             _deleter(_payload);
             _payload = nullptr;
@@ -145,8 +153,13 @@ namespace ui {
         virtual DefinedRenderable *get(const char* str) {
             return this;
         }
+        virtual void set_root(DefinedRenderable *r) {
+            _root = r;
+        }
         virtual void render() {
-            _render(this);
+            origin() += _root->origin();
+            if(_render) _render(this);
+            origin() -= _root->origin();
         }
         virtual void __introspect(size_t off) {
             std::cout << std::string(off, ' ')
@@ -161,19 +174,29 @@ namespace ui {
                 << (_render ? "R" : "")
                 << std::endl;
         }
+        bool hovers(defp_t p) {
+            defp_t t = p - (origin() + _root->origin());
+            if(t >= defp_t {0, 0} && t <= dimension()) {
+                return true;
+            }
+            return false;
+        }
         virtual bool click(defp_t p) {
             if(!_click) return false;
-            defp_t t = p - origin();
-            if(t >= defp_t {0, 0} && t <= dimension()) {
+            if(hovers(p)) {
                 _click(this);
                 return true;
             }
             return false;
         }
+        // CONTEXT MENU FUNCTIONS
+        virtual void show() {}
+        virtual void hide() {}
     };
 
     class AbstractRenderable {
     public:
+        virtual ~AbstractRenderable() {}
         virtual DefinedRenderable *buildDefined(defp_t res) = 0;
     };
 
@@ -182,6 +205,7 @@ namespace ui {
     private:
         std::vector<std::unique_ptr<T>> _items;
     public:
+        virtual ~Container() {}
         void append(T *item) {_items.emplace_back(item);}
         T *operator[](unsigned int i) {return _items[i].get();}
         unsigned int count() {return _items.size();}

@@ -35,14 +35,17 @@ namespace ui {
         AbstractBox::Align _y;
     public:
         DefinedBox(AbstractBox::Orientation o, AbstractBox::Growth g, AbstractBox::Align x, AbstractBox::Align y);
-        void render();
-        virtual void recalculate();
+        virtual void render();
+        virtual void set_root(DefinedRenderable *r);
+        virtual void recalculate_origin();
+        virtual void recalculate_dimension();
         virtual bool is_dynamic();
         virtual DefinedRenderable *get(const char* coord) {
             char* next;
             int i = strtol(coord, &next, 10);
             assert(i > 0);
             assert(*next == '\0' || *next == '.');
+            if(_orientation == AbstractBox::VERTICAL) i = count() - i + 1;
             if(*next == '\0') return operator[](i - 1);
             return operator[](i - 1)->get(next + 1);
         }

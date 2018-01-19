@@ -81,6 +81,7 @@ public:
         // TERRAIN SHADER
         qe::Cache::texts = qe::mkProgram("assets/shaders/texts.vsh"_p, "assets/shaders/texts.fsh"_p);
         qe::Cache::sprite2d = qe::mkProgram("assets/shaders/s2d.vsh"_p, "assets/shaders/s2d.fsh"_p);
+        qe::Cache::sprite2dcolor = qe::mkProgram("assets/shaders/s2dc.vsh"_p, "assets/shaders/s2dc.fsh"_p);
         qe::Cache::buttont = new qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>(qe::Loader<qe::PNGRGBA>("assets/textures/button.png"_p));
         // SETUP
         qe::Cache::objv2->use();

@@ -20,6 +20,15 @@ GameBoard::GameBoard(GameBoard &&other): hextile::HexTile<BoardTile, 4>(std::mov
     }
 }
 
+void GameBoard::synchronize() {
+    for(int i = 0; i < x(); ++i) {
+        for(int j = 0; j < y(); ++j) {
+            if(operator[](i)[j].unit()) {
+                operator[](i)[j].unit()->tile() = &operator[](i)[j];
+            }
+        }
+    }
+}
 BoardTile::~BoardTile() {
     delete _unit;
 }
@@ -59,6 +68,8 @@ void GameBoard::moveUnit(hexpoint_t from, hexpoint_t to) {
     assert(tt.unit() == nullptr);
     tt.setUnit(ft.unit());
     ft.setUnit(nullptr);
+    tt.unit()->tile() = &tt;
+    // TODO Map events
 }
 
 void GameBoard::attackUnit(hexpoint_t from, hexpoint_t to) {

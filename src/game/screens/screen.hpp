@@ -7,6 +7,7 @@ namespace gamespace {
 
     class Screen {
     public:
+        virtual ~Screen() {}
         virtual void activate_screen() = 0;
         virtual void deactivate_screen() = 0;
         virtual void key_callback(int key, int action) = 0;

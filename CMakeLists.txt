@@ -27,7 +27,9 @@ set(QE_GLM_PATH "${CMAKE_SOURCE_DIR}/extern/glm" CACHE PATH "" FORCE)
 add_executable(Or8Bit
     src/game/main.cpp
     src/game/board.cpp
+    src/game/match.cpp
     src/game/unit.cpp
+    src/game/context/coordinatemenu.cpp
     src/game/screens/game_impl.cpp
     src/game/screens/gameinput.cpp
     src/logger.cpp
@@ -52,6 +54,7 @@ add_subdirectory(src/savegame)
 
 # config header
 configure_file(src/config.h.in config.h)
+target_include_directories(Or8Bit PUBLIC src)
 
 # link program
 target_link_libraries(Or8Bit png_static zlibstatic glfw libquarterengine_static libuior8bit_static libsavegameor8bit_static)
