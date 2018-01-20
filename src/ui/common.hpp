@@ -17,8 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef UI_ABSTRACT_COMMON_HPP
-#define UI_ABSTRACT_COMMON_HPP
+#ifndef UI_COMMON_HPP
+#define UI_COMMON_HPP
 
 #include<assert.h>
 #include<iostream>
@@ -28,108 +28,93 @@
 
 namespace ui {
 
-    typedef float AbstractNumber;
-    typedef int DefinedNumber;
-
-    template<typename T>
     struct Point {
     public:
-        T x;
-        T y;
-        bool operator==(const Point<T> &a) {
+        float x;
+        float y;
+        bool operator==(const Point &a) {
             return x == a.x && y == a.y;
         }
-        bool operator!=(const Point<T> &a) {
+        bool operator!=(const Point &a) {
             return operator==(a) == false;
         }
-        bool operator<(const Point<T> &a) {
+        bool operator<(const Point &a) {
             return x < a.x && y < a.y;
         }
-        bool operator>=(const Point<T> &a) {
+        bool operator>=(const Point &a) {
             return x >= a.x && y >= a.y;
         }
-        bool operator>(const Point<T> &a) {
+        bool operator>(const Point &a) {
             return x > a.x && y > a.y;
         }
-        bool operator<=(const Point<T> &a) {
+        bool operator<=(const Point &a) {
             return x <= a.x && y <= a.y;
         }
-        Point<T> &operator+=(const Point<T> &a) {
+        Point &operator+=(const Point &a) {
             x += a.x;
             y += a.y;
             return *this;
         }
-        Point<T> &operator-=(const Point<T> &a) {
+        Point &operator-=(const Point &a) {
             x -= a.x;
             y -= a.y;
             return *this;
         }
-    };
-
-    typedef Point<AbstractNumber> absp_t;
-    typedef Point<DefinedNumber> defp_t;
-
-    inline defp_t operator*(defp_t a, absp_t d) {return defp_t {(int)(a.x * d.x), (int)(a.y * d.y)};}
-    inline defp_t operator*(absp_t a, defp_t d) {return defp_t {(int)(a.x * d.x), (int)(a.y * d.y)};}
-
-    template<typename T> Point<T> operator+(Point<T> a, Point<T> b) {return Point<T> {a.x + b.x, a.y + b.y};}
-    template<typename T> Point<T> operator-(Point<T> a, Point<T> b) {return Point<T> {a.x - b.x, a.y - b.y};}
-    template<typename T> Point<T> operator/(Point<T> a, Point<T> b) {return Point<T> {a.x / b.x, a.y / b.y};}
-
-    class AbstractArea {
-    private:
-        absp_t _origin;
-        absp_t _size;
-        absp_t _margin;
-        absp_t _padding;
-    public:
-        absp_t &origin() {
-            return _origin;
-        }
-        absp_t &dimension() {
-            return _size;
-        }
-        absp_t &margin() {
-            return _margin;
-        }
-        absp_t &padding() {
-            return _padding;
+        Point &operator*=(const Point &a) {
+            x *= a.x;
+            y *= a.y;
+            return *this;
         }
     };
 
-    class DefinedArea {
+    inline Point operator+(Point a, Point b) {return Point {a.x + b.x, a.y + b.y};}
+    inline Point operator-(Point a, Point b) {return Point {a.x - b.x, a.y - b.y};}
+    inline Point operator*(Point a, Point b) {return Point {a.x * b.x, a.y * b.y};}
+    inline Point operator/(Point a, Point b) {return Point {a.x / b.x, a.y / b.y};}
+
+    class Area {
     private:
-        defp_t _origin;
-        defp_t _size;
-        defp_t _margin;
-        defp_t _padding;
+        Point _origin;
+        Point _dimension;
+        Point _margin;
+        Point _padding;
+        bool _expand;
     public:
-        defp_t &origin() {
+        Point &origin() {
             return _origin;
         }
-        defp_t &dimension() {
-            return _size;
+        Point &dimension() {
+            return _dimension;
         }
-        defp_t &margin() {
+        Point &margin() {
             return _margin;
         }
-        defp_t &padding() {
+        Point &padding() {
             return _padding;
+        }
+        bool &expand() {
+            return _expand;
         }
         virtual void recalculate_origin() {}
         virtual void recalculate_dimension() {}
-        virtual bool is_dynamic() {return false;}
+        virtual void convert_coords(Point mul) {
+            _origin *= mul;
+            _dimension *= mul;
+            _margin *= mul;
+            _padding *= mul;
+        }
     };
 
-    class DefinedRenderable: public DefinedArea {
+    class Renderable: public Area {
     private:
-        std::function<void(DefinedRenderable*)> _render;
-        std::function<void(DefinedRenderable*)> _click;
+        std::function<void(Renderable*)> _render;
+        std::function<void(Renderable*)> _click;
         std::function<void(void*)> _deleter;
         void *_payload;
-        DefinedRenderable *_root;
+        Renderable *_root;
+        bool _enabled;
     public:
-        virtual ~DefinedRenderable() {
+        virtual ~Renderable() {
             if(_deleter) _deleter(_payload);
         }
         template<typename F> void render_with(F &&r) {
@@ -150,16 +135,16 @@ namespace ui {
         template<typename F> void payload(F &&d) {
             _deleter = d;
         }
-        virtual DefinedRenderable *get(const char* str) {
+        virtual Renderable *get(const char* str) {
             return this;
         }
-        virtual void set_root(DefinedRenderable *r) {
+        virtual void set_root(Renderable *r) {
             _root = r;
         }
         virtual void render() {
-            origin() += _root->origin();
+            if(_root != this) origin() += _root->origin();
             if(_render) _render(this);
-            origin() -= _root->origin();
+            if(_root != this) origin() -= _root->origin();
         }
         virtual void __introspect(size_t off) {
             std::cout << std::string(off, ' ')
@@ -169,19 +154,25 @@ namespace ui {
                 << dimension().x
                 << ","
                 << dimension().y
+                << "] pad ["
+                << padding().x
+                << ","
+                << padding().y
                 << "] "
                 << (_click ? "C" : "")
                 << (_render ? "R" : "")
+                << (_enabled ? "V" : "H")
                 << std::endl;
         }
-        bool hovers(defp_t p) {
-            defp_t t = p - (origin() + _root->origin());
-            if(t >= defp_t {0, 0} && t <= dimension()) {
+        bool hovers(Point p) {
+            Point t = p - origin() - padding();
+            if(_root != this) t -= _root->origin();
+            if(t >= Point {0, 0} && t <= dimension() - padding()) {
                 return true;
             }
             return false;
         }
-        virtual bool click(defp_t p) {
+        virtual bool click(Point p) {
             if(!_click) return false;
             if(hovers(p)) {
                 _click(this);
@@ -189,30 +180,20 @@ namespace ui {
             }
             return false;
         }
-        // CONTEXT MENU FUNCTIONS
-        virtual void show() {}
-        virtual void hide() {}
+        virtual void show() {_enabled = true;}
+        virtual void hide() {_enabled = false;}
+        bool enabled() {return _enabled;}
     };
 
-    class AbstractRenderable {
-    public:
-        virtual ~AbstractRenderable() {}
-        virtual DefinedRenderable *buildDefined(defp_t res) = 0;
-    };
-
-    template<typename T>
     class Container {
     private:
-        std::vector<std::unique_ptr<T>> _items;
+        std::vector<std::unique_ptr<Renderable>> _items;
     public:
         virtual ~Container() {}
-        void append(T *item) {_items.emplace_back(item);}
-        T *operator[](unsigned int i) {return _items[i].get();}
+        void append(Renderable *item) {_items.emplace_back(item);}
+        Renderable *operator[](unsigned int i) {return _items[i].get();}
         unsigned int count() {return _items.size();}
     };
-
-    typedef Container<AbstractRenderable> AbstractContainer;
-    typedef Container<DefinedRenderable> DefinedContainer;
 
 }
 

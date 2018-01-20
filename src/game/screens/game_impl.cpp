@@ -106,27 +106,27 @@ void GameScreenImpl::initializeSelection() {
 
 void GameScreenImpl::initializeHUD() {
     // fixed UI
-    ui::AbstractUI ui;
-    std::unique_ptr<ui::AbstractBox> box(new ui::AbstractBox());
-    std::unique_ptr<ui::AbstractText> text(new ui::AbstractText());
-    text->dimension() = ui::absp_t {1, 0.25};
-    text->margin() = ui::absp_t {0.02, 0.02};
+    _ui.reset(new ui::UI(ui::Point {_ctxt->width(), _ctxt->height()}));
+    std::unique_ptr<ui::Box> box(new ui::Box());
+    std::unique_ptr<ui::Text> text(new ui::Text());
+    text->dimension() = ui::Point {1, 0.25};
+    text->margin() = ui::Point {0.02, 0.02};
 
-    box->set_orientation(ui::AbstractBox::VERTICAL);
-    box->set_growth(ui::AbstractBox::MINIMUM);
-    box->set_align_inner(ui::AbstractBox::BEGINNING, ui::AbstractBox::END);
+    box->orientation() = ui::Box::VERTICAL;
+    box->expand() = false;
+    box->align_x() = ui::Box::BEGINNING;
+    box->align_y() = ui::Box::END;
 
     box->append(text.release());
-    ui.set_container(box.release());
+    box->convert_coords(_ui->res());
+    _ui->set_container(box.release());
 
-    _ui.reset(new ui::DefinedUI(ui::UIFactory(ui, _ctxt->width(), _ctxt->height()).release()));
-    // set callbacks
     auto *t = _ui->get("1.1");
     // TODO Various text rendering issues
-    auto text_renderer = [this](ui::DefinedRenderable *t) mutable {
+    auto text_renderer = [this](ui::Renderable *t) mutable {
         if(t->payload() == nullptr) {
             t->payload() = new text_t(
-                ((ui::DefinedText*)t)->text(),
+                ((ui::Text*)t)->text(),
                 qe::Cache::glyphlatin,
                 // to_ivec2(t->origin() + t->margin() + t->padding() + ui::absp_t {0, 0.5} * (t->dimension() - t->margin() - t->padding())),
                 to_ivec2(t->origin() + t->margin() + t->padding()),
@@ -137,12 +137,12 @@ void GameScreenImpl::initializeHUD() {
         pl->foreground() = glm::vec3(0, 0, 0);
         pl->render();
     };
-    t->render_with([this](ui::DefinedRenderable *t) mutable {
+    t->render_with([this](ui::Renderable *t) mutable {
         if(t->payload() == nullptr) {
             t->payload() = new text_t(
-                ((ui::DefinedText*)t)->text(),
+                ((ui::Text*)t)->text(),
                 qe::Cache::glyphlatin,
-                to_ivec2(t->origin() + t->margin() + t->padding() + ui::absp_t {0, 0.5} * (t->dimension() - t->margin() - t->padding())),
+                to_ivec2(t->origin() + t->margin() + t->padding() + ui::Point {0, 0.5} * (t->dimension() - t->margin() - t->padding())),
                 (int)(0.5 * (t->dimension().y - t->margin().y - t->padding().y)),
                 (int)(t->dimension().x - t->margin().x - t->padding().x));
         }
@@ -152,10 +152,10 @@ void GameScreenImpl::initializeHUD() {
     });
     t->payload([](void* t){delete (text_t*)t;});
     _match.observe_player_change([this, t](auto np) {
-        ((ui::DefinedText*)t)->text() = "Or8Bit - (c) 2017-2018 Team Or8Bit\n"s
+        ((ui::Text*)t)->text() = "Or8Bit - (c) 2017-2018 Team Or8Bit\n"s
             + "LMB to move, RMB to attack\n"
             + "Current player (. for ending a turn): " + np.name();
-        ((ui::DefinedText*)t)->delete_payload();
+        ((ui::Text*)t)->delete_payload();
     });
     t->payload() = nullptr;
 }
