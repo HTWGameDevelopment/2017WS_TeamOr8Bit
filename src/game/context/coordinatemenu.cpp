@@ -20,9 +20,7 @@ void CoordinateMenu::update() {
     _coordinates->delete_payload();
     _unit_text->text() = _u->name();
     _unit_hp->text() = std::to_string(_u->hp()) + "/" + std::to_string(_u->max_hp());
-    _hp_text->text() = "HP";
     _unit_text->delete_payload();
-    _hp_text->delete_payload();
     _unit_hp->delete_payload();
 }
 
@@ -30,5 +28,6 @@ void CoordinateMenu::invalidate() {
     _coordinates->delete_payload();
     _unit_text->delete_payload();
     _hp_text->delete_payload();
+    _qt->delete_payload();
     _unit_hp->delete_payload();
 }

@@ -158,6 +158,10 @@ namespace ui {
                 << padding().x
                 << ","
                 << padding().y
+                << "] mgn ["
+                << margin().x
+                << ","
+                << margin().y
                 << "] "
                 << (_click ? "C" : "")
                 << (_render ? "R" : "")
