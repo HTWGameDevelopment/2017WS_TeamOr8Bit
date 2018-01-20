@@ -11,13 +11,21 @@
 namespace gamespace {
     class UnitMove {
     public:
-        hexpoint_t from;
-        hexpoint_t to;
-        UnitMove::UnitMove(hexpoint_t f, hexpoint_t t) {
+        UnitMove(hexpoint_t f, hexpoint_t t) {
             from = f;
             to = t;
         };
-        virtual std::string toString() = 0;
+        virtual ~UnitMove();
+        UnitMove(const UnitMove &right);
+        hexpoint_t getFrom() {
+            return from;
+        }
+        hexpoint_t getTo() {
+            return to;
+        }
+    private:
+        hexpoint_t from;
+        hexpoint_t to;
     };
 }
 
