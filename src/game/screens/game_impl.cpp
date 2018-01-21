@@ -431,7 +431,7 @@ void GameScreenImpl::renderTerrain() {
 void GameScreenImpl::renderUnitOf(gamespace::BoardTile *b) {
     glm::vec2 p = b->centerPos();
     // render unit
-    glm::mat4 m = glm::translate(glm::vec3(p.x, 0, p.y));
+    glm::mat4 m = glm::translate(glm::vec3(p.x, b->renderData(), p.y));
     glm::mat4 mvp = _cam.camera->matrices().pv * m;
     b->unit()->render(*b, mvp, m);
 }

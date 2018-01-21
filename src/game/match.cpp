@@ -75,3 +75,65 @@ void Match::setMarkers() {
         _board[aoe[i].x][aoe[i].y].mark(AOE_LAYER, 1);
     }
 }
+
+struct roff_t {
+    hextile::hexpoint_t c;
+    float height;
+};
+
+void Match::setRenderOffsets() {
+    const roff_t offs[] = {
+        roff_t{hextile::hexpoint_t{0,4}, 3},
+        roff_t{hextile::hexpoint_t{1,4}, 3},
+        roff_t{hextile::hexpoint_t{2,5}, 3},
+        roff_t{hextile::hexpoint_t{2,6}, 3},
+        roff_t{hextile::hexpoint_t{1,6}, 3},
+        roff_t{hextile::hexpoint_t{1,5}, 3},
+        roff_t{hextile::hexpoint_t{0,5}, 3},
+        roff_t{hextile::hexpoint_t{0,6}, 3},
+        roff_t{hextile::hexpoint_t{1,7}, 3},
+        roff_t{hextile::hexpoint_t{0,7}, 3},
+        roff_t{hextile::hexpoint_t{1,8}, 3},
+        roff_t{hextile::hexpoint_t{0,8}, 3},
+        roff_t{hextile::hexpoint_t{1,9}, 3},
+        roff_t{hextile::hexpoint_t{1,10}, 3},
+        roff_t{hextile::hexpoint_t{0,10}, 3},
+        roff_t{hextile::hexpoint_t{0,9}, 3},
+        roff_t{hextile::hexpoint_t{1,11}, 3},
+        roff_t{hextile::hexpoint_t{1,12}, 3},
+        roff_t{hextile::hexpoint_t{0,12}, 3},
+        roff_t{hextile::hexpoint_t{1,13}, 3},
+        roff_t{hextile::hexpoint_t{2,13}, 3},
+        roff_t{hextile::hexpoint_t{2,12}, 3},
+        roff_t{hextile::hexpoint_t{3,13}, 3},
+        roff_t{hextile::hexpoint_t{4,13}, 3},
+        roff_t{hextile::hexpoint_t{5,13}, 3},
+        roff_t{hextile::hexpoint_t{6,13}, 3},
+        roff_t{hextile::hexpoint_t{14,13}, 3},
+        roff_t{hextile::hexpoint_t{15,13}, 3},
+        roff_t{hextile::hexpoint_t{16,14}, 3},
+        roff_t{hextile::hexpoint_t{17,14}, 3},
+        roff_t{hextile::hexpoint_t{17,13}, 3},
+        roff_t{hextile::hexpoint_t{18,12}, 3},
+        roff_t{hextile::hexpoint_t{17,12}, 3},
+        roff_t{hextile::hexpoint_t{18,13}, 3},
+        roff_t{hextile::hexpoint_t{19,13}, 3},
+        roff_t{hextile::hexpoint_t{19,11}, 3},
+        roff_t{hextile::hexpoint_t{18,10}, 3},
+        roff_t{hextile::hexpoint_t{19,10}, 3},
+        roff_t{hextile::hexpoint_t{19,9}, 3},
+        roff_t{hextile::hexpoint_t{18,8}, 3},
+        roff_t{hextile::hexpoint_t{19,8}, 3},
+        roff_t{hextile::hexpoint_t{19,7}, 3},
+        roff_t{hextile::hexpoint_t{18,7}, 3},
+        roff_t{hextile::hexpoint_t{18,6}, 3},
+        roff_t{hextile::hexpoint_t{19,6}, 3},
+        roff_t{hextile::hexpoint_t{17,6}, 3},
+        roff_t{hextile::hexpoint_t{18,5}, 3},
+        roff_t{hextile::hexpoint_t{19,5}, 3},
+        roff_t{hextile::hexpoint_t{19,4}, 3}
+    };
+    for(unsigned int i = 0; i < sizeof(offs) / sizeof(roff_t); ++i) {
+        _board[offs[i].c.x][offs[i].c.y].renderData() = offs[i].height;
+    }
+}
