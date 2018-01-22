@@ -18,7 +18,6 @@ namespace gamespace {
     public:
         Match(glm::ivec2 dim, Player player1, Player player2)
         : _board(dim.x, dim.y), _player1(player1), _player2(player2), _currentPlayer(&_player1) {
-            setRenderOffsets();
             setMarkers();
         }
         Match(const Match &other) = delete;
@@ -50,7 +49,7 @@ namespace gamespace {
             _player2.__introspect(off + 2);
         }
         void setMarkers();
-        void setRenderOffsets();
+        void setRenderOffsets(qe::Mesh<qe::OBJV3> *tank);
     };
 }
 

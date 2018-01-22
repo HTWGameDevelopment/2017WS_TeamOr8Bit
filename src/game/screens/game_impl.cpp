@@ -208,41 +208,42 @@ void GameScreenImpl::initializeMap() {
     for(; b != e; ++b) {
         b->setUnit(nullptr);
     }
-    auto *u1 = new gamespace::Unit(_tank.get(), &_match.player1(), "Tank",
-        100,
-        50,
-        50,
-        3,
-        3,
-        2,
-        gamespace::defaultFalloff,
-        gamespace::defaultFalloff,
-        gamespace::defaultFalloff,
-        gamespace::defaultFalloff);
-    auto *u2 = new gamespace::Unit(_tank.get(), &_match.player2(), "Tank",
-        100,
-        50,
-        50,
-        3,
-        3,
-        2,
-        gamespace::defaultFalloff,
-        gamespace::defaultFalloff,
-        gamespace::defaultFalloff,
-        gamespace::defaultFalloff);
-    // TESTING PURPOSES. MOVE THIS TO MATCH SOMEHOW
-    _match.board()[0][0].setUnit(new gamespace::Unit(*u1));
-    _match.board()[1][0].setUnit(new gamespace::Unit(*u1));
-    _match.board()[0][1].setUnit(new gamespace::Unit(*u1));
-    _match.board()[1][1].setUnit(new gamespace::Unit(*u1));
-    _match.board()[0][5].setUnit(new gamespace::Unit(*u2));
-    _match.board()[1][5].setUnit(new gamespace::Unit(*u2));
-    _match.board()[0][6].setUnit(new gamespace::Unit(*u2));
-    _match.board()[1][6].setUnit(new gamespace::Unit(*u2));
-    _match.board().synchronize();
-    delete u1;
-    delete u2;
+    // auto *u1 = new gamespace::Unit(_tank.get(), &_match.player1(), "Tank",
+    //     100,
+    //     50,
+    //     50,
+    //     3,
+    //     3,
+    //     2,
+    //     gamespace::defaultFalloff,
+    //     gamespace::defaultFalloff,
+    //     gamespace::defaultFalloff,
+    //     gamespace::defaultFalloff);
+    // auto *u2 = new gamespace::Unit(_tank.get(), &_match.player2(), "Tank",
+    //     100,
+    //     50,
+    //     50,
+    //     3,
+    //     3,
+    //     2,
+    //     gamespace::defaultFalloff,
+    //     gamespace::defaultFalloff,
+    //     gamespace::defaultFalloff,
+    //     gamespace::defaultFalloff);
+    // // TESTING PURPOSES. MOVE THIS TO MATCH SOMEHOW
+    // _match.board()[0][0].setUnit(new gamespace::Unit(*u1));
+    // _match.board()[1][0].setUnit(new gamespace::Unit(*u1));
+    // _match.board()[0][1].setUnit(new gamespace::Unit(*u1));
+    // _match.board()[1][1].setUnit(new gamespace::Unit(*u1));
+    // _match.board()[0][5].setUnit(new gamespace::Unit(*u2));
+    // _match.board()[1][5].setUnit(new gamespace::Unit(*u2));
+    // _match.board()[0][6].setUnit(new gamespace::Unit(*u2));
+    // _match.board()[1][6].setUnit(new gamespace::Unit(*u2));
+    // _match.board().synchronize();
+    // delete u1;
+    // delete u2;
     // _match.board()[0][0].unit()->markVisibility(_match.board()[0][0]);
+    _match.setRenderOffsets(_tank.get());
 }
 
 void GameScreenImpl::enableMoveMask() {
@@ -347,9 +348,10 @@ void GameScreenImpl::run() {
             auto e = _match.board().end();
             for(; b != e; ++b) {
                 auto coord = b->coord();
-                for(size_t i = 0; i < mc; ++i) {
-                    ptr[coord.x * max_y * mc + coord.y * mc + i] = b->marked(i) ? 1 : 0;
-                }
+                ptr[coord.x * max_y * mc + coord.y * mc + 0] = b->marked(0) ? 1 : 0;
+                ptr[coord.x * max_y * mc + coord.y * mc + 1] = b->marked(1) ? 1 : 0;
+                ptr[coord.x * max_y * mc + coord.y * mc + 2] = b->marked(2) ? 1 : 0;
+                ptr[coord.x * max_y * mc + coord.y * mc + 3] = b->marked_value(3);
             }
             _marker_buffer->update();
         }

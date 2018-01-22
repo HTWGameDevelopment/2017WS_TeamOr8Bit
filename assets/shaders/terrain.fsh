@@ -26,12 +26,12 @@ layout(std140) uniform MarkerBlock {
     uvec4 array[BX * BY];
 };
 
-bool ismarked(uvec2 p, uint marker) {
+uint ismarked(uvec2 p, uint marker) {
     uint index = uint(p.x * BY + p.y);
-    if(marker == uint(0)) return array[index].x == uint(1);
-    else if(marker == uint(1)) return array[index].y == uint(1);
-    else if(marker == uint(2)) return array[index].z == uint(1);
-    return array[index].w == uint(1);
+    if(marker == uint(0)) return array[index].x;
+    else if(marker == uint(1)) return array[index].y;
+    else if(marker == uint(2)) return array[index].z;
+    return array[index].w;
 }
 
 void main() {
@@ -88,12 +88,14 @@ void main() {
         if(uvec2(tcoord) == uni_sel) {
             visvalue = 0.3;
         }
-        if(ismarked(uvec2(tcoord), uint(2)) || ismarked(uvec2(tcoord), uint(1))) {
+        if(ismarked(uvec2(tcoord), uint(2)) == uint(1) || ismarked(uvec2(tcoord), uint(1)) == uint(1)) {
             visvalue += 0.2;
         }
-        if(ismarked(uvec2(tcoord), uint(3))) {
+        if(ismarked(uvec2(tcoord), uint(3)) == uint(1)) {
             if(floor(mod(dot(pos_world.xz, glm::vec2(-1, 1)) / 0.4, 2)) == 1)
                 color = vec3(0, 0.551, 0.8) * (0.1 + cosTheta);
+        } else if(ismarked(uvec2(tcoord), uint(3)) == uint(2)) {
+            return;
         }
         color += visvalue * uni_color;
     }

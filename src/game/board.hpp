@@ -61,6 +61,7 @@ namespace gamespace {
         GameBoard &board();
         bool mark(unsigned int layer, unsigned int d);
         bool marked(unsigned int layer);
+        unsigned int marked_value(unsigned int layer);
         unsigned int lastMarkerId(unsigned int layer) {
             return _marker_layer[layer].id;
         }

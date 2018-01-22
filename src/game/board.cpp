@@ -53,6 +53,10 @@ bool BoardTile::mark(unsigned int layer, unsigned int d) {
     }
 }
 
+unsigned int BoardTile::marked_value(unsigned int layer) {
+    return _marker_layer[layer].val;
+}
+
 GameBoard &BoardTile::board() {
     return *_board;
 }
