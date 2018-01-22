@@ -45,6 +45,7 @@ namespace gamespace {
         ui::Text *_unit_text;
         ui::Text *_hp_text;
         ui::Text *_unit_hp;
+        ui::Text *_qt;
         BoardTile *_b;
         Unit *_u;
         void update();
@@ -57,16 +58,19 @@ namespace gamespace {
             std::unique_ptr<ui::Box> cb2(new ui::Box());
             std::unique_ptr<ui::Text> ct1(new ui::Text());
             std::unique_ptr<ui::Text> ct2(new ui::Text());
+            std::unique_ptr<ui::Text> ctq(new ui::Text());
             std::unique_ptr<ui::Text> ct3(new ui::Text());
             std::unique_ptr<ui::Text> ct4(new ui::Text());
 
-            contextui->dimension() = ui::Point {0.075, 0.06};
+            contextui->dimension() = ui::Point {0.085, 0.06};
             ct1->dimension() = ui::Point {0.025, 0.03};
             ct2->dimension() = ui::Point {0.045, 0.03};
+            ctq->dimension() = ui::Point {0.015, 0.03};
             ct3->dimension() = ui::Point {0.025, 0.03};
             ct4->dimension() = ui::Point {0.045, 0.03};
             ct1->margin() = ui::Point {0.005, 0.005};
             ct2->margin() = ui::Point {0.005, 0.005};
+            ctq->margin() = ui::Point {0.005, 0.005};
             ct3->margin() = ui::Point {0.005, 0.005};
             ct4->margin() = ui::Point {0.005, 0.005};
             contextui->orientation() = ui::Box::VERTICAL;
@@ -84,10 +88,11 @@ namespace gamespace {
 
             cb11->append(ct1.release());
             cb11->append(ct2.release());
+            cb11->append(ctq.release());
             cb2->append(ct3.release());
             cb2->append(ct4.release());
-            contextui->append(cb11.release());
             contextui->append(cb2.release());
+            contextui->append(cb11.release());
             auto *m = new CoordinateMenu(b, dui);
             contextui->payload() = m;
             m->init(contextui.get());
@@ -95,13 +100,16 @@ namespace gamespace {
             contextui->render_with([res](ui::Renderable *t) mutable {
                 render_rectangle(t->origin(), t->dimension(), glm::vec3(0.8, 0.8, 0.8), res);
             });
+            contextui->get("1")->render_with([res](ui::Renderable *t) mutable {
+                render_rectangle(t->origin(), t->dimension(), glm::vec3(0.5, 0.5, 0.5), res);
+            });
             auto text_renderer = [](ui::Renderable *t) mutable {
                 if(t->payload() == nullptr) {
                     t->payload() = new text_t(
                         ((ui::Text*)t)->text(),
                         qe::Cache::glyphlatin,
-                        // to_ivec2(t->origin() + t->margin() + t->padding() + ui::absp_t {0, 0.5} * (t->dimension() - t->margin() - t->padding())),
-                        to_ivec2(t->origin() + t->margin() + t->padding()),
+                        to_ivec2(t->origin() + t->margin() + t->padding() + ui::Point {0, 0.25} * (t->dimension() - t->margin() - t->padding())),
+                        //to_ivec2(t->origin() + t->margin() + t->padding()),
                         (int)(0.5 * (t->dimension().y - t->margin().y - t->padding().y)),
                         (int)(t->dimension().x - t->margin().x - t->padding().x));
                 }
@@ -127,6 +135,8 @@ namespace gamespace {
             _titlebar = ui->get("1");
             _coordinates = (ui::Text*)ui->get("1.1");
             _unit_text = (ui::Text*)ui->get("1.2");
+            _qt = (ui::Text*)ui->get("1.3");
+            _qt->text() = "X";
             _hp_text = (ui::Text*)ui->get("2.1");
             _hp_text->text() = "HP";
             _unit_hp = (ui::Text*)ui->get("2.2");
@@ -148,10 +158,12 @@ namespace gamespace {
             _unit_text->render_with(renderer);
             _unit_hp->render_with(renderer);
             _hp_text->render_with(renderer);
+            _qt->render_with(renderer);
             _coordinates->payload(payload);
             _unit_text->payload(payload);
             _unit_hp->payload(payload);
             _hp_text->payload(payload);
+            _qt->payload(payload);
         }
     };
 

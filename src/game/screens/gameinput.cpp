@@ -4,6 +4,31 @@
 
 using namespace gamespace;
 
+inline hextile::hexpoint_t getLookedAtTile(glm::vec3 _pc) {
+    glm::vec2 pc(_pc.x, _pc.z);
+    float yval1 = floor(pc.y / 1.5);
+    float xval1 = floor((pc.x + (((int)yval1) % 2) * 0.5f * 2.0f * 0.866f) / (2.0f * 0.866f));
+    glm::vec4 xval = glm::vec4(0, 1, 0, 1) + xval1;
+    glm::vec4 yval = glm::vec4(0, 0, 1, 1) + yval1;
+
+    glm::vec4 xpoints(2.0f * 0.866f * xval.x - ((int)yval.x % 2) * 0.5f * 2.0f * 0.866f,
+        2.0f * 0.866f * xval.y - ((int)yval.y % 2) * 0.5f * 2.0f * 0.866f,
+        2.0f * 0.866f * xval.z - ((int)yval.z % 2) * 0.5f * 2.0f * 0.866f,
+        2.0f * 0.866f * xval.w - ((int)yval.w % 2) * 0.5f * 2.0f * 0.866f);
+    glm::vec4 ypoints(yval * 1.5f);
+
+    glm::vec4 distances(glm::distance(pc, glm::vec2(xpoints.x, ypoints.x)),
+        glm::distance(pc, glm::vec2(xpoints.y, ypoints.y)),
+        glm::distance(pc, glm::vec2(xpoints.z, ypoints.z)),
+        glm::distance(pc, glm::vec2(xpoints.w, ypoints.w)));
+
+    float d = std::min(distances.x, std::min(distances.y, std::min(distances.z, distances.w)));
+    if(d == distances.x) return hextile::hexpoint_t {(int)xval.x, (int)yval.x};
+    else if(d == distances.y) return hextile::hexpoint_t {(int)xval.y, (int)yval.y};
+    else if(d == distances.z) return hextile::hexpoint_t {(int)xval.z, (int)yval.z};
+    else if(d == distances.w) return hextile::hexpoint_t {(int)xval.w, (int)yval.w};
+}
+
 GameScreenInputState::GameScreenInputState(GameScreenImpl &impl): _mouse_mode(FREE), _resy(impl.context()->getResolution().y), _impl(&impl) {
     _movementmask[0] = false;
     _movementmask[1] = false;
@@ -58,6 +83,8 @@ void GameScreenInputState::button(int button, int action, int mods) {
         return;
     }
     if(action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT && _mouse_mode == FREE) {
+        auto p = getLookedAtTile(_impl->camera()->getPlaneCoord());
+        GDBG(GV2TOSTR(p));
         ui::Point s{_last_x, _resy-_last_y};
         _selected_menu = _impl->ui()->hovers(s);
         if(_selected_menu) {

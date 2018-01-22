@@ -49,6 +49,7 @@ namespace gamespace {
             _player2.__introspect(off + 2);
         }
         void setMarkers();
+        void setRenderOffsets(qe::Mesh<qe::OBJV3> *tank);
     };
 }
 
