@@ -5,6 +5,7 @@
 
 #include<engine/qe.hpp>
 
+#include<game/framebuffer_first_pass.hpp>
 #include<game/context/coordinatemenu.hpp>
 #include<game/match.hpp>
 
@@ -29,7 +30,10 @@ namespace gamespace {
         std::unique_ptr<qe::Mesh<qe::OBJV3>> _tank;
         std::unique_ptr<qe::Mesh<qe::OBJV3>> _ground;
         std::unique_ptr<qe::Program> _terrain_shader;
+        std::unique_ptr<qe::Program> _terrain_tileno_shader;
+        bool _terrain_render_geometry_pass;
         std::unique_ptr<qe::Buffer<GL_UNIFORM_BUFFER, uint32_t>> _marker_buffer;
+        qe::FramebufferFirstPass _ffbo;
         std::array<qe::subobj_t, 16> _ground_indices;
         struct CameraData {
             std::unique_ptr<qe::Camera> camera;

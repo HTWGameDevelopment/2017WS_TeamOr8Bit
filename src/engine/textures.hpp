@@ -43,6 +43,10 @@ namespace qe {
         switch(flag) {
         case qe::TEXTG:
             return qe::GLFlagSet {GL_TEXTURE_2D, GL_R8, GL_RED, GL_UNSIGNED_BYTE};
+        case qe::RGB:
+            return qe::GLFlagSet {GL_TEXTURE_2D, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE};
+        case qe::RG:
+            return qe::GLFlagSet {GL_TEXTURE_2D, GL_RG8, GL_RG, GL_UNSIGNED_BYTE};
         }
 
         return qe::GLFlagSet {GL_TEXTURE_2D, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
@@ -62,6 +66,8 @@ namespace qe {
         void initTexture() {
             if(T == PNGRGBA) return initTextureAsRGBA();
             else if(T == TEXTG) return initTextureAsGlyphmap();
+            else if(T == RG) return initTextureAsGlyphmap();
+            else if(T == RGB) return initTextureAsGlyphmap();
 
             assert(false);
         }
@@ -137,6 +143,9 @@ namespace qe {
         void __introspect(size_t off) {
             std::cout << std::string(off, ' ') << "Texture<" << constantToString(T) << "," << U << ">[" << std::endl;
             _source.__introspect(off + 2);
+        }
+        operator GLuint() {
+            return _texture;
         }
     };
 

@@ -72,7 +72,7 @@ hextile::hexpoint_t getLookedAtTile(glm::vec3 pc) {
 }
 
 GameScreenImpl::GameScreenImpl(gamespace::Match &&match, qe::Context *ctxt, std::shared_ptr<font::Font> font)
-: _match(std::move(match)), _ctxt(ctxt), _font(font), _shouldClose(true) {
+: _match(std::move(match)), _ctxt(ctxt), _font(font), _ffbo(ctxt->getResolution()), _shouldClose(true) {
     initializeBuffers();
     initializeShaders();
     initializeSelection();
@@ -96,6 +96,7 @@ void GameScreenImpl::initializeShaders() {
     _terrain_shader->use();
     _terrain_shader->setUniform<qe::UNIL>(glm::vec3(0.1, -1, 0.1));
     _terrain_shader->bindUniformBlockBinding(_terrain_shader->getUniformBlockIndex("MarkerBlock"), 1);
+    _terrain_tileno_shader.reset(qe::mkProgram("assets/shaders/terrain.vsh"_p, "assets/shaders/terrain_tileno.fsh"_p, as));
 }
 
 void GameScreenImpl::initializeSelection() {
@@ -106,7 +107,7 @@ void GameScreenImpl::initializeSelection() {
 
 void GameScreenImpl::initializeHUD() {
     // fixed UI
-    _ui.reset(new ui::UI(ui::Point {_ctxt->width(), _ctxt->height()}));
+    _ui.reset(new ui::UI(ui::Point {(float)_ctxt->width(), (float)_ctxt->height()}));
     std::unique_ptr<ui::Box> box(new ui::Box());
     std::unique_ptr<ui::Text> text(new ui::Text());
     text->dimension() = ui::Point {1, 0.25};
@@ -357,6 +358,13 @@ void GameScreenImpl::run() {
         }
         // render
         _ctxt->start();
+        // render terrain tile to fbo
+        _ffbo.bind();
+        _terrain_render_geometry_pass = true;
+        renderTerrain();
+        _terrain_render_geometry_pass = false;
+        _ffbo.unbind();
+        // render everything to normal buffer
         render();
         _ctxt->swap();
         // event handling
@@ -396,17 +404,20 @@ void GameScreenImpl::render() {
 void GameScreenImpl::renderTerrain() {
     glm::mat4 m = glm::translate(glm::vec3(18.099, 0, 10.963) + glm::vec3(-2 * 0.866, 0, -1.0));
     glm::mat4 mvp = _cam.camera->matrices().pv * m;
-    _terrain_shader->use();
-    _terrain_shader->setUniform<qe::UNIMVP>(mvp);
-    _terrain_shader->setUniform<qe::UNIM>(m);
-    _terrain_shader->setUniform<qe::UNIV>(_cam.camera->matrices().v);
-    if(_cam.controlling)
-        _terrain_shader->setUniform<qe::UNISEL>(glm::uvec2(9999, 9999));
-    else
-        _terrain_shader->setUniform<qe::UNISEL>(to_uvec2(getLookedAtTile(_cam.camera->getPlaneCoord())));
-    // qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.800, 0.567, 0.305));
+    qe::Program *ts = _terrain_render_geometry_pass ? _terrain_tileno_shader.get() : _terrain_shader.get();
+    ts->use();
+    ts->setUniform<qe::UNIMVP>(mvp);
+    ts->setUniform<qe::UNIM>(m);
+    ts->setUniform<qe::UNIV>(_cam.camera->matrices().v);
+    if(_terrain_render_geometry_pass == false) {
+        if(_cam.controlling) {
+            ts->setUniform<qe::UNISEL>(glm::uvec2(9999, 9999));
+        } else {
+            ts->setUniform<qe::UNISEL>(to_uvec2(getLookedAtTile(_cam.camera->getPlaneCoord())));
+        }
+        ts->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.8, 0.8));
+    }
     // render grey areas
-    _terrain_shader->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.8, 0.8));
     _ground->render_sub(_ground_indices[DamMain_CUBezierCurve]);
     _ground->render_sub(_ground_indices[DamBaseBottom_Cube_001]);
     _ground->render_sub(_ground_indices[DamBaseBottom_001_Cube_002]);
@@ -422,10 +433,10 @@ void GameScreenImpl::renderTerrain() {
     _ground->render_sub(_ground_indices[DamBaseTop_001_Cone_001]);
     _ground->render_sub(_ground_indices[DamBaseTop_002_Cone_002]);
     // render ground areas
-    _terrain_shader->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.567, 0.305));
+    if(_terrain_render_geometry_pass == false) ts->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.567, 0.305));
     _ground->render_sub(_ground_indices[Ground_Plane_002]);
     // render water
-    _terrain_shader->setUniform<qe::UNICOLOR>(glm::vec3(0.0, 0.551, 0.8));
+    if(_terrain_render_geometry_pass == false) ts->setUniform<qe::UNICOLOR>(glm::vec3(0.0, 0.551, 0.8));
     _ground->render_sub(_ground_indices[WaterPlane_Plane_003]);
     _ground->render_sub(_ground_indices[WaterBlock_Cube_004]);
 }
