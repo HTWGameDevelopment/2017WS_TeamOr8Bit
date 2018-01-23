@@ -42,6 +42,15 @@ namespace ui {
         Align &align_y() {
             return _y;
         }
+        virtual Box &operator=(Box &&other) {
+            if(this == &other) return *this;
+            Renderable::operator=(std::move(other));
+            Container::operator=(std::move(other));
+            _orientation = other._orientation;
+            _x = other._x;
+            _y = other._y;
+            return *this;
+        }
         virtual void render();
         virtual void set_root(Renderable *r);
         virtual Renderable *get(const char* str);

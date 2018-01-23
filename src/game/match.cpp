@@ -165,6 +165,7 @@ void Match::setRenderOffsets(qe::Mesh<qe::OBJV3> *tank) {
         roff_t{hextile::hexpoint_t{19,13}, 2.8},
         roff_t{hextile::hexpoint_t{19,11}, 2.1},
         roff_t{hextile::hexpoint_t{18,10}, 2.1},
+        roff_t{hextile::hexpoint_t{18,11}, 2.1},
         roff_t{hextile::hexpoint_t{19,10}, 2.1},
         roff_t{hextile::hexpoint_t{19,9}, 1.6},
         roff_t{hextile::hexpoint_t{18,8}, 1.6},

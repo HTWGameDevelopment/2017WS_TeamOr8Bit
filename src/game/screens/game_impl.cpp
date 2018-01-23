@@ -43,36 +43,17 @@ inline glm::uvec2 to_uvec2(hextile::hexpoint_t t) {
     return glm::uvec2(t.x, t.y);
 }
 
-hextile::hexpoint_t getLookedAtTile(glm::vec2 pc) {
-    float yval1 = floor(pc.y / 1.5);
-    float xval1 = floor((pc.x + (((int)yval1) % 2) * 0.5f * 2.0f * 0.866f) / (2.0f * 0.866f));
-    glm::vec4 xval = glm::vec4(0, 1, 0, 1) + xval1;
-    glm::vec4 yval = glm::vec4(0, 0, 1, 1) + yval1;
-
-    glm::vec4 xpoints(2.0f * 0.866f * xval.x - ((int)yval.x % 2) * 0.5f * 2.0f * 0.866f,
-        2.0f * 0.866f * xval.y - ((int)yval.y % 2) * 0.5f * 2.0f * 0.866f,
-        2.0f * 0.866f * xval.z - ((int)yval.z % 2) * 0.5f * 2.0f * 0.866f,
-        2.0f * 0.866f * xval.w - ((int)yval.w % 2) * 0.5f * 2.0f * 0.866f);
-    glm::vec4 ypoints(yval * 1.5f);
-
-    glm::vec4 distances(glm::distance(pc, glm::vec2(xpoints.x, ypoints.x)),
-        glm::distance(pc, glm::vec2(xpoints.y, ypoints.y)),
-        glm::distance(pc, glm::vec2(xpoints.z, ypoints.z)),
-        glm::distance(pc, glm::vec2(xpoints.w, ypoints.w)));
-
-    float d = std::min(distances.x, std::min(distances.y, std::min(distances.z, distances.w)));
-    if(d == distances.x) return hextile::hexpoint_t {(int)xval.x, (int)yval.x};
-    else if(d == distances.y) return hextile::hexpoint_t {(int)xval.y, (int)yval.y};
-    else if(d == distances.z) return hextile::hexpoint_t {(int)xval.z, (int)yval.z};
-    else if(d == distances.w) return hextile::hexpoint_t {(int)xval.w, (int)yval.w};
-}
-
-hextile::hexpoint_t getLookedAtTile(glm::vec3 pc) {
-    return getLookedAtTile(glm::vec2(pc.x, pc.z));
+hextile::hexpoint_t GameScreenImpl::getLookedAtTile(glm::vec2 uv) {
+    qe::rgpixel_t r;
+    _ffbo.bindread();
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glReadPixels(uv.x, _ctxt->getResolution().y - uv.y, 1, 1, GL_RG_INTEGER, GL_UNSIGNED_INT, &r);
+    GLSERRORCHECK;
+    return hextile::hexpoint_t {r.r, r.g};
 }
 
 GameScreenImpl::GameScreenImpl(gamespace::Match &&match, qe::Context *ctxt, std::shared_ptr<font::Font> font)
-: _match(std::move(match)), _ctxt(ctxt), _font(font), _shouldClose(true) {
+: _match(std::move(match)), _ctxt(ctxt), _font(font), _ffbo(ctxt->getResolution()), _shouldClose(true) {
     initializeBuffers();
     initializeShaders();
     initializeSelection();
@@ -96,6 +77,7 @@ void GameScreenImpl::initializeShaders() {
     _terrain_shader->use();
     _terrain_shader->setUniform<qe::UNIL>(glm::vec3(0.1, -1, 0.1));
     _terrain_shader->bindUniformBlockBinding(_terrain_shader->getUniformBlockIndex("MarkerBlock"), 1);
+    _terrain_tileno_shader.reset(qe::mkProgram("assets/shaders/terrain.vsh"_p, "assets/shaders/terrain_tileno.fsh"_p, as));
 }
 
 void GameScreenImpl::initializeSelection() {
@@ -106,7 +88,7 @@ void GameScreenImpl::initializeSelection() {
 
 void GameScreenImpl::initializeHUD() {
     // fixed UI
-    _ui.reset(new ui::UI(ui::Point {_ctxt->width(), _ctxt->height()}));
+    _ui.reset(new ui::UI(ui::Point {(float)_ctxt->width(), (float)_ctxt->height()}));
     std::unique_ptr<ui::Box> box(new ui::Box());
     std::unique_ptr<ui::Text> text(new ui::Text());
     text->dimension() = ui::Point {1, 0.25};
@@ -323,9 +305,10 @@ void GameScreenImpl::run() {
     auto *ptr = _marker_buffer->ptr();
 
     while(!_ctxt->shouldClose() && _shouldClose == false) {
-        // calculate lookat tile
+        // calculate lookat tile (of last frame!!!)
         if(_cam.controlling == false) {
-            auto pc = getLookedAtTile(_cam.camera->getPlaneCoord());
+            auto pc = getLookedAtTile(_cam.camera->save());
+            _selection.lastLookedAtTile = pc;
             if(pc.x < 0 || pc.y < 0 || pc.x >= max_x || pc.y >= max_y) {
                 _selection.hovering = nullptr;
             } else {
@@ -357,6 +340,14 @@ void GameScreenImpl::run() {
         }
         // render
         _ctxt->start();
+        // render terrain tile to fbo
+        _ffbo.bind();
+        _ffbo.clear();
+        _terrain_render_geometry_pass = true;
+        renderTerrain();
+        _terrain_render_geometry_pass = false;
+        _ffbo.unbind();
+        // render everything to normal buffer
         render();
         _ctxt->swap();
         // event handling
@@ -396,17 +387,20 @@ void GameScreenImpl::render() {
 void GameScreenImpl::renderTerrain() {
     glm::mat4 m = glm::translate(glm::vec3(18.099, 0, 10.963) + glm::vec3(-2 * 0.866, 0, -1.0));
     glm::mat4 mvp = _cam.camera->matrices().pv * m;
-    _terrain_shader->use();
-    _terrain_shader->setUniform<qe::UNIMVP>(mvp);
-    _terrain_shader->setUniform<qe::UNIM>(m);
-    _terrain_shader->setUniform<qe::UNIV>(_cam.camera->matrices().v);
-    if(_cam.controlling)
-        _terrain_shader->setUniform<qe::UNISEL>(glm::uvec2(9999, 9999));
-    else
-        _terrain_shader->setUniform<qe::UNISEL>(to_uvec2(getLookedAtTile(_cam.camera->getPlaneCoord())));
-    // qe::Cache::objv3->setUniform<qe::UNICOLOR>(glm::vec3(0.800, 0.567, 0.305));
+    qe::Program *ts = _terrain_render_geometry_pass ? _terrain_tileno_shader.get() : _terrain_shader.get();
+    ts->use();
+    ts->setUniform<qe::UNIMVP>(mvp);
+    ts->setUniform<qe::UNIM>(m);
+    ts->setUniform<qe::UNIV>(_cam.camera->matrices().v);
+    if(_terrain_render_geometry_pass == false) {
+        if(_cam.controlling) {
+            ts->setUniform<qe::UNISEL>(glm::uvec2(9999, 9999));
+        } else {
+            ts->setUniform<qe::UNISEL>(to_uvec2(_selection.lastLookedAtTile));
+        }
+        ts->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.8, 0.8));
+    }
     // render grey areas
-    _terrain_shader->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.8, 0.8));
     _ground->render_sub(_ground_indices[DamMain_CUBezierCurve]);
     _ground->render_sub(_ground_indices[DamBaseBottom_Cube_001]);
     _ground->render_sub(_ground_indices[DamBaseBottom_001_Cube_002]);
@@ -422,10 +416,10 @@ void GameScreenImpl::renderTerrain() {
     _ground->render_sub(_ground_indices[DamBaseTop_001_Cone_001]);
     _ground->render_sub(_ground_indices[DamBaseTop_002_Cone_002]);
     // render ground areas
-    _terrain_shader->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.567, 0.305));
+    if(_terrain_render_geometry_pass == false) ts->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.567, 0.305));
     _ground->render_sub(_ground_indices[Ground_Plane_002]);
     // render water
-    _terrain_shader->setUniform<qe::UNICOLOR>(glm::vec3(0.0, 0.551, 0.8));
+    if(_terrain_render_geometry_pass == false) ts->setUniform<qe::UNICOLOR>(glm::vec3(0.0, 0.551, 0.8));
     _ground->render_sub(_ground_indices[WaterPlane_Plane_003]);
     _ground->render_sub(_ground_indices[WaterBlock_Cube_004]);
 }

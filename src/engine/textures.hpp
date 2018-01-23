@@ -43,6 +43,10 @@ namespace qe {
         switch(flag) {
         case qe::TEXTG:
             return qe::GLFlagSet {GL_TEXTURE_2D, GL_R8, GL_RED, GL_UNSIGNED_BYTE};
+        case qe::RGB:
+            return qe::GLFlagSet {GL_TEXTURE_2D, GL_RGB8, GL_RGB, GL_UNSIGNED_BYTE};
+        case qe::RG32UI:
+            return qe::GLFlagSet {GL_TEXTURE_2D, GL_RG32UI, GL_RG_INTEGER, GL_UNSIGNED_INT};
         }
 
         return qe::GLFlagSet {GL_TEXTURE_2D, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
@@ -62,6 +66,8 @@ namespace qe {
         void initTexture() {
             if(T == PNGRGBA) return initTextureAsRGBA();
             else if(T == TEXTG) return initTextureAsGlyphmap();
+            else if(T == RG32UI) return initTextureAsGlyphmap();
+            else if(T == RGB) return initTextureAsGlyphmap();
 
             assert(false);
         }
@@ -75,9 +81,13 @@ namespace qe {
             GLSERRORCHECK;
             bindTo();
             glTexImage2D(_gl.target, 0, _gl.internalFormat, _source.width(), _source.height(), 0, _gl.format, _gl.type, _source.parse());
+            GLERRORCHECK;
             glTexParameteri(_gl.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            GLERRORCHECK;
             glTexParameteri(_gl.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            GLERRORCHECK;
             glTexParameteri(_gl.target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            GLERRORCHECK;
             glTexParameteri(_gl.target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             GLERRORCHECK;
         }
@@ -91,9 +101,13 @@ namespace qe {
             GLSERRORCHECK;
             bindTo();
             glTexImage2D(_gl.target, 0, _gl.internalFormat, _source.width(), _source.height(), 0, _gl.format, _gl.type, _source.parse());
+            GLERRORCHECK;
             glTexParameteri(_gl.target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            GLERRORCHECK;
             glTexParameteri(_gl.target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            GLERRORCHECK;
             glTexParameteri(_gl.target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            GLERRORCHECK;
             glTexParameteri(_gl.target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             GLERRORCHECK;
         }
@@ -137,6 +151,9 @@ namespace qe {
         void __introspect(size_t off) {
             std::cout << std::string(off, ' ') << "Texture<" << constantToString(T) << "," << U << ">[" << std::endl;
             _source.__introspect(off + 2);
+        }
+        operator GLuint() {
+            return _texture;
         }
     };
 
