@@ -16,7 +16,7 @@ namespace gamespace {
 
     typedef std::function<unsigned int(BoardTile &)> relation;
 
-    std::function<bool(BoardTile&,unsigned int&)> getEdgeRelation(unsigned int layer, relation _v);
+    std::function<bool(BoardTile&,unsigned int&)> getEdgeRelation(unsigned int layer, relation _v, bool noground_block);
 
     class Unit {
     private:
@@ -69,7 +69,6 @@ namespace gamespace {
         unsigned int vr() {return _vr;}
         unsigned int dpt() {return _dpt;}
         std::string name() {return _name;}
-
     };
 
 }

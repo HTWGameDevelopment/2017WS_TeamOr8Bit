@@ -6,8 +6,12 @@ unsigned int gamespace::defaultFalloff(BoardTile &t) {
     return 1;
 }
 
-std::function<bool(BoardTile&,unsigned int&)> gamespace::getEdgeRelation(unsigned int layer, relation _v) {
-    return [layer, _v](BoardTile &b, unsigned int &p) {if(p == 0) return false; return b.mark(layer, p--);};
+std::function<bool(BoardTile&,unsigned int&)> gamespace::getEdgeRelation(unsigned int layer, relation _v, bool noground_block = false) {
+    return [layer, _v, noground_block](BoardTile &b, unsigned int &p) {
+        if(p == 0) return false;
+        if(noground_block && b.marked_value(AOE_LAYER) == 2) return false;
+        return b.mark(layer, p--);
+    };
 }
 
 void Unit::markVisibility(BoardTile &tile) {
@@ -15,7 +19,7 @@ void Unit::markVisibility(BoardTile &tile) {
 }
 
 void Unit::markMovement(BoardTile &tile) {
-    tile.board().markByEdge(tile.coord(), _dpt, MOVE_LAYER, getEdgeRelation(MOVE_LAYER, _t));
+    tile.board().markByEdge(tile.coord(), _dpt, MOVE_LAYER, getEdgeRelation(MOVE_LAYER, _t, true));
 }
 
 void Unit::markAttack(BoardTile &tile) {
