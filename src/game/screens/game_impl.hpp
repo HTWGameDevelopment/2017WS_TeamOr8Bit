@@ -48,11 +48,13 @@ namespace gamespace {
             Type type;
             gamespace::BoardTile *selected;
             gamespace::BoardTile *hovering;
+            hextile::hexpoint_t lastLookedAtTile;
         } _selection;
         bool _shouldClose;
         void render();
         void renderTerrain();
         void renderUnitOf(gamespace::BoardTile *b);
+        hextile::hexpoint_t getLookedAtTile(glm::vec2 pc);
     public:
         GameScreenImpl(gamespace::Match &&match, qe::Context *ctxt, std::shared_ptr<font::Font> font);
         void pre_run();

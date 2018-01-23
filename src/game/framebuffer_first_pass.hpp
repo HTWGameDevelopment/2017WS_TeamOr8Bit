@@ -29,16 +29,19 @@ namespace qe {
     class FramebufferFirstPass: public Framebuffer {
     private:
         Renderbuffer _depth;
-        Texture<RG, DIFFTEXBIND_GL> _tileno;
+        Texture<RG32UI, DIFFTEXBIND_GL> _tileno;
     public:
-        FramebufferFirstPass(glm::ivec2 size): Framebuffer(), _depth(size), _tileno(Loader<RG>(size)) {
+        FramebufferFirstPass(glm::ivec2 size): Framebuffer(), _depth(size), _tileno(Loader<RG32UI>(size)) {
             attachTexture(GL_COLOR_ATTACHMENT0, _tileno);
             attachRenderbuffer(GL_DEPTH_ATTACHMENT, _depth);
             valid();
         }
         virtual ~FramebufferFirstPass() {}
-        Texture<RG, DIFFTEXBIND_GL> &get_tileno() {
+        Texture<RG32UI, DIFFTEXBIND_GL> &get_tileno() {
             return _tileno;
+        }
+        void clear() {
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
     };
 

@@ -130,8 +130,8 @@ namespace qe {
     };
 
     struct rgpixel_t {
-        unsigned char r;
-        unsigned char g;
+        uint32_t r;
+        uint32_t g;
     };
 
     template<> class Loader<RGB>: public LoaderContainer<rgbpixel_t> {
@@ -140,7 +140,7 @@ namespace qe {
         Loader(Loader &&other): LoaderContainer(std::move(other)) {}
     };
 
-    template<> class Loader<RG>: public LoaderContainer<rgpixel_t> {
+    template<> class Loader<RG32UI>: public LoaderContainer<rgpixel_t> {
     public:
         Loader(glm::ivec2 s): LoaderContainer(s) {}
         Loader(Loader &&other): LoaderContainer(std::move(other)) {}

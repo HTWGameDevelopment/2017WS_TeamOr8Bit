@@ -5,7 +5,7 @@ layout(location = 3) uniform vec3 light_world;
 
 in vec3 pos_world;
 
-out vec2 tileno;
+out uvec2 tileno;
 
 #assign BOARDSIZE_X
 #assign BOARDSIZE_Y
@@ -42,6 +42,6 @@ void main() {
         tcoord = vec2(xval.w, yval.w);
     }
 
-    tileno = tcoord / vec2(BOARDSIZE_X, BOARDSIZE_Y);
+    tileno = uvec2(tcoord);
 
 }

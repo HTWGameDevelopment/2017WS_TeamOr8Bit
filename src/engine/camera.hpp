@@ -140,6 +140,9 @@ namespace qe {
         glm::vec3 pos() {
             return _pos;
         }
+        glm::vec2 save() {
+            return _save;
+        }
         glm::vec3 getPlaneCoord() {
             float delta;
 

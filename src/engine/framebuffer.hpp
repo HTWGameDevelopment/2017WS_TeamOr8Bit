@@ -59,6 +59,10 @@ namespace qe {
             glBindFramebuffer(GL_FRAMEBUFFER, _fb);
             GLSERRORCHECK;
         }
+        void bindread() {
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, _fb);
+            GLSERRORCHECK;
+        }
         static void unbind() {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
