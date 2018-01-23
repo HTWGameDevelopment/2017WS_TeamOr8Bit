@@ -56,6 +56,7 @@ namespace ui {
                 if(i->get() == ui) {
                     ui->hide();
                     _context_menus.erase(i);
+                    return;
                 }
             }
         }
@@ -79,8 +80,11 @@ namespace ui {
             for(auto &i : _context_menus)
                 i->__introspect(off + 2);
         }
-        void click(Point pos) {
-            if(_container.get()) _container->click(pos);
+        bool click(Point pos) {
+            if(_container.get() && _container->click(pos)) return true;
+            for(auto &i : _context_menus)
+                if(i->click(pos)) return true;
+            return false;
         }
         Renderable *hovers(ui::Point pos) {
             for(auto &i : _context_menus) {

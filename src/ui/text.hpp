@@ -28,6 +28,11 @@ namespace ui {
     private:
         std::string _text;
     public:
+        virtual Text &operator=(Text &&other) {
+            Renderable::operator=(std::move(other));
+            _text = std::move(other._text);
+            return *this;
+        }
         std::string &text() {
             return _text;
         }

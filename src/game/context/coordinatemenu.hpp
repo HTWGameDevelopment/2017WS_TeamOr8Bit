@@ -137,6 +137,7 @@ namespace gamespace {
             _unit_text = (ui::Text*)ui->get("1.2");
             _qt = (ui::Text*)ui->get("1.3");
             _qt->text() = "X";
+            _qt->on_click([this](ui::Renderable*) {destroy();});
             _hp_text = (ui::Text*)ui->get("2.1");
             _hp_text->text() = "HP";
             _unit_hp = (ui::Text*)ui->get("2.2");

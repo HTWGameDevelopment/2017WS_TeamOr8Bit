@@ -85,13 +85,15 @@ void GameScreenInputState::button(int button, int action, int mods) {
     if(action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT && _mouse_mode == FREE) {
         auto p = getLookedAtTile(_impl->camera()->getPlaneCoord());
         GDBG(GV2TOSTR(p));
-        ui::Point s{_last_x, _resy-_last_y};
-        _selected_menu = _impl->ui()->hovers(s);
-        if(_selected_menu) {
-            _origin_save = _selected_menu->origin();
-            _mouse_save = s;
-            _mouse_mode = UIINTERACTION;
-            GDBG("new mouse mode: UIINTERACTION");
+        ui::Point s{_last_x, _resy - _last_y};
+        if(_impl->ui()->click(s) == false) { // check for registered handlers first
+            _selected_menu = _impl->ui()->hovers(s);
+            if(_selected_menu) {
+                _origin_save = _selected_menu->origin();
+                _mouse_save = s;
+                _mouse_mode = UIINTERACTION;
+                GDBG("new mouse mode: UIINTERACTION");
+            }
         }
         return;
     }

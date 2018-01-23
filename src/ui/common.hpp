@@ -117,6 +117,17 @@ namespace ui {
         virtual ~Renderable() {
             if(_deleter) _deleter(_payload);
         }
+        virtual Renderable &operator=(const Renderable &other) = delete;
+        virtual Renderable &operator=(Renderable &&other) {
+            if(this == &other) return *this;
+            _render = std::move(other._render);
+            _click = std::move(other._click);
+            _deleter = std::move(other._deleter);
+            _payload = other._payload;
+            _root = other._root;
+            _enabled = other._enabled;
+            return *this;
+        }
         template<typename F> void render_with(F &&r) {
             _render = std::move(r);
         }
@@ -194,6 +205,10 @@ namespace ui {
         std::vector<std::unique_ptr<Renderable>> _items;
     public:
         virtual ~Container() {}
+        virtual Container &operator=(Container &&other) {
+            _items = std::move(other._items);
+            return *this;
+        }
         void append(Renderable *item) {_items.emplace_back(item);}
         Renderable *operator[](unsigned int i) {return _items[i].get();}
         unsigned int count() {return _items.size();}
