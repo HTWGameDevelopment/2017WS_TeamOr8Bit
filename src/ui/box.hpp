@@ -17,28 +17,50 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef UI_ABSTRACT_BOX_HPP
-#define UI_ABSTRACT_BOX_HPP
+#ifndef UI_BOX_HPP
+#define UI_BOX_HPP
 
-#include<ui/abstract_common.hpp>
+#include<ui/common.hpp>
 
 namespace ui {
 
-    class AbstractBox: public AbstractRenderable, public AbstractArea, public AbstractContainer {
+    class Box: public Renderable, public Container {
     public:
         enum Orientation { HORIZONTAL, VERTICAL };
-        enum Growth { MINIMUM, FILL };
         enum Align { BEGINNING, CENTER, END };
     private:
         Orientation _orientation;
-        Growth _growth;
         Align _x;
         Align _y;
     public:
-        void set_orientation(Orientation o) {_orientation = o;}
-        void set_growth(Growth g) {_growth = g;}
-        void set_align_inner(Align x, Align y) {_x = x; _y = y;}
-        DefinedRenderable *buildDefined(defp_t res);
+        Orientation &orientation() {
+            return _orientation;
+        }
+        Align &align_x() {
+            return _x;
+        }
+        Align &align_y() {
+            return _y;
+        }
+        virtual Box &operator=(Box &&other) {
+            if(this == &other) return *this;
+            Renderable::operator=(std::move(other));
+            Container::operator=(std::move(other));
+            _orientation = other._orientation;
+            _x = other._x;
+            _y = other._y;
+            return *this;
+        }
+        virtual void render();
+        virtual void set_root(Renderable *r);
+        virtual Renderable *get(const char* str);
+        virtual void show();
+        virtual void hide();
+        virtual bool click(Point p);
+        virtual void recalculate_origin();
+        virtual void recalculate_dimension();
+        virtual void convert_coords(Point mul);
+        virtual void __introspect(size_t off);
     };
 
 }
