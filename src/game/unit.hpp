@@ -30,6 +30,7 @@ namespace gamespace {
         unsigned int _ar; //!< Attack range
         unsigned int _vr; //!< Visibility range
         unsigned int _dpt; //!< travel distance per turn
+        unsigned int _last_turn_id;
         relation _a; //!< attack range relation
         relation _d; //!< attack damage relation
         relation _t; //!< travel distance relation
@@ -43,6 +44,8 @@ namespace gamespace {
         void markVisibility(BoardTile &tile);
         void markMovement(BoardTile &tile);
         void markAttack(BoardTile &tile);
+        void setLastTurnId(unsigned int i) {_last_turn_id = i;};
+        unsigned int getLastTurnId(){return _last_turn_id;};
         Player &player() {
             return *_player;
         }

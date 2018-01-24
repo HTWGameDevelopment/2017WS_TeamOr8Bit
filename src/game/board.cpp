@@ -1,6 +1,7 @@
 #include "gameboard.hpp"
 
 #include "unit.hpp"
+#include "unitMove.hpp"
 
 using namespace gamespace;
 
@@ -66,6 +67,7 @@ bool BoardTile::marked(unsigned int layer) {
 }
 
 void GameBoard::moveUnit(hexpoint_t from, hexpoint_t to) {
+    UnitMove uMove(from, to);
     auto &ft = get(from);
     auto &tt = get(to);
     assert(ft.unit());
@@ -73,7 +75,6 @@ void GameBoard::moveUnit(hexpoint_t from, hexpoint_t to) {
     tt.setUnit(ft.unit());
     ft.setUnit(nullptr);
     tt.unit()->tile() = &tt;
-    // TODO Map events
 }
 
 void GameBoard::attackUnit(hexpoint_t from, hexpoint_t to) {
