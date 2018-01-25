@@ -48,6 +48,7 @@ namespace gamespace {
         ui::Text *_qt;
         BoardTile *_b;
         Unit *_u;
+        unsigned int _udisp;
         void update();
         void registerCallbacks();
         void destroy();
@@ -123,7 +124,7 @@ namespace gamespace {
             return m;
         }
         CoordinateMenu(BoardTile *b, ui::UI *ui);
-        virtual ~CoordinateMenu() {}
+        virtual ~CoordinateMenu();
         ui::Renderable *view() {
             return _ui;
         }

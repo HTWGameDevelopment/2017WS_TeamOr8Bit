@@ -1,5 +1,8 @@
 #include "game_impl.hpp"
 
+#include<game/unitmove.hpp>
+#include<game/unitattack.hpp>
+
 using namespace gamespace;
 using namespace std::string_literals;
 
@@ -190,41 +193,6 @@ void GameScreenImpl::initializeMap() {
     for(; b != e; ++b) {
         b->setUnit(nullptr);
     }
-    // auto *u1 = new gamespace::Unit(_tank.get(), &_match.player1(), "Tank",
-    //     100,
-    //     50,
-    //     50,
-    //     3,
-    //     3,
-    //     2,
-    //     gamespace::defaultFalloff,
-    //     gamespace::defaultFalloff,
-    //     gamespace::defaultFalloff,
-    //     gamespace::defaultFalloff);
-    // auto *u2 = new gamespace::Unit(_tank.get(), &_match.player2(), "Tank",
-    //     100,
-    //     50,
-    //     50,
-    //     3,
-    //     3,
-    //     2,
-    //     gamespace::defaultFalloff,
-    //     gamespace::defaultFalloff,
-    //     gamespace::defaultFalloff,
-    //     gamespace::defaultFalloff);
-    // // TESTING PURPOSES. MOVE THIS TO MATCH SOMEHOW
-    // _match.board()[0][0].setUnit(new gamespace::Unit(*u1));
-    // _match.board()[1][0].setUnit(new gamespace::Unit(*u1));
-    // _match.board()[0][1].setUnit(new gamespace::Unit(*u1));
-    // _match.board()[1][1].setUnit(new gamespace::Unit(*u1));
-    // _match.board()[0][5].setUnit(new gamespace::Unit(*u2));
-    // _match.board()[1][5].setUnit(new gamespace::Unit(*u2));
-    // _match.board()[0][6].setUnit(new gamespace::Unit(*u2));
-    // _match.board()[1][6].setUnit(new gamespace::Unit(*u2));
-    // _match.board().synchronize();
-    // delete u1;
-    // delete u2;
-    // _match.board()[0][0].unit()->markVisibility(_match.board()[0][0]);
     _match.setRenderOffsets(_tank.get());
 }
 
@@ -234,7 +202,7 @@ void GameScreenImpl::enableMoveMask() {
         if(_selection.hovering->marked(MOVE_LAYER) && _selection.hovering != _selection.selected) {
             assert(_selection.selected);
             if(_selection.hovering->unit() != nullptr) return; // cannot move to an occupied tile
-            _match.board().moveUnit(_selection.selected->coord(), _selection.hovering->coord());
+            _match.doMove(new UnitMove(_selection.selected->coord(), _selection.hovering->coord(), &_match));
         }
         _selection.type = SelectionState::Type::SEL_NONE;
         _selection.selected = nullptr;
@@ -259,7 +227,7 @@ void GameScreenImpl::enableAttackMask() {
             assert(_selection.selected);
             if(_selection.hovering->unit() == nullptr) return; // cannot attack empty tile
             if(_selection.hovering->unit()->player() == _match.currentPlayer()) return; // cannot attack own unit
-            _match.board().attackUnit(_selection.selected->coord(), _selection.hovering->coord());
+            _match.doMove(new UnitAttack(_selection.selected->coord(), _selection.hovering->coord(), &_match));
         }
         _selection.type = SelectionState::Type::SEL_NONE;
         _selection.selected = nullptr;

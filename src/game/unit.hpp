@@ -18,6 +18,11 @@ namespace gamespace {
 
     std::function<bool(BoardTile&,unsigned int&)> getEdgeRelation(unsigned int layer, relation _v, bool noground_block);
 
+    struct cb_t {
+        unsigned int id;
+        std::function<void(void)> f;
+    };
+
     class Unit {
     private:
         qe::Mesh<qe::OBJV3> *_mesh;
@@ -36,16 +41,38 @@ namespace gamespace {
         relation _t; //!< travel distance relation
         relation _v; //!< visibility relation
         BoardTile *_tile; //!< Board tile
+        unsigned int _lid;
+        std::vector<cb_t> _on_change;
     public:
         Unit(qe::Mesh<qe::OBJV3> *m, Player *p, std::string name, unsigned int h, unsigned int d, unsigned int a, unsigned int r, unsigned int v, unsigned int t, relation are, relation dr, relation tr, relation vre)
             : _mesh(m), _player(p), _name(name), _max_hp(h), _hp(h), _dp(d), _ap(a), _ar(r), _vr(v), _dpt(t), _a(are), _d(dr), _t(tr), _v(vre) {}
-        virtual ~Unit() {}
+        virtual ~Unit() {
+            emit_change();
+        }
         void render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m);
         void markVisibility(BoardTile &tile);
         void markMovement(BoardTile &tile);
         void markAttack(BoardTile &tile);
         void setLastTurnId(unsigned int i) {_last_turn_id = i;};
         unsigned int getLastTurnId(){return _last_turn_id;};
+        template<typename F>
+        unsigned int on_change(F &&f) {
+            _on_change.push_back(cb_t {_lid, f});
+            return _lid++;
+        }
+        void emit_change() {
+            for(auto &f : _on_change) {
+                f.f();
+            }
+        }
+        void on_change_r(unsigned int id) {
+            for(auto b = _on_change.begin(); b != _on_change.end(); ++b) {
+                if(b->id == id) {
+                    _on_change.erase(b);
+                    return;
+                }
+            }
+        }
         Player &player() {
             return *_player;
         }

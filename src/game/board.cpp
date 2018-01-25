@@ -1,7 +1,6 @@
 #include "gameboard.hpp"
 
 #include "unit.hpp"
-#include "unitMove.hpp"
 
 using namespace gamespace;
 
@@ -67,7 +66,6 @@ bool BoardTile::marked(unsigned int layer) {
 }
 
 void GameBoard::moveUnit(hexpoint_t from, hexpoint_t to) {
-    UnitMove uMove(from, to);
     auto &ft = get(from);
     auto &tt = get(to);
     assert(ft.unit());

@@ -7,6 +7,17 @@ using namespace gamespace;
 
 CoordinateMenu::CoordinateMenu(BoardTile *b, ui::UI *ui): _top(ui), _b(b), _u(b->unit()) {
     assert(_u);
+    _udisp = _u->on_change([this](){
+        if(_u->dead()) {
+            destroy();
+        } else {
+            update();
+        }
+    });
+}
+
+CoordinateMenu::~CoordinateMenu() {
+    _u->on_change_r(_udisp);
 }
 
 void CoordinateMenu::destroy() {
