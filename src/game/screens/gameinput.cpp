@@ -103,7 +103,7 @@ void GameScreenInputState::button(int button, int action, int mods) {
             _mouse_mode = FREE;
             _selected_menu = nullptr;
             GDBG("new mouse mode: FREE");
-        } else if(_mouse_mode == FREE) _impl->enableMoveMask();
+        } else if(_mouse_mode == FREE) _impl->enableActionMask();
     } else if(button == GLFW_MOUSE_BUTTON_MIDDLE && _mouse_mode == LOCKED) {
         _impl->context()->displayCursor();
         _impl->context()->resetMouseToCenter();

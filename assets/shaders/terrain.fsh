@@ -88,8 +88,12 @@ void main() {
         if(uvec2(tcoord) == uni_sel) {
             visvalue = 0.3;
         }
-        if(ismarked(uvec2(tcoord), uint(2)) == uint(1) || ismarked(uvec2(tcoord), uint(1)) == uint(1)) {
+        if(ismarked(uvec2(tcoord), uint(2)) == uint(1)) {
             visvalue += 0.2;
+        }
+        if(ismarked(uvec2(tcoord), uint(1)) == uint(1)) {
+            if(floor(mod(dot(pos_world.xz, glm::vec2(1, -1)) / 0.4, 2)) == 1)
+                color = vec3(1, 0.2, 0.2) * (0.1 + cosTheta);
         }
         if(ismarked(uvec2(tcoord), uint(3)) == uint(1)) {
             if(floor(mod(dot(pos_world.xz, glm::vec2(-1, 1)) / 0.4, 2)) == 1)

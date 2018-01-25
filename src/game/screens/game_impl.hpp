@@ -45,7 +45,7 @@ namespace gamespace {
         } _textures;
         std::unique_ptr<ui::UI> _ui;
         struct SelectionState {
-            enum Type { SEL_TO_MOVE, SEL_TO_ATTACK, SEL_NONE };
+            enum Type { SEL_TO_ACTION, SEL_NONE };
             Type type;
             gamespace::BoardTile *selected;
             gamespace::BoardTile *hovering;
@@ -67,8 +67,7 @@ namespace gamespace {
         void initializeMap();
         void initializeSelection();
         void initializeHUD();
-        void enableMoveMask();
-        void enableAttackMask();
+        void enableActionMask();
         void inCameraMode(bool mode);
         void createContextForLookAt();
         gamespace::Match &match() {

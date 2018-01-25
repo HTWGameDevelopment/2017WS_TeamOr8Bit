@@ -181,7 +181,10 @@ void Match::setRenderOffsets(UnitManager &manager) {
     };
     for(unsigned int i = 0; i < sizeof(offs) / sizeof(roff_t); ++i) {
         _board[offs[i].c.x][offs[i].c.y].renderData() = offs[i].height;
-        _board[offs[i].c.x][offs[i].c.y].setUnit(manager.createTHeli(&player1()));
+        if(i % 2 == 1)
+            _board[offs[i].c.x][offs[i].c.y].setUnit(manager.createTank(&player1()));
+        else
+            _board[offs[i].c.x][offs[i].c.y].setUnit(manager.createTank(&player2()));
     }
     _board.synchronize();
 }

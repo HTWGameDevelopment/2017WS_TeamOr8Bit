@@ -195,51 +195,29 @@ void GameScreenImpl::initializeMap() {
     _match.setRenderOffsets(_unitmanager);
 }
 
-void GameScreenImpl::enableMoveMask() {
+void GameScreenImpl::enableActionMask() {
     if(_selection.hovering == nullptr) return; // no tile to select
-    if(_selection.type == SelectionState::Type::SEL_TO_MOVE) {
-        if(_selection.hovering->marked(MOVE_LAYER) && _selection.hovering != _selection.selected) {
+    if(_selection.type == SelectionState::Type::SEL_TO_ACTION) {
+        if(_selection.hovering->marked(MOVE_LAYER) && _selection.hovering != _selection.selected && _selection.hovering->unit() == nullptr) { // is move action?
             assert(_selection.selected);
-            if(_selection.hovering->unit() != nullptr) return; // cannot move to an occupied tile
             _match.doMove(new UnitMove(_selection.selected->coord(), _selection.hovering->coord(), &_match));
-        }
-        _selection.type = SelectionState::Type::SEL_NONE;
-        _selection.selected = nullptr;
-        _selection.hovering = nullptr;
-        _match.board().clearMarker(MOVE_LAYER);
-        _match.board().clearMarker(ACTION_LAYER);
-    } else {
-        _match.board().clearMarker(ACTION_LAYER);
-        if(_selection.hovering->unit() == nullptr) return; // no unit to select
-        if(_selection.hovering->unit()->player() != _match.currentPlayer()) return; // can only select own units
-        GDBG("enable movement mask on " << _selection.hovering->coord().string());
-        _selection.hovering->unit()->markMovement(*_selection.hovering);
-        _selection.selected = _selection.hovering;
-        _selection.type = SelectionState::Type::SEL_TO_MOVE;
-    }
-}
-
-void GameScreenImpl::enableAttackMask() {
-    if(_selection.hovering == nullptr) return; // no tile to select
-    if(_selection.type == SelectionState::Type::SEL_TO_ATTACK) {
-        if(_selection.hovering->marked(ACTION_LAYER) && _selection.hovering != _selection.selected) {
+        } else if(_selection.hovering->marked(ACTION_LAYER) && _selection.hovering != _selection.selected && _selection.hovering->unit() && _selection.hovering->unit()->player() != _match.currentPlayer()) { // is it attack action?
             assert(_selection.selected);
-            if(_selection.hovering->unit() == nullptr) return; // cannot attack empty tile
-            if(_selection.hovering->unit()->player() == _match.currentPlayer()) return; // cannot attack own unit
             _match.doMove(new UnitAttack(_selection.selected->coord(), _selection.hovering->coord(), &_match));
         }
         _selection.type = SelectionState::Type::SEL_NONE;
         _selection.selected = nullptr;
         _selection.hovering = nullptr;
+        _match.board().clearMarker(MOVE_LAYER);
         _match.board().clearMarker(ACTION_LAYER);
-        _match.board().clearMarker(MOVE_LAYER);
     } else {
-        _match.board().clearMarker(MOVE_LAYER);
         if(_selection.hovering->unit() == nullptr) return; // no unit to select
         if(_selection.hovering->unit()->player() != _match.currentPlayer()) return; // can only select own units
-        _selection.hovering->unit()->markAttack(*_selection.hovering);
+        GDBG("enable movement mask on " << _selection.hovering->coord().string());
+        _selection.hovering->unit()->markMovement(*_selection.hovering);
         _selection.selected = _selection.hovering;
-        _selection.type = SelectionState::Type::SEL_TO_ATTACK;
+        _selection.hovering->unit()->markAttack(*_selection.hovering);
+        _selection.type = SelectionState::Type::SEL_TO_ACTION;
     }
 }
 
@@ -299,7 +277,7 @@ void GameScreenImpl::run() {
             for(; b != e; ++b) {
                 auto coord = b->coord();
                 ptr[coord.x * max_y * mc + coord.y * mc + 0] = b->marked(0) ? 1 : 0;
-                ptr[coord.x * max_y * mc + coord.y * mc + 1] = b->marked(1) ? 1 : 0;
+                ptr[coord.x * max_y * mc + coord.y * mc + 1] = b->marked(1) && b->unit() && b->unit()->player() != _match.currentPlayer() ? 1 : 0;
                 ptr[coord.x * max_y * mc + coord.y * mc + 2] = b->marked(2) ? 1 : 0;
                 ptr[coord.x * max_y * mc + coord.y * mc + 3] = b->marked_value(3);
             }

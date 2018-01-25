@@ -20,7 +20,8 @@ namespace gamespace {
             _match->board().attackUnit(_from, _to);
             _match->board().get(_from).unit()->setLastTurnId(_match->getTurnId());
             _match->board().get(_from).unit()->emit_change();
-            _match->board().get(_to).unit()->emit_change();
+            if(_match->board().get(_to).unit())
+                _match->board().get(_to).unit()->emit_change();
         }
         virtual unsigned int type() {
             return MOVE_ATTACK;
