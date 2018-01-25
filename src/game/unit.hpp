@@ -16,7 +16,7 @@ namespace gamespace {
 
     typedef std::function<unsigned int(BoardTile &)> relation;
 
-    std::function<bool(BoardTile&,unsigned int&)> getEdgeRelation(unsigned int layer, relation _v, bool noground_block);
+    std::function<bool(BoardTile&,unsigned int&)> getEdgeRelation(unsigned int layer, relation _v, Player *player, bool noground_block, bool unit_block);
 
     struct cb_t {
         unsigned int id;
@@ -41,11 +41,12 @@ namespace gamespace {
         relation _t; //!< travel distance relation
         relation _v; //!< visibility relation
         BoardTile *_tile; //!< Board tile
+        bool _consider_noground;
         unsigned int _lid;
         std::vector<cb_t> _on_change;
     public:
-        Unit(qe::Mesh<qe::OBJV3> *m, Player *p, std::string name, unsigned int h, unsigned int d, unsigned int a, unsigned int r, unsigned int v, unsigned int t, relation are, relation dr, relation tr, relation vre)
-            : _mesh(m), _player(p), _name(name), _max_hp(h), _hp(h), _dp(d), _ap(a), _ar(r), _vr(v), _dpt(t), _a(are), _d(dr), _t(tr), _v(vre) {}
+        Unit(qe::Mesh<qe::OBJV3> *m, Player *p, std::string name, bool consider_noground, unsigned int h, unsigned int d, unsigned int a, unsigned int r, unsigned int v, unsigned int t, relation are, relation dr, relation tr, relation vre)
+            : _mesh(m), _player(p), _name(name), _max_hp(h), _hp(h), _dp(d), _ap(a), _ar(r), _vr(v), _dpt(t), _a(are), _d(dr), _t(tr), _v(vre), _consider_noground(consider_noground) {}
         virtual ~Unit() {
             emit_change();
         }
@@ -53,6 +54,9 @@ namespace gamespace {
         void markVisibility(BoardTile &tile);
         void markMovement(BoardTile &tile);
         void markAttack(BoardTile &tile);
+        bool considersNoground() {
+            return _consider_noground;
+        }
         void setLastTurnId(unsigned int i) {_last_turn_id = i;};
         unsigned int getLastTurnId(){return _last_turn_id;};
         template<typename F>

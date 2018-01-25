@@ -6,24 +6,27 @@ unsigned int gamespace::defaultFalloff(BoardTile &t) {
     return 1;
 }
 
-std::function<bool(BoardTile&,unsigned int&)> gamespace::getEdgeRelation(unsigned int layer, relation _v, bool noground_block = false) {
-    return [layer, _v, noground_block](BoardTile &b, unsigned int &p) {
+std::function<bool(BoardTile&,unsigned int&)> gamespace::getEdgeRelation(unsigned int layer, relation _v, Player *player, bool noground_block = false, bool unit_block = false) {
+    return [player, layer, _v, noground_block, unit_block](BoardTile &b, unsigned int &p) {
         if(p == 0) return false;
         if(noground_block && b.marked_value(AOE_LAYER) == 2) return false;
-        return b.mark(layer, p--);
+        if(unit_block && b.unit() && b.unit()->player() == *player) return false;
+        bool r = b.mark(layer, p--);
+        if(unit_block && b.unit()) return false;
+        return r;
     };
 }
 
 void Unit::markVisibility(BoardTile &tile) {
-    tile.board().markByEdge(tile.coord(), _vr, VISIBILITY_LAYER, getEdgeRelation(VISIBILITY_LAYER, _v));
+    tile.board().markByEdge(tile.coord(), _vr, VISIBILITY_LAYER, getEdgeRelation(VISIBILITY_LAYER, _v, _player));
 }
 
 void Unit::markMovement(BoardTile &tile) {
-    tile.board().markByEdge(tile.coord(), _dpt, MOVE_LAYER, getEdgeRelation(MOVE_LAYER, _t, true));
+    tile.board().markByEdge(tile.coord(), _dpt, MOVE_LAYER, getEdgeRelation(MOVE_LAYER, _t, _player, considersNoground(), true));
 }
 
 void Unit::markAttack(BoardTile &tile) {
-    tile.board().markByEdge(tile.coord(), _ar, ACTION_LAYER, getEdgeRelation(ACTION_LAYER, _a));
+    tile.board().markByEdge(tile.coord(), _ar, ACTION_LAYER, getEdgeRelation(ACTION_LAYER, _a, _player, false, true));
 }
 
 void Unit::render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m) {
