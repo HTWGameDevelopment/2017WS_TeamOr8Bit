@@ -167,6 +167,9 @@ namespace gamespace {
             _hp_text->payload(payload);
             _qt->payload(payload);
         }
+        Unit *unit() {
+            return _u;
+        }
     };
 
 }

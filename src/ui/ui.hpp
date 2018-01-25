@@ -60,6 +60,13 @@ namespace ui {
                 }
             }
         }
+        template<typename F>
+        bool hasModelMatching(void *u, F &&f) {
+            for(auto &c : _context_menus) {
+                if(f(c->payload())) return true;
+            }
+            return false;
+        }
         void render() {
             if(_container.get()) _container->render();
             for(auto &i : _context_menus) {
