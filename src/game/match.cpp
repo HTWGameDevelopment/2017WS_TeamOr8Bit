@@ -125,7 +125,7 @@ struct roff_t {
     float height;
 };
 
-void Match::setRenderOffsets(qe::Mesh<qe::OBJV3> *tank) {
+void Match::setRenderOffsets(UnitManager &manager) {
     const roff_t offs[] = {
         roff_t{hextile::hexpoint_t{0,4}, 0.1},
         roff_t{hextile::hexpoint_t{1,4}, 0.1},
@@ -179,21 +179,9 @@ void Match::setRenderOffsets(qe::Mesh<qe::OBJV3> *tank) {
         roff_t{hextile::hexpoint_t{19,5}, 0.6},
         roff_t{hextile::hexpoint_t{19,4}, 0.6}
     };
-    auto *u1 = new gamespace::Unit(tank, &player1(), "Tank",
-        100,
-        50,
-        50,
-        3,
-        3,
-        2,
-        gamespace::defaultFalloff,
-        gamespace::defaultFalloff,
-        gamespace::defaultFalloff,
-        gamespace::defaultFalloff);
     for(unsigned int i = 0; i < sizeof(offs) / sizeof(roff_t); ++i) {
         _board[offs[i].c.x][offs[i].c.y].renderData() = offs[i].height;
-        _board[offs[i].c.x][offs[i].c.y].setUnit(new gamespace::Unit(*u1));
+        _board[offs[i].c.x][offs[i].c.y].setUnit(manager.createTank(&player1()));
     }
-    delete u1;
     _board.synchronize();
 }

@@ -5,6 +5,7 @@
 #include<game/unit.hpp>
 #include<game/player.hpp>
 #include<game/move.hpp>
+#include<game/unitmanager.hpp>
 
 namespace gamespace {
     class Match {
@@ -64,7 +65,7 @@ namespace gamespace {
             _player2.__introspect(off + 2);
         }
         void setMarkers();
-        void setRenderOffsets(qe::Mesh<qe::OBJV3> *tank);
+        void setRenderOffsets(UnitManager &manager);
     };
 }
 

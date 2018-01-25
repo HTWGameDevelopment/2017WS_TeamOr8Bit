@@ -73,6 +73,9 @@ namespace gamespace {
                 }
             }
         }
+        void setPlayer(Player *player) {
+            _player = player;
+        }
         Player &player() {
             return *_player;
         }

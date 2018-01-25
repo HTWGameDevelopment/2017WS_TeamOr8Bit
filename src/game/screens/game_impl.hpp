@@ -5,6 +5,7 @@
 
 #include<engine/qe.hpp>
 
+#include<game/unitmanager.hpp>
 #include<game/framebuffer_first_pass.hpp>
 #include<game/context/coordinatemenu.hpp>
 #include<game/match.hpp>
@@ -27,7 +28,7 @@ namespace gamespace {
         std::shared_ptr<font::Font> _font;
         std::unique_ptr<qe::Mesh<qe::OBJV1>> _cube;
         std::unique_ptr<qe::Mesh<qe::OBJV2>> _tile;
-        std::unique_ptr<qe::Mesh<qe::OBJV3>> _tank;
+        UnitManager _unitmanager;
         std::unique_ptr<qe::Mesh<qe::OBJV3>> _ground;
         std::unique_ptr<qe::Program> _terrain_shader;
         std::unique_ptr<qe::Program> _terrain_tileno_shader;

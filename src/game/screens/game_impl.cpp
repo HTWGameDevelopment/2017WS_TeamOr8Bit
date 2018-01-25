@@ -149,7 +149,6 @@ void GameScreenImpl::initializeAssets() {
     // MODELS
     _cube.reset(new qe::Mesh<qe::OBJV1>(qe::Loader<qe::OBJV1>("assets/models/cube.objv1"_p)));
     _tile.reset(new qe::Mesh<qe::OBJV2>(qe::Loader<qe::OBJV2>("assets/models/hextile.objv2"_p)));
-    _tank.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/tank.objv3"_p)));
     _ground.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/map.objv3"_p)));
     // RESOLVE SUBOBJS
         const char* names[] = {
@@ -193,7 +192,7 @@ void GameScreenImpl::initializeMap() {
     for(; b != e; ++b) {
         b->setUnit(nullptr);
     }
-    _match.setRenderOffsets(_tank.get());
+    _match.setRenderOffsets(_unitmanager);
 }
 
 void GameScreenImpl::enableMoveMask() {
@@ -403,7 +402,7 @@ void GameScreenImpl::__introspect(size_t off) {
     std::cout << std::string(off, ' ') << "GameScreenImpl" << std::endl;
     _match.__introspect(off + 2);
     if(_cube.get()) _cube->__introspect(off + 2);
-    if(_tank.get()) _tank->__introspect(off + 2);
+    _unitmanager.__introspect(off + 2);
     if(_ground.get()) _ground->__introspect(off + 2);
     if(_ui.get()) _ui->__introspect(off + 2);
     if(_terrain_shader.get()) _terrain_shader->__introspect(off + 2);
