@@ -152,6 +152,9 @@ namespace ui {
         virtual void set_root(Renderable *r) {
             _root = r;
         }
+        Renderable *root() {
+            return _root;
+        }
         virtual void render() {
             if(_root != this) origin() += _root->origin();
             if(_render) _render(this);

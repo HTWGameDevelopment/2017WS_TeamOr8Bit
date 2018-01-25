@@ -45,7 +45,6 @@ namespace ui {
         }
         void add_context_menu(Renderable *r) {
             _context_menus.emplace_back(r);
-            r->set_root(r);
             r->recalculate_dimension();
             r->recalculate_origin();
             r->show();
