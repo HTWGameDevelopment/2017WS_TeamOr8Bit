@@ -103,7 +103,7 @@ namespace qe {
     template<typename T>
     class LoaderContainer {
     protected:
-        std::unique_ptr<T> _pixels;
+        std::unique_ptr<T[]> _pixels;
         size_t _width;
         size_t _height;
     public:
