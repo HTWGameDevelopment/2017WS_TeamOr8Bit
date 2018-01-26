@@ -25,34 +25,34 @@ namespace gamespace {
             _meshes.theli.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/theli.objv3"_p)));
             _meshes.btank.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/btank.objv3"_p)));
             _units.tank.reset(new gamespace::Unit(_meshes.tank.get(), nullptr, "Tank", true, true,
-                100,
-                50,
-                50,
-                2,
-                3,
-                2,
+                100, // Health
+                50,  // Defense Points
+                50,  // Attack Points
+                2,   // Attack Range
+                3,   // Visibility
+                2,   // Max move distance
                 gamespace::defaultFalloff,
                 gamespace::defaultFalloff,
                 gamespace::defaultFalloff,
                 gamespace::defaultFalloff));
             _units.btank.reset(new gamespace::Unit(_meshes.btank.get(), nullptr, "Turret", true, false,
-                200,
-                80,
-                70,
-                3,
-                3,
-                2,
+                200, // Health
+                80,  // Defense Points
+                70,  // Attack Points
+                3,   // Attack Range
+                3,   // Visibility
+                2,   // Max move distance
                 gamespace::defaultFalloff,
                 gamespace::defaultFalloff,
                 gamespace::defaultFalloff,
                 gamespace::defaultFalloff));
             _units.theli.reset(new gamespace::Unit(_meshes.theli.get(), nullptr, "Transport Helicopter", false, true,
-                70,
-                20,
-                80,
-                4,
-                6,
-                4,
+                70,  // Health
+                20,  // Defense Points
+                80,  // Attack Points
+                4,   // Attack Range
+                6,   // Visibility
+                4,   // Max move distance
                 gamespace::defaultFalloff,
                 gamespace::defaultFalloff,
                 gamespace::defaultFalloff,

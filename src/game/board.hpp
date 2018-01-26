@@ -3,6 +3,7 @@
 
 #include<hextile/hextile.hpp>
 
+#include<glm/mat4x4.hpp>
 #include<glm/vec2.hpp>
 #include<stdio.h>
 
@@ -12,7 +13,7 @@ namespace gamespace {
     class GameBoard;
 
     typedef hextile::hexpoint_t hexpoint_t;
-    typedef float render_data_t;
+    typedef glm::mat4 render_data_t;
 
     const unsigned int VISIBILITY_LAYER = 0;
     const unsigned int ACTION_LAYER = 1;
