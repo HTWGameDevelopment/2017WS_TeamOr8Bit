@@ -190,3 +190,15 @@ void Match::setRenderOffsets(UnitManager &manager) {
     }
     _board.synchronize();
 }
+
+void Match::checkWinningCondition() {
+    for(size_t i = 0; i < _board.x(); ++i) {
+        for(size_t j = 0; j < _board.y(); ++j) {
+            if(_board[i][j].unit() && _board[i][j].unit()->player() != *_currentPlayer)
+                return;
+        }
+    }
+    // trigger win for current player
+    for(size_t i = 0; i < _on_win.size(); ++i)
+        _on_win[i](currentPlayer());
+}

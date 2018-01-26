@@ -32,6 +32,7 @@ add_executable(Or8Bit
     src/game/context/coordinatemenu.cpp
     src/game/screens/game_impl.cpp
     src/game/screens/gameinput.cpp
+    src/game/screens/ending.cpp
     src/logger.cpp
     src/font/font_linux.cpp
     src/font/font_win.cpp)
