@@ -59,8 +59,8 @@ CoordinateMenu *CoordinateMenu::createForTile(BoardTile *b, ui::UI *dui, glm::ve
     contextui->render_with([res](ui::Renderable *t) mutable {
         render_rectangle(t->origin(), t->dimension(), glm::vec3(0.8, 0.8, 0.8), res);
     });
-    contextui->get("1")->render_with([res](ui::Renderable *t) mutable {
-        render_rectangle(t->origin(), t->dimension(), glm::vec3(0.5, 0.5, 0.5), res);
+    contextui->get("1")->render_with([res, u = b->unit()](ui::Renderable *t) mutable {
+        render_rectangle(t->origin(), t->dimension(), u->player().color(), res);
     });
     auto text_renderer = [](ui::Renderable *t) mutable {
         assert(t->payload());
