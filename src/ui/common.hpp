@@ -113,7 +113,9 @@ namespace ui {
         void *_payload;
         Renderable *_root;
         bool _enabled;
+        bool _hoverable;
     public:
+        Renderable(): _hoverable(true) {}
         virtual ~Renderable() {
             if(_deleter) _deleter(_payload);
         }
@@ -133,6 +135,9 @@ namespace ui {
         }
         template<typename F> void on_click(F &&c) {
             _click = std::move(c);
+        }
+        bool &hoverable() {
+            return _hoverable;
         }
         void *&payload() {
             return _payload;
@@ -183,6 +188,7 @@ namespace ui {
                 << std::endl;
         }
         bool hovers(Point p) {
+            if(_hoverable == false) return false;
             Point t = p - origin() - padding();
             if(_root != this) t -= _root->origin();
             if(t >= Point {0, 0} && t <= dimension() - padding()) {

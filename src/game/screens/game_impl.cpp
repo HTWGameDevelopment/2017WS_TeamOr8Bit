@@ -104,9 +104,12 @@ void GameScreenImpl::initializeHUD() {
 
     box->append(text.release());
     box->convert_coords(_ui->res());
-    _ui->set_container(box.release());
+    box->origin() = ui::Point {0, 0};
+    box->dimension() = _ui->res();
+    box->hoverable() = false;
+    _ui->add_layer("top", box.release());
 
-    auto *t = _ui->get("1.1");
+    auto *t = _ui->get(0, "1.1");
     // TODO Various text rendering issues
     auto text_renderer = [this](ui::Renderable *t) mutable {
         if(t->payload() == nullptr) {
@@ -233,7 +236,7 @@ void GameScreenImpl::pre_run() {
 void GameScreenImpl::createContextForLookAt() {
     if(_selection.hovering == nullptr) return;
     auto *u = _selection.hovering->unit();
-    if(u && _ui->hasModelMatching(_selection.hovering->unit(), [u](void *m){return ((CoordinateMenu*)m)->unit() == u;}) == false)
+    if(u && _ui->hasModelMatching(_selection.hovering->unit(), [u](std::string name, void *m){return name == "unitctxt" && ((CoordinateMenu*)m)->unit() == u;}) == false)
         CoordinateMenu::createForTile(_selection.hovering, _ui.get(), _ctxt->getResolution());
 }
 
