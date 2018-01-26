@@ -38,6 +38,7 @@ void main() {
     vec3 n = normalize(normal_camera);
     vec3 l = normalize(light_camera);
     float cosTheta = clamp(dot(n,l),0,1);
+    float cosTheta_s = cosTheta;
 
     float visvalue = 0.1;
 
@@ -99,9 +100,12 @@ void main() {
             if(floor(mod(dot(pos_world.xz, glm::vec2(-1, 1)) / 0.4, 2)) == 1)
                 color = vec3(0, 0.551, 0.8) * (0.1 + cosTheta);
         } else if(ismarked(uvec2(tcoord), uint(3)) == uint(2)) {
+            color = 0.1 * uni_color + cosTheta_s * uni_color;
             return;
         }
         color += visvalue * uni_color;
+        return;
     }
 
+    color = 0.1 * uni_color + cosTheta_s * uni_color;
 }
