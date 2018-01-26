@@ -35,9 +35,11 @@ public:
         auto *a = _screens.addScreen(new gamespace::AboutScreen());
         auto *g = _screens.addScreen(new gamespace::GameScreen(_screens, *_ctxt, _font));
         _mainmenu = _screens.addScreen(new gamespace::MainScreen(_screens, _ctxt, qe::Cache::glyphlatin));
+        auto *ending = _screens.addScreen(new gamespace::EndingScreen(_screens, _ctxt, qe::Cache::glyphlatin));
 
         _mainmenu->linkAbout(a);
         _mainmenu->linkGame(g);
+        ending->linkMain(_mainmenu);
     }
     void initializeGlyphmap() {
 #ifdef HAS_FREETYPE

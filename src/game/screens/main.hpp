@@ -111,10 +111,12 @@ namespace gamespace {
             box->append(text2.release());
             box->append(text1.release());
             box->convert_coords(_ui->res());
-            _ui->set_container(box.release());
+            box->origin() = ui::Point {0, 0};
+            box->dimension() = _ui->res();
+            _ui->add_layer("mainmenu", box.release());
 
-            auto *quit = _ui->get("1.2");
-            auto *start = _ui->get("1.1");
+            auto *quit = _ui->get(0, "1.2");
+            auto *start = _ui->get(0, "1.1");
             start->on_click([this](void*) mutable {
                 _gamescreen->newGame(glm::ivec2(20, 14),
                     gamespace::Player(glm::vec3(0.448, 0.884, 1), "Blue"),

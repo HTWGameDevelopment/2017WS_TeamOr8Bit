@@ -70,7 +70,7 @@ CoordinateMenu *CoordinateMenu::createForTile(BoardTile *b, ui::UI *dui, glm::ve
     };
     m->set_renderer_payload(text_renderer, [](void *t){delete (text_t*)t;});
     contextui->convert_coords(dui->res());
-    dui->add_context_menu(contextui.release());
+    dui->add_layer("unitctxt", contextui.release());
     m->update();
     return m;
 }
@@ -113,7 +113,6 @@ void rebuild_payload(ui::Renderable *t) {
 
 void CoordinateMenu::init(ui::Renderable *ui) {
     _ui = ui;
-    ui->set_root(ui);
     _titlebar = ui->get("1");
     _coordinates = (ui::Text*)ui->get("1.1");
     _unit_text = (ui::Text*)ui->get("1.2");

@@ -128,9 +128,11 @@ void Box::recalculate_origin() {
                 }
                 break;
             case END:
+                current_origin = origin() + dimension(); // TODO fix other END orientations
                 for(unsigned int i = 0; i < count(); ++i) {
                     auto *it = operator[](i);
-                    it->origin().y = dimension().y - it->origin().y - it->dimension().y;
+                    it->origin().y = current_origin.y - it->dimension().y;
+                    current_origin.y -= it->dimension().y;
                 }
                 break;
         }
@@ -162,9 +164,11 @@ void Box::recalculate_origin() {
                 }
                 break;
             case END:
+                current_origin = origin() + dimension();
                 for(unsigned int i = 0; i < count(); ++i) {
                     auto *it = operator[](i);
-                    it->origin().x = dimension().x - it->origin().x - it->dimension().x;
+                    it->origin().x = current_origin.x - it->dimension().x;
+                    current_origin.x -= it->dimension().x;
                 }
                 break;
         }

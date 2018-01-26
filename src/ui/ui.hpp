@@ -25,76 +25,70 @@
 
 namespace ui {
 
+    struct layer_t {
+        std::string name;
+        std::unique_ptr<Renderable> layer;
+    };
+
     class UI {
     private:
-        std::unique_ptr<Renderable> _container;
-        std::vector<std::unique_ptr<Renderable>> _context_menus;
+        std::vector<layer_t> _layers;
         Point _res;
     public:
         UI(Point res): _res(res) {}
         Point res() {
             return _res;
         }
-        void set_container(Renderable *r) {
-            _container.reset(r);
-            _container->set_root(r);
-            _container->dimension() = _res;
-            _container->origin() = Point {0, 0};
-            _container->recalculate_dimension();
-            _container->recalculate_origin();
-        }
-        void add_context_menu(Renderable *r) {
-            _context_menus.emplace_back(r);
+        void add_layer(std::string name, Renderable *r) {
+            _layers.push_back(layer_t {name, std::unique_ptr<Renderable>(r)});
+            r->set_root(r);
             r->recalculate_dimension();
             r->recalculate_origin();
             r->show();
         }
         void hide_context_menu(Renderable *ui) {
             assert(ui);
-            for(auto i = _context_menus.begin(); i != _context_menus.end(); ++i) {
-                if(i->get() == ui) {
+            for(auto i = _layers.begin(); i != _layers.end(); ++i) {
+                if(i->layer.get() == ui) {
                     ui->hide();
-                    _context_menus.erase(i);
+                    _layers.erase(i);
                     return;
                 }
             }
         }
         template<typename F>
         bool hasModelMatching(void *u, F &&f) {
-            for(auto &c : _context_menus) {
-                if(f(c->payload())) return true;
+            for(auto &c : _layers) {
+                if(f(c.name, c.layer->payload())) return true;
             }
             return false;
         }
         void render() {
-            if(_container.get()) _container->render();
-            for(auto &i : _context_menus) {
-                if(i->enabled()) i->render();
+            for(auto &i : _layers) {
+                if(i.layer->enabled()) i.layer->render();
             }
         }
-        Renderable *get(const char* coord) {
+        Renderable *get(unsigned int layer, const char* coord) {
             char* next;
             int i = strtol(coord, &next, 10);
             assert(i == 1);
             assert(*next == '\0' || *next == '.');
-            if(*next == '\0') return _container.get();
-            return _container->get(next + 1);
+            if(*next == '\0') return _layers[layer].layer.get();
+            return _layers[layer].layer->get(next + 1);
         }
         void __introspect(size_t off = 0) {
             std::cout << std::string(off, ' ') << "UI[" << _res.x << "," << _res.y << "]" << std::endl;
-            if(_container.get()) _container->__introspect(off + 2);
-            for(auto &i : _context_menus)
-                i->__introspect(off + 2);
+            for(auto &i : _layers)
+                i.layer->__introspect(off + 2);
         }
         bool click(Point pos) {
-            if(_container.get() && _container->click(pos)) return true;
-            for(auto &i : _context_menus)
-                if(i->click(pos)) return true;
+            for(auto &i : _layers)
+                if(i.layer->click(pos)) return true;
             return false;
         }
         Renderable *hovers(ui::Point pos) {
-            for(auto &i : _context_menus) {
-                if(i->hovers(pos)) return i.get();
+            for(auto &i : _layers) {
+                if(i.layer->hovers(pos)) return i.layer.get();
             }
             return nullptr;
         }

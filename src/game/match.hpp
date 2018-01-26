@@ -13,6 +13,7 @@ namespace gamespace {
         GameBoard _board; //!< pointer to board
         std::vector<std::unique_ptr<Move>> _move;
         std::vector<std::function<void(Player&)>> _on_player_change;
+        std::vector<std::function<void(Player&)>> _on_win;
         std::vector<std::function<void(Move&)>> _on_move;
         gamespace::Player _player1;
         gamespace::Player _player2;
@@ -37,7 +38,9 @@ namespace gamespace {
             ++_turn;
             for(size_t i = 0; i < _on_move.size(); ++i)
                 _on_move[i](*m);
+            checkWinningCondition();
         }
+        void checkWinningCondition();
         unsigned int getTurnId() {
             return _turn;
         }
@@ -52,8 +55,25 @@ namespace gamespace {
             _on_player_change.push_back(f);
             f(currentPlayer());
         }
+        template<typename F> void on_win(F &&f) {
+            _on_win.push_back(f);
+        }
         template<typename F> void observe_moves(F &&f) {
             _on_move.push_back(f);
+        }
+        bool can_trigger_map_event() {
+            return _board[7][13].unit() && _board[13][13].unit()
+                && _board[7][13].unit()->player() == *_currentPlayer
+                && _board[13][13].unit()->player() == *_currentPlayer;
+        }
+        void trigger_map_event() {
+            for(size_t i = 0; i < _board.x(); ++i) {
+                for(size_t j = 0; j < _board.y(); ++j) {
+                    if(_board[i][j].marked_value(AOE_LAYER) == 1) {
+                        _board[i][j].destroyUnit();
+                    }
+                }
+            }
         }
         void __introspect(size_t off) {
             std::cout << std::string(off, ' ') << "Match" << std::endl;
