@@ -155,6 +155,8 @@ void Match::setRenderOffsets(UnitManager &manager) {
         roff_t{hextile::hexpoint_t{4,13}, 2.8},
         roff_t{hextile::hexpoint_t{5,13}, 2.8},
         roff_t{hextile::hexpoint_t{6,13}, 2.8},
+        roff_t{hextile::hexpoint_t{7,13}, 2.8},
+        roff_t{hextile::hexpoint_t{13,13}, 2.8},
         roff_t{hextile::hexpoint_t{14,13}, 2.8},
         roff_t{hextile::hexpoint_t{15,13}, 2.8},
         roff_t{hextile::hexpoint_t{16,13}, 2.8},
