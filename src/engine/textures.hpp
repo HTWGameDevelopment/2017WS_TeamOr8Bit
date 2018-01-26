@@ -65,7 +65,7 @@ namespace qe {
          */
         void initTexture() {
             if(T == PNGRGBA) return initTextureAsRGBA();
-            else if(T == TEXTG) return initTextureAsGlyphmap();
+            else if(T == TEXTG) return initTextureAsRGBA();
             else if(T == RG32UI) return initTextureAsGlyphmap();
             else if(T == RGB) return initTextureAsGlyphmap();
 

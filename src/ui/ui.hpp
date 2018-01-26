@@ -45,7 +45,6 @@ namespace ui {
         }
         void add_context_menu(Renderable *r) {
             _context_menus.emplace_back(r);
-            r->set_root(r);
             r->recalculate_dimension();
             r->recalculate_origin();
             r->show();
@@ -59,6 +58,13 @@ namespace ui {
                     return;
                 }
             }
+        }
+        template<typename F>
+        bool hasModelMatching(void *u, F &&f) {
+            for(auto &c : _context_menus) {
+                if(f(c->payload())) return true;
+            }
+            return false;
         }
         void render() {
             if(_container.get()) _container->render();

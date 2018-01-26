@@ -94,9 +94,10 @@ namespace gamespace {
             cb2->append(ct4.release());
             contextui->append(cb2.release());
             contextui->append(cb11.release());
+            contextui->origin() = ui::Point {0, 0};
             auto *m = new CoordinateMenu(b, dui);
-            contextui->payload() = m;
             m->init(contextui.get());
+            contextui->payload() = m;
             contextui->payload([](void *t){delete (CoordinateMenu*)t;});
             contextui->render_with([res](ui::Renderable *t) mutable {
                 render_rectangle(t->origin(), t->dimension(), glm::vec3(0.8, 0.8, 0.8), res);
@@ -105,15 +106,7 @@ namespace gamespace {
                 render_rectangle(t->origin(), t->dimension(), glm::vec3(0.5, 0.5, 0.5), res);
             });
             auto text_renderer = [](ui::Renderable *t) mutable {
-                if(t->payload() == nullptr) {
-                    t->payload() = new text_t(
-                        ((ui::Text*)t)->text(),
-                        qe::Cache::glyphlatin,
-                        to_ivec2(t->origin() + t->margin() + t->padding() + ui::Point {0, 0.25} * (t->dimension() - t->margin() - t->padding())),
-                        //to_ivec2(t->origin() + t->margin() + t->padding()),
-                        (int)(0.5 * (t->dimension().y - t->margin().y - t->padding().y)),
-                        (int)(t->dimension().x - t->margin().x - t->padding().x));
-                }
+                assert(t->payload());
                 text_t *pl = (text_t*)t->payload();
                 pl->foreground() = glm::vec3(0, 0, 0);
                 pl->render();
@@ -121,6 +114,7 @@ namespace gamespace {
             m->set_renderer_payload(text_renderer, [](void *t){delete (text_t*)t;});
             contextui->convert_coords(dui->res());
             dui->add_context_menu(contextui.release());
+            m->update();
             return m;
         }
         CoordinateMenu(BoardTile *b, ui::UI *ui);
@@ -133,16 +127,18 @@ namespace gamespace {
         }
         void init(ui::Renderable *ui) {
             _ui = ui;
+            ui->set_root(ui);
             _titlebar = ui->get("1");
             _coordinates = (ui::Text*)ui->get("1.1");
             _unit_text = (ui::Text*)ui->get("1.2");
             _qt = (ui::Text*)ui->get("1.3");
             _qt->text() = "X";
-            _qt->on_click([this](ui::Renderable*) {destroy();});
+            _qt->on_click([this](ui::Renderable* t) {
+                destroy();
+            });
             _hp_text = (ui::Text*)ui->get("2.1");
             _hp_text->text() = "HP";
             _unit_hp = (ui::Text*)ui->get("2.2");
-            update();
         }
         virtual void invalidate();
         void show() {
@@ -166,6 +162,9 @@ namespace gamespace {
             _unit_hp->payload(payload);
             _hp_text->payload(payload);
             _qt->payload(payload);
+        }
+        Unit *unit() {
+            return _u;
         }
     };
 

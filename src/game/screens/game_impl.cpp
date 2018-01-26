@@ -231,7 +231,9 @@ void GameScreenImpl::pre_run() {
 }
 
 void GameScreenImpl::createContextForLookAt() {
-    if(_selection.hovering && _selection.hovering->unit())
+    if(_selection.hovering == nullptr) return;
+    auto *u = _selection.hovering->unit();
+    if(u && _ui->hasModelMatching(_selection.hovering->unit(), [u](void *m){return ((CoordinateMenu*)m)->unit() == u;}) == false)
         CoordinateMenu::createForTile(_selection.hovering, _ui.get(), _ctxt->getResolution());
 }
 

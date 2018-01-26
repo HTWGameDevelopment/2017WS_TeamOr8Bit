@@ -41,6 +41,7 @@ namespace qe {
         std::string _text; //!< text
         glyphmap *_glyphmap; //!< Glyphmap
         glm::ivec2 _baseline; //!< Starting position of baseline
+        glm::ivec2 _dimensions;
         float _scale;
         glm::vec3 _foreground; //!< text color
     public:
@@ -79,6 +80,24 @@ namespace qe {
                     pos.x += metrics.adv_x * _scale;
                 }
             }
+        }
+        glm::ivec2 recalculate_dimension() {
+            glm::ivec2 pos(0, 0);
+            for(size_t i = 0; i < _text.length(); ++i) { // TODO Unicode support?
+                if(_text[i] == '\n') {
+                    pos.x = _baseline.x;
+                    pos.y += _glyphmap->linespace();
+                } else {
+                    fontmetrics metrics = _glyphmap->getMetrics(_text[i]);
+                    pos.x += metrics.adv_x * _scale;
+                    pos.y = std::max(pos.y, (int)metrics.h);
+                }
+            }
+            _dimensions = pos;
+            return _dimensions;
+        }
+        glm::ivec2 dimension() {
+            return _dimensions;
         }
         void scale_text(glm::ivec2 baseline, int maxheight, int maxlength) {
             _baseline = baseline;
