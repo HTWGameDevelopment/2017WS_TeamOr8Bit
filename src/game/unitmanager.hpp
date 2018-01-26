@@ -21,7 +21,7 @@ namespace gamespace {
         UnitManager() {
             _meshes.tank.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/tank.objv3"_p)));
             _meshes.theli.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/theli.objv3"_p)));
-            _units.tank.reset(new gamespace::Unit(_meshes.tank.get(), nullptr, "Tank", true,
+            _units.tank.reset(new gamespace::Unit(_meshes.tank.get(), nullptr, "Tank", true, true,
                 100,
                 50,
                 50,
@@ -32,7 +32,7 @@ namespace gamespace {
                 gamespace::defaultFalloff,
                 gamespace::defaultFalloff,
                 gamespace::defaultFalloff));
-            _units.theli.reset(new gamespace::Unit(_meshes.theli.get(), nullptr, "Transport Helicopter", false,
+            _units.theli.reset(new gamespace::Unit(_meshes.theli.get(), nullptr, "Transport Helicopter", false, true,
                 70,
                 20,
                 80,

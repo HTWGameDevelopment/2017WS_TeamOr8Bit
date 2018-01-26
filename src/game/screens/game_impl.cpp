@@ -214,7 +214,7 @@ void GameScreenImpl::enableActionMask() {
         if(_selection.hovering->unit() == nullptr) return; // no unit to select
         if(_selection.hovering->unit()->player() != _match.currentPlayer()) return; // can only select own units
         GDBG("enable movement mask on " << _selection.hovering->coord().string());
-        _selection.hovering->unit()->markMovement(*_selection.hovering);
+        if(_selection.hovering->unit()->isMoveable()) _selection.hovering->unit()->markMovement(*_selection.hovering);
         _selection.selected = _selection.hovering;
         _selection.hovering->unit()->markAttack(*_selection.hovering);
         _selection.type = SelectionState::Type::SEL_TO_ACTION;
