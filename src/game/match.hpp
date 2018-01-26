@@ -61,8 +61,8 @@ namespace gamespace {
                 && _board[13][13].unit()->player() == *_currentPlayer;
         }
         void trigger_map_event() {
-            for(size_t i = 0; i < _board.x(); ++i) {
-                for(size_t j = 0; j < _board.y(); ++i) {
+            for(size_t i = 0; i < _board.y(); ++i) {
+                for(size_t j = 0; j < _board.x(); ++j) {
                     if(_board[i][j].marked_value(AOE_LAYER) == 1) {
                         _board[i][j].destroyUnit();
                     }
