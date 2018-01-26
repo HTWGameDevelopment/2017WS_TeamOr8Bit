@@ -57,7 +57,7 @@ namespace gamespace {
                 gamespace::defaultFalloff,
                 gamespace::defaultFalloff,
                 gamespace::defaultFalloff));
-            _units.tank->setSpecialAction("Convert to turret", [this](Unit *u){
+            _units.tank->setSpecialAction("Convert to turret", [this](Unit *u) {
                 auto *p = u->tile();
                 auto *player = &u->player();
                 u->tile()->destroyUnit();

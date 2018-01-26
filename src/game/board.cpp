@@ -29,6 +29,7 @@ void GameBoard::synchronize() {
         }
     }
 }
+
 BoardTile::~BoardTile() {
     delete _unit;
 }
@@ -51,6 +52,11 @@ bool BoardTile::mark(unsigned int layer, unsigned int d) {
         _marker_layer[layer].val = d;
         return true;
     }
+}
+
+void BoardTile::setUnit(Unit *unit) {
+    _unit = unit;
+    if(_unit) _unit->tile() = this;
 }
 
 unsigned int BoardTile::marked_value(unsigned int layer) {
