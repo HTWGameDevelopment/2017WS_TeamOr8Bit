@@ -53,6 +53,11 @@ bool BoardTile::mark(unsigned int layer, unsigned int d) {
     }
 }
 
+void BoardTile::setUnit(Unit *unit) {
+    _unit = unit;
+    if(_unit) _unit->tile() = this;
+}
+
 unsigned int BoardTile::marked_value(unsigned int layer) {
     return _marker_layer[layer].val;
 }

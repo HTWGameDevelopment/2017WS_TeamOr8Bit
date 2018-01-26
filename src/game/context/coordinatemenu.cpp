@@ -40,8 +40,8 @@ CoordinateMenu *CoordinateMenu::createForTile(BoardTile *b, ui::UI *dui, glm::ve
     cb11->align_y() = ui::Box::BEGINNING;
     cb2->align_x() = ui::Box::BEGINNING;
     cb2->align_y() = ui::Box::BEGINNING;
-    cb2->align_x() = ui::Box::CENTER;
-    cb2->align_y() = ui::Box::BEGINNING;
+    cba->align_x() = ui::Box::CENTER;
+    cba->align_y() = ui::Box::BEGINNING;
 
     cb11->append(ct1.release());
     cb11->append(ct2.release());
@@ -77,8 +77,8 @@ CoordinateMenu *CoordinateMenu::createForTile(BoardTile *b, ui::UI *dui, glm::ve
 
 CoordinateMenu::CoordinateMenu(BoardTile *b, ui::UI *ui): _top(ui), _b(b), _u(b->unit()) {
     assert(_u);
-    _udisp = _u->on_change([this](){
-        if(_u->dead()) {
+    _udisp = _u->on_change([this](bool alive){
+        if(alive == false) {
             destroy();
         } else {
             update();
@@ -133,6 +133,7 @@ void CoordinateMenu::init(ui::Renderable *ui) {
         t->dimension() = ui::Point {0.045, 0.03};
         t->margin() = ui::Point {0.005, 0.005};
         t->text() = b->name;
+        t->set_root(ui);
         auto text_renderer = [](ui::Renderable *t) mutable {
             assert(t->payload());
             text_t *pl = (text_t*)t->payload();

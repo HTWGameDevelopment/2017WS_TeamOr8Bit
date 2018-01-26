@@ -20,7 +20,7 @@ namespace gamespace {
 
     struct cb_t {
         unsigned int id;
-        std::function<void(void)> f;
+        std::function<void(bool)> f;
     };
 
     struct saction_t {
@@ -55,7 +55,7 @@ namespace gamespace {
         Unit(qe::Mesh<qe::OBJV3> *m, Player *p, std::string name, bool consider_noground, bool moveable, unsigned int h, unsigned int d, unsigned int a, unsigned int r, unsigned int v, unsigned int t, relation are, relation dr, relation tr, relation vre)
             : _mesh(m), _player(p), _name(name), _max_hp(h), _hp(h), _dp(d), _ap(a), _ar(r), _vr(v), _dpt(t), _a(are), _d(dr), _t(tr), _v(vre), _consider_noground(consider_noground), _moveable(moveable) {}
         virtual ~Unit() {
-            emit_change();
+            emit_change(false);
         }
         void render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m);
         void markVisibility(BoardTile &tile);
@@ -81,9 +81,9 @@ namespace gamespace {
             _on_change.push_back(cb_t {_lid, f});
             return _lid++;
         }
-        void emit_change() {
+        void emit_change(bool alive = true) {
             for(auto &f : _on_change) {
-                f.f();
+                f.f(alive);
             }
         }
         void on_change_r(unsigned int id) {
