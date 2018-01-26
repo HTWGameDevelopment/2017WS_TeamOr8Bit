@@ -55,6 +55,20 @@ namespace gamespace {
         template<typename F> void observe_moves(F &&f) {
             _on_move.push_back(f);
         }
+        bool can_trigger_map_event() {
+            return _board[7][13].unit() && _board[13][13].unit()
+                && _board[7][13].unit()->player() == *_currentPlayer
+                && _board[13][13].unit()->player() == *_currentPlayer;
+        }
+        void trigger_map_event() {
+            for(size_t i = 0; i < _board.x(); ++i) {
+                for(size_t j = 0; j < _board.y(); ++i) {
+                    if(_board[i][j].marked_value(AOE_LAYER) == 1) {
+                        _board[i][j].destroyUnit();
+                    }
+                }
+            }
+        }
         void __introspect(size_t off) {
             std::cout << std::string(off, ' ') << "Match" << std::endl;
             _board.__introspect(off + 2);
