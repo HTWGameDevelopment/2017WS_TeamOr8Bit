@@ -23,6 +23,7 @@ namespace gamespace {
         Match(glm::ivec2 dim, Player player1, Player player2)
         : _board(dim.x, dim.y), _player1(player1), _player2(player2), _currentPlayer(&_player1) {
             setMarkers();
+            _turn = 0;
         }
         Match(const Match &other) = delete;
         Match(Match &&other): _board(std::move(other._board)), _move(std::move(other._move)), _player1(std::move(other._player1)), _player2(std::move(other._player2)), _currentPlayer(&_player1) {
@@ -35,7 +36,6 @@ namespace gamespace {
         void doMove(Move *m) {
             _move.emplace_back(m);
             m->doMove();
-            ++_turn;
             for(size_t i = 0; i < _on_move.size(); ++i)
                 _on_move[i](*m);
             checkWinningCondition();
@@ -47,6 +47,8 @@ namespace gamespace {
         void endTurn() {
             if(_currentPlayer == &_player1) _currentPlayer = &_player2;
             else _currentPlayer = &_player1;
+
+            ++_turn;
 
             for(size_t i = 0; i < _on_player_change.size(); ++i)
                 _on_player_change[i](currentPlayer());

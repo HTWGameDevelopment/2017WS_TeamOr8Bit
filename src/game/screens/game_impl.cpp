@@ -229,6 +229,7 @@ void GameScreenImpl::enableActionMask() {
     } else {
         if(_selection.hovering->unit() == nullptr) return; // no unit to select
         if(_selection.hovering->unit()->player() != _match.currentPlayer()) return; // can only select own units
+        if(_selection.hovering->unit()->getLastTurnId() == _match.getTurnId()) return; // unit already moved this turn
         GDBG("enable movement mask on " << _selection.hovering->coord().string());
         if(_selection.hovering->unit()->isMoveable()) _selection.hovering->unit()->markMovement(*_selection.hovering);
         _selection.selected = _selection.hovering;
