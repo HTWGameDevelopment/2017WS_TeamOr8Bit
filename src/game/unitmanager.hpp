@@ -12,19 +12,33 @@ namespace gamespace {
         struct {
             std::unique_ptr<qe::Mesh<qe::OBJV3>> tank;
             std::unique_ptr<qe::Mesh<qe::OBJV3>> theli;
+            std::unique_ptr<qe::Mesh<qe::OBJV3>> btank;
         } _meshes;
         struct {
             std::unique_ptr<Unit> tank;
             std::unique_ptr<Unit> theli;
+            std::unique_ptr<Unit> btank;
         } _units;
     public:
         UnitManager() {
             _meshes.tank.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/tank.objv3"_p)));
             _meshes.theli.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/theli.objv3"_p)));
+            _meshes.btank.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/btank.objv3"_p)));
             _units.tank.reset(new gamespace::Unit(_meshes.tank.get(), nullptr, "Tank", true, true,
                 100,
                 50,
                 50,
+                2,
+                3,
+                2,
+                gamespace::defaultFalloff,
+                gamespace::defaultFalloff,
+                gamespace::defaultFalloff,
+                gamespace::defaultFalloff));
+            _units.btank.reset(new gamespace::Unit(_meshes.btank.get(), nullptr, "Turret", true, false,
+                200,
+                80,
+                70,
                 3,
                 3,
                 2,
@@ -36,13 +50,19 @@ namespace gamespace {
                 70,
                 20,
                 80,
-                5,
-                7,
+                4,
+                6,
                 4,
                 gamespace::defaultFalloff,
                 gamespace::defaultFalloff,
                 gamespace::defaultFalloff,
                 gamespace::defaultFalloff));
+            _units.tank->setSpecialAction("Convert to turret", [this](Unit *u){
+                auto *p = u->tile();
+                auto *player = &u->player();
+                u->tile()->destroyUnit();
+                p->setUnit(createBTank(player));
+            });
         }
         Unit *createTank(Player *p) {
             auto *t = new Unit(*_units.tank);
@@ -51,6 +71,11 @@ namespace gamespace {
         }
         Unit *createTHeli(Player *p) {
             auto *t = new Unit(*_units.theli);
+            t->setPlayer(p);
+            return t;
+        }
+        Unit *createBTank(Player *p) {
+            auto *t = new Unit(*_units.btank);
             t->setPlayer(p);
             return t;
         }

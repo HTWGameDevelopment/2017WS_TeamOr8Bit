@@ -48,75 +48,13 @@ namespace gamespace {
         ui::Text *_qt;
         BoardTile *_b;
         Unit *_u;
+        std::vector<ui::Renderable*> _action_items;
         unsigned int _udisp;
         void update();
         void registerCallbacks();
         void destroy();
     public:
-        static CoordinateMenu *createForTile(BoardTile *b, ui::UI *dui, glm::vec2 res) {
-            std::unique_ptr<ui::Box> contextui(new ui::Box());
-            std::unique_ptr<ui::Box> cb11(new ui::Box());
-            std::unique_ptr<ui::Box> cb2(new ui::Box());
-            std::unique_ptr<ui::Text> ct1(new ui::Text());
-            std::unique_ptr<ui::Text> ct2(new ui::Text());
-            std::unique_ptr<ui::Text> ctq(new ui::Text());
-            std::unique_ptr<ui::Text> ct3(new ui::Text());
-            std::unique_ptr<ui::Text> ct4(new ui::Text());
-
-            contextui->dimension() = ui::Point {0.085, 0.06};
-            ct1->dimension() = ui::Point {0.025, 0.03};
-            ct2->dimension() = ui::Point {0.045, 0.03};
-            ctq->dimension() = ui::Point {0.015, 0.03};
-            ct3->dimension() = ui::Point {0.025, 0.03};
-            ct4->dimension() = ui::Point {0.045, 0.03};
-            ct1->margin() = ui::Point {0.005, 0.005};
-            ct2->margin() = ui::Point {0.005, 0.005};
-            ctq->margin() = ui::Point {0.005, 0.005};
-            ct3->margin() = ui::Point {0.005, 0.005};
-            ct4->margin() = ui::Point {0.005, 0.005};
-            contextui->orientation() = ui::Box::VERTICAL;
-            cb11->orientation() = ui::Box::HORIZONTAL;
-            cb2->orientation() = ui::Box::HORIZONTAL;
-            contextui->expand() = false;
-            cb11->expand() = false;
-            cb2->expand() = false;
-            contextui->align_x() = ui::Box::BEGINNING;
-            contextui->align_y() = ui::Box::BEGINNING;
-            cb11->align_x() = ui::Box::BEGINNING;
-            cb11->align_y() = ui::Box::BEGINNING;
-            cb2->align_x() = ui::Box::BEGINNING;
-            cb2->align_y() = ui::Box::BEGINNING;
-
-            cb11->append(ct1.release());
-            cb11->append(ct2.release());
-            cb11->append(ctq.release());
-            cb2->append(ct3.release());
-            cb2->append(ct4.release());
-            contextui->append(cb2.release());
-            contextui->append(cb11.release());
-            contextui->origin() = ui::Point {0, 0};
-            auto *m = new CoordinateMenu(b, dui);
-            m->init(contextui.get());
-            contextui->payload() = m;
-            contextui->payload([](void *t){delete (CoordinateMenu*)t;});
-            contextui->render_with([res](ui::Renderable *t) mutable {
-                render_rectangle(t->origin(), t->dimension(), glm::vec3(0.8, 0.8, 0.8), res);
-            });
-            contextui->get("1")->render_with([res](ui::Renderable *t) mutable {
-                render_rectangle(t->origin(), t->dimension(), glm::vec3(0.5, 0.5, 0.5), res);
-            });
-            auto text_renderer = [](ui::Renderable *t) mutable {
-                assert(t->payload());
-                text_t *pl = (text_t*)t->payload();
-                pl->foreground() = glm::vec3(0, 0, 0);
-                pl->render();
-            };
-            m->set_renderer_payload(text_renderer, [](void *t){delete (text_t*)t;});
-            contextui->convert_coords(dui->res());
-            dui->add_context_menu(contextui.release());
-            m->update();
-            return m;
-        }
+        static CoordinateMenu *createForTile(BoardTile *b, ui::UI *dui, glm::vec2 res);
         CoordinateMenu(BoardTile *b, ui::UI *ui);
         virtual ~CoordinateMenu();
         ui::Renderable *view() {
@@ -125,21 +63,7 @@ namespace gamespace {
         ui::Renderable *titlebar() {
             return _titlebar;
         }
-        void init(ui::Renderable *ui) {
-            _ui = ui;
-            ui->set_root(ui);
-            _titlebar = ui->get("1");
-            _coordinates = (ui::Text*)ui->get("1.1");
-            _unit_text = (ui::Text*)ui->get("1.2");
-            _qt = (ui::Text*)ui->get("1.3");
-            _qt->text() = "X";
-            _qt->on_click([this](ui::Renderable* t) {
-                destroy();
-            });
-            _hp_text = (ui::Text*)ui->get("2.1");
-            _hp_text->text() = "HP";
-            _unit_hp = (ui::Text*)ui->get("2.2");
-        }
+        void init(ui::Renderable *ui);
         virtual void invalidate();
         void show() {
             _ui->show();

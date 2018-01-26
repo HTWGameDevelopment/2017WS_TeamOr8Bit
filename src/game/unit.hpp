@@ -23,6 +23,11 @@ namespace gamespace {
         std::function<void(void)> f;
     };
 
+    struct saction_t {
+        std::string name;
+        std::function<void(Unit*)> f;
+    };
+
     class Unit {
     private:
         qe::Mesh<qe::OBJV3> *_mesh;
@@ -45,6 +50,7 @@ namespace gamespace {
         bool _moveable;
         unsigned int _lid;
         std::vector<cb_t> _on_change;
+        std::vector<saction_t> _actions;
     public:
         Unit(qe::Mesh<qe::OBJV3> *m, Player *p, std::string name, bool consider_noground, bool moveable, unsigned int h, unsigned int d, unsigned int a, unsigned int r, unsigned int v, unsigned int t, relation are, relation dr, relation tr, relation vre)
             : _mesh(m), _player(p), _name(name), _max_hp(h), _hp(h), _dp(d), _ap(a), _ar(r), _vr(v), _dpt(t), _a(are), _d(dr), _t(tr), _v(vre), _consider_noground(consider_noground), _moveable(moveable) {}
@@ -60,6 +66,13 @@ namespace gamespace {
         }
         bool isMoveable() {
             return _moveable;
+        }
+        template<typename S, typename F>
+        void setSpecialAction(S name, F &&f) {
+            _actions.push_back(saction_t {name, f});
+        }
+        std::vector<saction_t> &getSpecialActions() {
+            return _actions;
         }
         void setLastTurnId(unsigned int i) {_last_turn_id = i;};
         unsigned int getLastTurnId(){return _last_turn_id;};
