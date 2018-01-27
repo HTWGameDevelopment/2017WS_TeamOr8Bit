@@ -17,19 +17,41 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef UI_ABSTRACT_UI_HPP
-#define UI_ABSTRACT_UI_HPP
+#ifndef QE_RENDERBUFFER_HPP
+#define QE_RENDERBUFFER_HPP
 
-#include<ui/abstract_common.hpp>
+#include<engine/constants.hpp>
 
-namespace ui {
+#include<logger.h>
 
-    class AbstractUI {
+namespace qe {
+
+    // TODO only depth-renderbuffer right now
+    class Renderbuffer {
     private:
-        std::unique_ptr<AbstractRenderable> _container;
+        GLuint _buffer;
+        glm::ivec2 _size;
     public:
-        void set_container(AbstractRenderable *r) {_container.reset(r);}
-        AbstractRenderable *get() {return _container.get();}
+        Renderbuffer(glm::ivec2 size): _size(size) {
+            glGenRenderbuffers(1, &_buffer);
+            bind();
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
+        }
+        Renderbuffer(const Renderbuffer &other) = delete;
+        Renderbuffer(Renderbuffer &&other): _buffer(other._buffer), _size(other._size) {
+            other._buffer = 0;
+        }
+        ~Renderbuffer() {
+            glDeleteRenderbuffers(1, &_buffer);
+        }
+        Renderbuffer &operator=(const Renderbuffer &other) = delete;
+        operator GLuint() {
+            return _buffer;
+        }
+        void bind() {
+            glBindRenderbuffer(GL_RENDERBUFFER, _buffer);
+            GLSERRORCHECK;
+        }
     };
 
 }

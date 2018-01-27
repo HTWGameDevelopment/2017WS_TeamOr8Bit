@@ -17,11 +17,11 @@ namespace gamespace {
         enum movement_mode { LOCKED, FREE, UIINTERACTION };
         double _last_x;
         double _last_y;
-        ui::defp_t _origin_save;
-        ui::defp_t _mouse_save;
+        ui::Point _origin_save;
+        ui::Point _mouse_save;
         double _resy;
         movement_mode _mouse_mode;
-        ui::DefinedContextUI *_selected_menu;
+        ui::Renderable *_selected_menu;
         GameScreenImpl *_impl;
     public:
         GameScreenInputState(GameScreenImpl &impl);

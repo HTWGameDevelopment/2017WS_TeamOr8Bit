@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Fabian Stiewitz
+// Copyright (c) 2017-2018 Fabian Stiewitz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -17,14 +17,34 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#include "uifactory.hpp"
+#ifndef QE_FRAMEBUFFER_FIRST_PASS_HPP
+#define QE_FRAMEBUFFER_FIRST_PASS_HPP
 
-using namespace ui;
+#include<engine/framebuffer.hpp>
+#include<engine/renderbuffer.hpp>
+#include<engine/textures.hpp>
 
-UIFactory::UIFactory(AbstractUI &ui, DefinedNumber resx, DefinedNumber resy): _ui(resx, resy) {
-    auto *t = ui.get();
-    if(t) {
-        _ui.set_container(t->buildDefined(_ui.resolution()));
-        _ui.recalculate();
-    }
+namespace qe {
+
+    class FramebufferFirstPass: public Framebuffer {
+    private:
+        Renderbuffer _depth;
+        Texture<RG32UI, DIFFTEXBIND_GL> _tileno;
+    public:
+        FramebufferFirstPass(glm::ivec2 size): Framebuffer(), _depth(size), _tileno(Loader<RG32UI>(size)) {
+            attachTexture(GL_COLOR_ATTACHMENT0, _tileno);
+            attachRenderbuffer(GL_DEPTH_ATTACHMENT, _depth);
+            valid();
+        }
+        virtual ~FramebufferFirstPass() {}
+        Texture<RG32UI, DIFFTEXBIND_GL> &get_tileno() {
+            return _tileno;
+        }
+        void clear() {
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
+    };
+
 }
+
+#endif

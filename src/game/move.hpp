@@ -7,8 +7,7 @@ namespace gamespace {
     class Move {
     public:
         virtual void doMove() = 0;
-        virtual void undoMove() = 0;
-        virtual std::string toString() = 0;
+        virtual unsigned int type() = 0;
         virtual void __introspect(size_t off) = 0;
     };
 }

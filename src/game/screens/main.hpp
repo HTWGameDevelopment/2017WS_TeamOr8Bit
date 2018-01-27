@@ -9,10 +9,9 @@
 #include<game/screens/about.hpp>
 #include<game/screens/game.hpp>
 
-#include<ui/abstractbox.hpp>
-#include<ui/abstracttext.hpp>
-#include<ui/definedtext.hpp>
-#include<ui/uifactory.hpp>
+#include<ui/ui.hpp>
+#include<ui/box.hpp>
+#include<ui/text.hpp>
 #include<screenmanager/screen.hpp>
 
 
@@ -30,7 +29,7 @@ namespace gamespace {
         screen::ScreenManager<Screen> *_manager;
         bool _active;
         glm::dvec2 _save;
-        std::unique_ptr<ui::DefinedUI> _ui;
+        std::unique_ptr<ui::UI> _ui;
     public:
         MainScreen(screen::ScreenManager<Screen> &manager, qe::Context *ctxt, glyphmap glyphmap): Screen(), _ctxt(ctxt), _gamescreen(nullptr), _glyphmap(glyphmap), _manager(&manager) {
             assert(ctxt);
@@ -70,7 +69,7 @@ namespace gamespace {
             // set vao
             qe::Cache::meshm->render();
         }
-        void render_button(ui::defp_t a, ui::defp_t b) {
+        void render_button(ui::Point a, ui::Point b) {
             glm::vec2 origin = glm::vec2(a.x, a.y) * glm::vec2(2, 2) / _ctxt->getResolution();
             glm::vec2 dimension = glm::vec2(b.x, b.y) * glm::vec2(2, 2) / _ctxt->getResolution();
             render_button(origin - glm::vec2(1, 1), dimension);
@@ -83,38 +82,41 @@ namespace gamespace {
         }
         virtual void mouse_button_callback(int button, int action, int mods) {
             glm::ivec2 cpos = _ctxt->getMousePos();
-            _ui->click(ui::defp_t {(int)cpos.x, (int)(_ctxt->getResolution().y - cpos.y)});
+            _ui->click(ui::Point {cpos.x, _ctxt->getResolution().y - cpos.y});
         }
         void key_callback(int key, int action) {}
         void mouse_callback(double x, double y) {}
         void idle_callback() {}
         void load_ui() {
-            ui::AbstractUI ui;
-            std::unique_ptr<ui::AbstractBox> box(new ui::AbstractBox());
-            std::unique_ptr<ui::AbstractText> text1(new ui::AbstractText());
-            std::unique_ptr<ui::AbstractText> text2(new ui::AbstractText());
+            _ui.reset(new ui::UI(ui::Point {_ctxt->width(), _ctxt->height()}));
+            std::unique_ptr<ui::Box> box(new ui::Box());
+            std::unique_ptr<ui::Text> text1(new ui::Text());
+            std::unique_ptr<ui::Text> text2(new ui::Text());
 
-            text1->dimension() = ui::absp_t {0.15, 0.15};
-            text2->dimension() = ui::absp_t {0.15, 0.15};
-            text1->margin() = ui::absp_t {0.02, 0.02};
-            text2->margin() = ui::absp_t {0.02, 0.02};
-            text1->padding() = ui::absp_t {0.01, 0.01};
-            text2->padding() = ui::absp_t {0.01, 0.01};
+            text1->dimension() = ui::Point {0.15, 0.15};
+            text2->dimension() = ui::Point {0.15, 0.15};
+            text1->margin() = ui::Point {0.02, 0.02};
+            text2->margin() = ui::Point {0.02, 0.02};
+            text1->padding() = ui::Point {0.01, 0.01};
+            text2->padding() = ui::Point {0.01, 0.01};
 
             text1->text() = "Start Game";
             text2->text() = "Quit";
 
-            box->set_orientation(ui::AbstractBox::Orientation::VERTICAL);
-            box->set_growth(ui::AbstractBox::Growth::FILL);
-            box->set_align_inner(ui::AbstractBox::Align::CENTER, ui::AbstractBox::Align::CENTER);
+            box->orientation() = ui::Box::Orientation::VERTICAL;
+            box->expand() = true;
+            box->align_x() = ui::Box::Align::CENTER;
+            box->align_y() = ui::Box::Align::CENTER;
 
-            box->append(text1.release());
             box->append(text2.release());
-            ui.set_container(box.release());
+            box->append(text1.release());
+            box->convert_coords(_ui->res());
+            box->origin() = ui::Point {0, 0};
+            box->dimension() = _ui->res();
+            _ui->add_layer("mainmenu", box.release());
 
-            _ui.reset(new ui::DefinedUI(ui::UIFactory(ui, _ctxt->width(), _ctxt->height()).release()));
-            auto *quit = _ui->get("1.2");
-            auto *start = _ui->get("1.1");
+            auto *quit = _ui->get(0, "1.2");
+            auto *start = _ui->get(0, "1.1");
             start->on_click([this](void*) mutable {
                 _gamescreen->newGame(glm::ivec2(20, 14),
                     gamespace::Player(glm::vec3(0.448, 0.884, 1), "Blue"),
@@ -124,13 +126,13 @@ namespace gamespace {
             quit->on_click([this](void*) mutable {
                 _manager->quit();
             });
-            auto renderer = [this](ui::DefinedRenderable *t) mutable {
+            auto renderer = [this](ui::Renderable *t) mutable {
                 this->render_button(t->origin() + t->margin(), t->dimension() - t->margin());
                 if(t->payload() == nullptr) {
                     t->payload() = new text_t(
-                        ((ui::DefinedText*)t)->text(),
+                        ((ui::Text*)t)->text(),
                         _glyphmap,
-                        to_ivec2(t->origin() + t->margin() + t->padding() + ui::absp_t {0, 0.5} * (t->dimension() - t->margin() - t->padding())),
+                        to_ivec2(t->origin() + t->margin() + t->padding() + ui::Point {0, 0.5} * (t->dimension() - t->margin() - t->padding())),
                         (int)(0.5 * (t->dimension().y - t->margin().y - t->padding().y)),
                         (int)(t->dimension().x - t->margin().x - t->padding().x));
                 }

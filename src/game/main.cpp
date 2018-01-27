@@ -35,14 +35,16 @@ public:
         auto *a = _screens.addScreen(new gamespace::AboutScreen());
         auto *g = _screens.addScreen(new gamespace::GameScreen(_screens, *_ctxt, _font));
         _mainmenu = _screens.addScreen(new gamespace::MainScreen(_screens, _ctxt, qe::Cache::glyphlatin));
+        auto *ending = _screens.addScreen(new gamespace::EndingScreen(_screens, _ctxt, qe::Cache::glyphlatin));
 
         _mainmenu->linkAbout(a);
         _mainmenu->linkGame(g);
+        ending->linkMain(_mainmenu);
     }
     void initializeGlyphmap() {
 #ifdef HAS_FREETYPE
         std::cout << "Using font " << _font->bpath() << std::endl;
-        qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _font->face(), 32, _ctxt->getResolution());
+        qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _font->face(), 30, _ctxt->getResolution());
 #else
         std::cout << "Using baked font " << _font->bpath() << std::endl;
         qe::Cache::glyphlatin = new qe::GlyphmapLatin(_font->bpath(), _ctxt->getResolution());

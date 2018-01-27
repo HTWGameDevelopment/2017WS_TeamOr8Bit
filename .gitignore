@@ -25,3 +25,4 @@ screenshot.png
 *.kra
 docs/doxygen
 extern/glew/
+src/game/board.cpp___jb_tmp___

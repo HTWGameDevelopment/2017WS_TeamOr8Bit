@@ -3,6 +3,9 @@
 
 #include<hextile/hextile.hpp>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include<glm/gtx/transform.hpp>
+#include<glm/mat4x4.hpp>
 #include<glm/vec2.hpp>
 #include<stdio.h>
 
@@ -12,6 +15,7 @@ namespace gamespace {
     class GameBoard;
 
     typedef hextile::hexpoint_t hexpoint_t;
+    typedef glm::mat4 render_data_t;
 
     const unsigned int VISIBILITY_LAYER = 0;
     const unsigned int ACTION_LAYER = 1;
@@ -27,12 +31,13 @@ namespace gamespace {
         GameBoard *_board; // pointer to board
         hextile::hexpoint_t _p; // coordinate
         std::array<hextile::marker_t, 4> _marker_layer;
+        render_data_t _render_offsets;
     public:
         static constexpr float dim_x = 2 * 0.866; // dimension in X direction
         static constexpr float dim_y = 2 * 1.0; // dimension in Y direction
-        BoardTile(GameBoard *t, hextile::hexpoint_t o): _unit(nullptr), _board(t), _p(o) {}
+        BoardTile(GameBoard *t, hextile::hexpoint_t o): _unit(nullptr), _board(t), _p(o), _render_offsets(glm::translate(glm::vec3(0,0,0))) {}
         BoardTile(const BoardTile &other) = delete;
-        BoardTile(BoardTile &&other): _unit(other._unit), _board(other._board), _p(other._p), _marker_layer(other._marker_layer) {
+        BoardTile(BoardTile &&other): _unit(other._unit), _board(other._board), _p(other._p), _marker_layer(other._marker_layer), _render_offsets(other._render_offsets) {
             other._unit = nullptr;
             other._board = nullptr;
         }
@@ -47,8 +52,9 @@ namespace gamespace {
             }
             return r;
         }
-        void setUnit(Unit *unit) {
-            _unit = unit;
+        void setUnit(Unit *unit);
+        void clearUnit() {
+            _unit = nullptr;
         }
         Unit *unit() {
             return _unit;
@@ -59,6 +65,7 @@ namespace gamespace {
         GameBoard &board();
         bool mark(unsigned int layer, unsigned int d);
         bool marked(unsigned int layer);
+        unsigned int marked_value(unsigned int layer);
         unsigned int lastMarkerId(unsigned int layer) {
             return _marker_layer[layer].id;
         }
@@ -67,6 +74,9 @@ namespace gamespace {
             return 0;
         }
         void destroyUnit();
+        render_data_t &renderData() {
+            return _render_offsets;
+        }
         void __introspect(size_t off);
     };
 

@@ -1,6 +1,7 @@
 #ifndef GAMESPACE_GAMEMENU
 #define GAMESPACE_GAMEMENU
 
+#include<game/screens/ending.hpp>
 #include<game/screens/game_impl.hpp>
 #include<game/screens/gameinput.hpp>
 #include<game/screens/screen.hpp>
@@ -16,11 +17,19 @@ namespace gamespace {
         std::unique_ptr<GameScreenInputState> _input;
         screen::ScreenManager<Screen> *_manager;
         bool _block_input;
+        bool _goto_ending = false;
     public:
         GameScreen(screen::ScreenManager<Screen> &manager, qe::Context &ctxt, std::shared_ptr<font::Font> font): _ctxt(&ctxt), _font(font), _manager(&manager), _block_input(true) {}
         void newGame(glm::ivec2 size, gamespace::Player player1, gamespace::Player player2) {
             _impl.reset(new GameScreenImpl(gamespace::Match(size, player1, player2), _ctxt, _font));
             _input.reset(new GameScreenInputState(*_impl.get()));
+            _goto_ending = false;
+            _impl->match().on_win([this](Player &player){
+                GDBG("win triggered");
+                ((EndingScreen*)&_manager->getScreen(3))->setWinningPlayer(&player);
+                _goto_ending = true;
+                _impl->deactivate();
+            });
         }
         void activate_screen() {
             assert(_impl.get() && _input.get());
@@ -28,7 +37,8 @@ namespace gamespace {
             _impl->pre_run();
             _block_input = false;
             _impl->run();
-            _manager->changeActiveScreen(_manager->getScreen(2));
+            if(_goto_ending) _manager->changeActiveScreen(_manager->getScreen(3));
+            else _manager->changeActiveScreen(_manager->getScreen(2));
         }
         void deactivate_screen() {
             assert(_impl.get() && _input.get());
