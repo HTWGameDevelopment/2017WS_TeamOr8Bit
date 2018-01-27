@@ -53,6 +53,9 @@ namespace gamespace {
             return r;
         }
         void setUnit(Unit *unit);
+        void clearUnit() {
+            _unit = nullptr;
+        }
         Unit *unit() {
             return _unit;
         }

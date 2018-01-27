@@ -16,7 +16,7 @@ namespace gamespace {
 
     typedef std::function<unsigned int(BoardTile &)> relation;
 
-    std::function<bool(BoardTile&,unsigned int&)> getEdgeRelation(unsigned int layer, relation _v, Player *player, bool noground_block, bool unit_block);
+    std::function<bool(BoardTile&,unsigned int&)> getEdgeRelation(Unit *u, unsigned int layer, relation _v, Player *player, bool noground_block, bool unit_block);
 
     struct cb_t {
         unsigned int id;
@@ -51,10 +51,15 @@ namespace gamespace {
         unsigned int _lid;
         std::vector<cb_t> _on_change;
         std::vector<saction_t> _actions;
+        std::vector<const char*> _container_mask;
+        Unit *_container;
     public:
         Unit(qe::Mesh<qe::OBJV3> *m, Player *p, std::string name, bool consider_noground, bool moveable, unsigned int h, unsigned int d, unsigned int a, unsigned int r, unsigned int v, unsigned int t, relation are, relation dr, relation tr, relation vre)
-            : _mesh(m), _player(p), _name(name), _max_hp(h), _hp(h), _dp(d), _ap(a), _ar(r), _vr(v), _dpt(t), _a(are), _d(dr), _t(tr), _v(vre), _consider_noground(consider_noground), _moveable(moveable) {}
+            : _mesh(m), _player(p), _name(name)
+            , _max_hp(h), _hp(h), _dp(d), _ap(a), _ar(r), _vr(v), _dpt(t), _a(are), _d(dr), _t(tr), _v(vre)
+            , _consider_noground(consider_noground), _moveable(moveable), _container(nullptr) {}
         virtual ~Unit() {
+            if(_container) delete _container;
             emit_change(false);
         }
         void render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m);
@@ -66,6 +71,18 @@ namespace gamespace {
         }
         bool isMoveable() {
             return _moveable;
+        }
+        void setContainerMask(std::initializer_list<const char*> l) {
+            _container_mask = l;
+        }
+        bool containerMatchesType(std::string name) {
+            for(auto *i : _container_mask) {
+                if(name == i) return true;
+            }
+            return false;
+        }
+        Unit *&container() {
+            return _container;
         }
         template<typename S, typename F>
         void setSpecialAction(S name, F &&f) {
@@ -82,6 +99,7 @@ namespace gamespace {
             return _lid++;
         }
         void emit_change(bool alive = true) {
+            if(_container && alive == true) _container->emit_change(alive);
             for(auto &f : _on_change) {
                 f.f(alive);
             }

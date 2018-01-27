@@ -184,7 +184,7 @@ void Match::setRenderOffsets(UnitManager &manager) {
     for(unsigned int i = 0; i < sizeof(offs) / sizeof(roff_t); ++i) {
         _board[offs[i].c.x][offs[i].c.y].renderData() = offs[i].prem;
         if(i % 2 == 1)
-            _board[offs[i].c.x][offs[i].c.y].setUnit(manager.createTank(&player1()));
+            _board[offs[i].c.x][offs[i].c.y].setUnit(manager.createInfantry(&player2()));
         else
             _board[offs[i].c.x][offs[i].c.y].setUnit(manager.createGTrans(&player2()));
     }
@@ -192,6 +192,7 @@ void Match::setRenderOffsets(UnitManager &manager) {
 }
 
 void Match::checkWinningCondition() {
+    return;
     for(size_t i = 0; i < _board.x(); ++i) {
         for(size_t j = 0; j < _board.y(); ++j) {
             if(_board[i][j].unit() && _board[i][j].unit()->player() != *_currentPlayer)

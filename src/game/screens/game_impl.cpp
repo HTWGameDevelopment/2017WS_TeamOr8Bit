@@ -1,5 +1,6 @@
 #include "game_impl.hpp"
 
+#include<game/unitcmove.hpp>
 #include<game/unitmove.hpp>
 #include<game/unitattack.hpp>
 
@@ -214,9 +215,16 @@ void GameScreenImpl::initializeMap() {
 void GameScreenImpl::enableActionMask() {
     if(_selection.hovering == nullptr) return; // no tile to select
     if(_selection.type == SelectionState::Type::SEL_TO_ACTION) {
-        if(_selection.hovering->marked(MOVE_LAYER) && _selection.hovering != _selection.selected && _selection.hovering->unit() == nullptr) { // is move action?
+        if(_selection.hovering->marked(MOVE_LAYER)
+            && _selection.hovering != _selection.selected
+            && (_selection.hovering->unit() == nullptr
+                || (_selection.hovering->unit()->containerMatchesType(_selection.selected->unit()->name())
+                    && _selection.hovering->unit()->container() == nullptr))) { // is move action?
             assert(_selection.selected);
-            _match.doMove(new UnitMove(_selection.selected->coord(), _selection.hovering->coord(), &_match));
+            if(_selection.hovering->unit() == nullptr) // normal move
+                _match.doMove(new UnitMove(_selection.selected->coord(), _selection.hovering->coord(), &_match));
+            else // container move
+                _match.doMove(new UnitCMove(_selection.selected->coord(), _selection.hovering->coord(), &_match));
         } else if(_selection.hovering->marked(ACTION_LAYER) && _selection.hovering != _selection.selected && _selection.hovering->unit() && _selection.hovering->unit()->player() != _match.currentPlayer()) { // is it attack action?
             assert(_selection.selected);
             _match.doMove(new UnitAttack(_selection.selected->coord(), _selection.hovering->coord(), &_match));

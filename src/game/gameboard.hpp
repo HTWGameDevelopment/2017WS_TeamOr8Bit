@@ -15,6 +15,7 @@ namespace gamespace {
         GameBoard(GameBoard &&other);
         void moveUnit(hexpoint_t from, hexpoint_t to);
         void attackUnit(hexpoint_t from, hexpoint_t to);
+        void containerMove(hexpoint_t from, hexpoint_t to);
         void synchronize();
     };
 }

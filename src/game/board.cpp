@@ -91,6 +91,19 @@ void GameBoard::attackUnit(hexpoint_t from, hexpoint_t to) {
     if(tt.unit()->dead()) tt.destroyUnit();
 }
 
+void GameBoard::containerMove(hexpoint_t from, hexpoint_t to) {
+    auto &ft = get(from);
+    auto &tt = get(to);
+    assert(ft.unit());
+    assert(tt.unit());
+    assert(ft.unit()->player() == tt.unit()->player());
+    assert(tt.unit()->containerMatchesType(ft.unit()->name()));
+    assert(tt.unit()->container() == nullptr);
+    tt.unit()->container() = ft.unit();
+    ft.unit()->tile() = nullptr;
+    ft.clearUnit();
+}
+
 void BoardTile::__introspect(size_t off) {
     std::cout << std::string(off, ' ') << "BoardTile[" << _p.x << "," << _p.y << "]" << std::endl;
     if(_unit) _unit->__introspect(off + 2);

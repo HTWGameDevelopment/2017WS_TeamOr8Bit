@@ -150,7 +150,10 @@ void CoordinateMenu::init(ui::Renderable *ui) {
 void CoordinateMenu::update() {
     assert(_u);
     _b = _u->tile();
-    _coordinates->text() = "[" + std::to_string(_b->coord().x) + ":" + std::to_string(_b->coord().y) + "]";
+    if(_b != nullptr)
+        _coordinates->text() = "[" + std::to_string(_b->coord().x) + ":" + std::to_string(_b->coord().y) + "]";
+    else
+        _coordinates->text() = "[in unit]";
     _unit_text->text() = _u->name();
     _unit_hp->text() = std::to_string(_u->hp()) + "/" + std::to_string(_u->max_hp());
     invalidate();
