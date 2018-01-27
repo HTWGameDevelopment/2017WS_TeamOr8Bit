@@ -74,6 +74,7 @@ void GameScreenInputState::mouse(double x, double y) {
 }
 
 void GameScreenInputState::button(int button, int action, int mods) {
+    static bool release_ignore = false;
     if(action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_MIDDLE && _mouse_mode == FREE) {
         _impl->context()->hideCursor();
         _impl->context()->resetMouse();
@@ -94,10 +95,18 @@ void GameScreenInputState::button(int button, int action, int mods) {
                 _mouse_mode = UIINTERACTION;
                 GDBG("new mouse mode: UIINTERACTION");
             }
+        } else {
+            GDBG("UI caught click");
+            release_ignore = true;
         }
         return;
     }
     if(action != GLFW_RELEASE) return;
+    if(release_ignore) {
+        GDBG("ignoring release event");
+        release_ignore = false;
+        return;
+    }
     if(button == GLFW_MOUSE_BUTTON_LEFT) {
         if(_mouse_mode == UIINTERACTION) {
             _mouse_mode = FREE;

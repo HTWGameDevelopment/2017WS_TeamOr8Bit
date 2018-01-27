@@ -13,8 +13,9 @@ namespace gamespace {
         GameBoard(int x, int y);
         GameBoard(const GameBoard &other) = delete;
         GameBoard(GameBoard &&other);
-        void moveUnit(hexpoint_t from, hexpoint_t to);
+        void moveUnit(hexpoint_t from, hexpoint_t to, bool from_container);
         void attackUnit(hexpoint_t from, hexpoint_t to);
+        void containerMove(hexpoint_t from, hexpoint_t to, bool from_container);
         void synchronize();
     };
 }
