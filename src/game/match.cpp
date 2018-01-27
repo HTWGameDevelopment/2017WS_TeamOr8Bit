@@ -186,7 +186,7 @@ void Match::setRenderOffsets(UnitManager &manager) {
         if(i % 2 == 1)
             _board[offs[i].c.x][offs[i].c.y].setUnit(manager.createTank(&player1()));
         else
-            _board[offs[i].c.x][offs[i].c.y].setUnit(manager.createTHeli(&player2()));
+            _board[offs[i].c.x][offs[i].c.y].setUnit(manager.createGTrans(&player2()));
     }
     _board.synchronize();
 }
