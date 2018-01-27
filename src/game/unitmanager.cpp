@@ -10,7 +10,19 @@ UnitManager::UnitManager(GameScreenImpl *impl): _impl(impl) {
     _meshes.btank.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/btank.objv3"_p)));
     _meshes.gtrans.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/gtrans.objv3"_p)));
     _meshes.infantry.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/infantry.objv3"_p)));
+    _meshes.aheli.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/aheli.objv3"_p)));
     _units.tank.reset(new gamespace::Unit(_meshes.tank.get(), nullptr, "Tank", true, true,
+        100, // Health
+        50,  // Defense Points
+        50,  // Attack Points
+        2,   // Attack Range
+        3,   // Visibility
+        2,   // Max move distance
+        gamespace::defaultFalloff,
+        gamespace::defaultFalloff,
+        gamespace::defaultFalloff,
+        gamespace::defaultFalloff));
+    _units.aheli.reset(new gamespace::Unit(_meshes.aheli.get(), nullptr, "Attack Helicopter", false, true,
         100, // Health
         50,  // Defense Points
         50,  // Attack Points
@@ -70,9 +82,11 @@ UnitManager::UnitManager(GameScreenImpl *impl): _impl(impl) {
         auto *player = &u->player();
         u->tile()->destroyUnit();
         p->setUnit(createBTank(player));
+        p->unit()->setLastTurnId(_impl->match().getTurnId());
     });
     _units.gtrans->setContainerMask({"Infantry"});
-    _units.gtrans->setSpecialAction("Move out", [this](Unit *u) {
+    _units.theli->setContainerMask({"Infantry"});
+    auto moveoutaction = [this](Unit *u) {
         // mark map
         u->container()->markMovement(*u->tile());
         u->tile()->board().clearMarker(ACTION_LAYER);
@@ -83,5 +97,7 @@ UnitManager::UnitManager(GameScreenImpl *impl): _impl(impl) {
         s.type = SelectionState::Type::SEL_TO_ACTION;
         GDBG("set up selection flags");
         // TODO disable on turn
-    });
+    };
+    _units.gtrans->setSpecialAction("Move out", moveoutaction);
+    _units.aheli->setSpecialAction("Move out", moveoutaction);
 }
