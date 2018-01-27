@@ -19,10 +19,13 @@ namespace gamespace {
         UnitCMove(hexpoint_t from, hexpoint_t to, Match *b, bool from_container): _from(from), _to(to), _match(b), _fc(from_container) {}
         virtual void doMove() {
             _match->board().containerMove(_from, _to, _fc);
+            if(_fc) {
+                _match->board().get(_from).unit()->setLastTurnId(_match->getTurnId());
+                _match->board().get(_from).unit()->emit_change();
+            }
             _match->board().get(_to).unit()->setLastTurnId(_match->getTurnId());
             _match->board().get(_to).unit()->emit_change();
             _match->board().get(_to).unit()->container()->emit_change();
-            // TODO container turn
         }
         virtual unsigned int type() {
             return CONTAINER_MOVE;

@@ -82,5 +82,6 @@ UnitManager::UnitManager(GameScreenImpl *impl): _impl(impl) {
         s.selected = u->tile();
         s.type = SelectionState::Type::SEL_TO_ACTION;
         GDBG("set up selection flags");
+        // TODO disable on turn
     });
 }
