@@ -71,14 +71,21 @@ bool BoardTile::marked(unsigned int layer) {
     return _marker_layer[layer].id == _board->currentMarker(layer) && _marker_layer[layer].val != 0;
 }
 
-void GameBoard::moveUnit(hexpoint_t from, hexpoint_t to) {
+void GameBoard::moveUnit(hexpoint_t from, hexpoint_t to, bool from_container) {
     auto &ft = get(from);
     auto &tt = get(to);
     assert(ft.unit());
     assert(tt.unit() == nullptr);
-    tt.setUnit(ft.unit());
-    ft.setUnit(nullptr);
+    if(from_container) {
+        assert(ft.unit()->container());
+        tt.setUnit(ft.unit()->container());
+        ft.unit()->container() = nullptr;
+    } else {
+        tt.setUnit(ft.unit());
+        ft.setUnit(nullptr);
+    }
     tt.unit()->tile() = &tt;
+    GDBG("executing move from " << GV2TOSTR(from) << " to " << GV2TOSTR(to) << "(container: " << from_container << ")");
 }
 
 void GameBoard::attackUnit(hexpoint_t from, hexpoint_t to) {
@@ -91,7 +98,7 @@ void GameBoard::attackUnit(hexpoint_t from, hexpoint_t to) {
     if(tt.unit()->dead()) tt.destroyUnit();
 }
 
-void GameBoard::containerMove(hexpoint_t from, hexpoint_t to) {
+void GameBoard::containerMove(hexpoint_t from, hexpoint_t to, bool from_container) {
     auto &ft = get(from);
     auto &tt = get(to);
     assert(ft.unit());
@@ -99,9 +106,15 @@ void GameBoard::containerMove(hexpoint_t from, hexpoint_t to) {
     assert(ft.unit()->player() == tt.unit()->player());
     assert(tt.unit()->containerMatchesType(ft.unit()->name()));
     assert(tt.unit()->container() == nullptr);
-    tt.unit()->container() = ft.unit();
-    ft.unit()->tile() = nullptr;
-    ft.clearUnit();
+    if(from_container) {
+        tt.unit()->container() = ft.unit()->container();
+        ft.unit()->container() = nullptr;
+    } else {
+        tt.unit()->container() = ft.unit();
+        ft.unit()->tile() = nullptr;
+        ft.clearUnit();
+    }
+    GDBG("executing container move from " << GV2TOSTR(from) << " to " << GV2TOSTR(to) << "(container: " << from_container << ")");
 }
 
 void BoardTile::__introspect(size_t off) {

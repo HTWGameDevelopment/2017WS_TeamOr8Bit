@@ -57,7 +57,8 @@ hextile::hexpoint_t GameScreenImpl::getLookedAtTile(glm::vec2 uv) {
 }
 
 GameScreenImpl::GameScreenImpl(gamespace::Match &&match, qe::Context *ctxt, std::shared_ptr<font::Font> font)
-: _match(std::move(match)), _ctxt(ctxt), _font(font), _ffbo(ctxt->getResolution()), _shouldClose(true) {
+: _match(std::move(match)), _ctxt(ctxt), _font(font), _ffbo(ctxt->getResolution()), _shouldClose(true)
+, _unitmanager(this) {
     initializeBuffers();
     initializeShaders();
     initializeSelection();
@@ -88,6 +89,7 @@ void GameScreenImpl::initializeSelection() {
     _selection.selected = nullptr;
     _selection.hovering = nullptr;
     _selection.type = SelectionState::Type::SEL_NONE;
+    _selection.from_container = false;
 }
 
 void GameScreenImpl::initializeHUD() {
@@ -218,23 +220,28 @@ void GameScreenImpl::enableActionMask() {
         if(_selection.hovering->marked(MOVE_LAYER)
             && _selection.hovering != _selection.selected
             && (_selection.hovering->unit() == nullptr
-                || (_selection.hovering->unit()->containerMatchesType(_selection.selected->unit()->name())
-                    && _selection.hovering->unit()->container() == nullptr))) { // is move action?
+                || (_selection.hovering->unit()->player() == _selection.selected->unit()->player()
+                        && _selection.hovering->unit()->containerMatchesType(_selection.selected->unit()->name())
+                        && _selection.hovering->unit()->container() == nullptr))) { // is move action?
             assert(_selection.selected);
             if(_selection.hovering->unit() == nullptr) // normal move
-                _match.doMove(new UnitMove(_selection.selected->coord(), _selection.hovering->coord(), &_match));
+                _match.doMove(new UnitMove(_selection.selected->coord(), _selection.hovering->coord(), &_match, _selection.from_container));
             else // container move
-                _match.doMove(new UnitCMove(_selection.selected->coord(), _selection.hovering->coord(), &_match));
+                _match.doMove(new UnitCMove(_selection.selected->coord(), _selection.hovering->coord(), &_match, _selection.from_container));
         } else if(_selection.hovering->marked(ACTION_LAYER) && _selection.hovering != _selection.selected && _selection.hovering->unit() && _selection.hovering->unit()->player() != _match.currentPlayer()) { // is it attack action?
             assert(_selection.selected);
             _match.doMove(new UnitAttack(_selection.selected->coord(), _selection.hovering->coord(), &_match));
+        } else {
+            GDBG("selected tile out of range for action");
         }
+        _selection.from_container = false;
         _selection.type = SelectionState::Type::SEL_NONE;
         _selection.selected = nullptr;
         _selection.hovering = nullptr;
         _match.board().clearMarker(MOVE_LAYER);
         _match.board().clearMarker(ACTION_LAYER);
     } else {
+        _selection.from_container = false;
         if(_selection.hovering->unit() == nullptr) return; // no unit to select
         if(_selection.hovering->unit()->player() != _match.currentPlayer()) return; // can only select own units
         if(_selection.hovering->unit()->getLastTurnId() == _match.getTurnId()) return; // unit already moved this turn
