@@ -1,5 +1,7 @@
 #include "coordinatemenu.hpp"
 
+#include<game/uirender.hpp>
+
 #include<game/match.hpp>
 #include<game/board.hpp>
 #include<game/unit.hpp>

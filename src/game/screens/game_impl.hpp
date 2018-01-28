@@ -17,9 +17,6 @@
 
 namespace gamespace {
 
-    typedef decltype(qe::Cache::glyphlatin) glyphmap;
-    typedef qe::Text<std::remove_pointer<glyphmap>::type> text_t;
-
     struct SelectionState {
         enum Type { SEL_TO_ACTION, SEL_NONE };
         Type type;

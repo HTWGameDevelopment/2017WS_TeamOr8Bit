@@ -13,6 +13,7 @@
 #include<ui/box.hpp>
 #include<ui/text.hpp>
 #include<screenmanager/screen.hpp>
+#include<game/uirender.hpp>
 
 
 namespace gamespace {
@@ -127,16 +128,8 @@ namespace gamespace {
                 _manager->quit();
             });
             auto renderer = [this](ui::Renderable *t) mutable {
-                this->render_button(t->origin() + t->margin(), t->dimension() - t->margin());
-                if(t->payload() == nullptr) {
-                    t->payload() = new text_t(
-                        ((ui::Text*)t)->text(),
-                        _glyphmap,
-                        to_ivec2(t->origin() + t->margin() + t->padding() + ui::Point {0, 0.5} * (t->dimension() - t->margin() - t->padding())),
-                        (int)(0.5 * (t->dimension().y - t->margin().y - t->padding().y)),
-                        (int)(t->dimension().x - t->margin().x - t->padding().x));
-                }
-                ((text_t*)(t->payload()))->render();
+                render_rectangle(t->origin() + t->margin(), t->dimension() - t->margin(), glm::vec3(0.3, 0.3, 0.3), _ctxt->getResolution());
+                render_text(t, glm::vec3(1, 1, 1));
             };
             start->render_with(renderer);
             quit->render_with(renderer);

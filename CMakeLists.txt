@@ -50,6 +50,7 @@ add_executable(Or8Bit
     src/game/match.cpp
     src/game/match.hpp
     src/game/move.hpp
+    src/game/uirender.cpp
     src/game/unit.cpp
     src/game/unit.hpp
     src/game/unitattack.hpp

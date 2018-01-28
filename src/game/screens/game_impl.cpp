@@ -1,5 +1,7 @@
 #include "game_impl.hpp"
 
+#include<game/uirender.hpp>
+
 #include<game/unitcmove.hpp>
 #include<game/unitmove.hpp>
 #include<game/unitattack.hpp>
@@ -120,7 +122,9 @@ void GameScreenImpl::initializeHUD() {
     lower_box->expand() = false;
     lower_box->dimension() = ui::Point {1, 0.2};
     lower_box->get("1")->dimension() = ui::Point {0.15, 0.1};
+    lower_box->get("1")->margin() = ui::Point {0.003, 0.003};
     lower_box->get("2")->dimension() = ui::Point {0.15, 0.1};
+    lower_box->get("2")->margin() = ui::Point {0.003, 0.003};
 
     box->append(lower_box.release());
     box->append(upper_box.release());
@@ -133,24 +137,14 @@ void GameScreenImpl::initializeHUD() {
     auto *t = _ui->get(0, "1.1.1");
     auto *t2 = _ui->get(0, "1.2.1");
     auto *t3 = _ui->get(0, "1.2.2");
-    // TODO Various text rendering issues
-    auto text_renderer = [this](ui::Renderable *t) mutable {
-        if(t->payload() == nullptr) {
-            t->payload() = new text_t(
-                ((ui::Text*)t)->text(),
-                qe::Cache::glyphlatin,
-                to_ivec2(t->origin() + t->margin() + t->padding() + ui::Point {0, 0.5} * (t->dimension() - t->margin() - t->padding())),
-                // to_ivec2(t->origin() + t->margin() + t->padding()),
-                (int)(0.5 * (t->dimension().y - t->margin().y - t->padding().y)),
-                (int)(t->dimension().x - t->margin().x - t->padding().x));
-        }
-        text_t *pl = (text_t*)t->payload();
-        pl->foreground() = glm::vec3(1, 1, 1);
-        pl->render();
+    auto text_renderer = [](ui::Renderable *t) mutable {render_text(t, glm::vec3(1, 1, 1));};
+    auto text_bgrender = [res = _ctxt->getResolution()](ui::Renderable *t) mutable {
+        render_rectangle(t->origin() + t->margin(), t->dimension() - (2.0f * t->margin()), glm::vec3(0.3, 0.3, 0.3), res);
+        render_text(t, glm::vec3(1, 1, 1));
     };
     t->render_with(text_renderer);
-    t2->render_with(text_renderer);
-    t3->render_with(text_renderer);
+    t2->render_with(text_bgrender);
+    t3->render_with(text_bgrender);
     t->payload([](void* t){delete (text_t*)t;});
     t2->payload([](void* t){delete (text_t*)t;});
     t3->payload([](void* t){delete (text_t*)t;});
