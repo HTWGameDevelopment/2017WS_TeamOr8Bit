@@ -4,18 +4,20 @@
 
 using namespace gamespace;
 
-unsigned int gamespace::defaultFalloff(BoardTile &) {
-    return 1;
+unsigned int gamespace::defaultFalloff(BoardTile &t) {
+    return t.terrain().falloff();
 }
 
 std::function<bool(BoardTile&,unsigned int&)> gamespace::getEdgeRelation(Unit *u, unsigned int layer, relation _v, Player *player, bool noground_block = false, bool unit_block = false) {
     return [player, layer, _v, noground_block, unit_block, u](BoardTile &b, unsigned int &p) {
-        if(p == 0) return false;
+        unsigned int v = _v(b);
+        if(p < v) return false;
         if(noground_block && b.marked_value(AOE_LAYER) == 2) return false;
         if(unit_block && b.unit() && b.unit()->player() == *player
             && (b.unit()->containerMatchesType(u->name()) == false
                 || b.unit()->getLastTurnId() == b.board().match()->getTurnId())) return false;
-        bool r = b.mark(layer, p--);
+        bool r = b.mark(layer, p);
+        p -= v;
         if(unit_block && b.unit()) return false;
         return r;
     };

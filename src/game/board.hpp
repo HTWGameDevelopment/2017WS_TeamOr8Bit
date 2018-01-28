@@ -1,6 +1,8 @@
 #ifndef GAME_BOARD_HPP
 #define GAME_BOARD_HPP
 
+#include<game/terrain.hpp>
+
 #include<hextile/hextile.hpp>
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -32,12 +34,13 @@ namespace gamespace {
         hextile::hexpoint_t _p; // coordinate
         std::array<hextile::marker_t, 4> _marker_layer;
         render_data_t _render_offsets;
+        Terrain _terrain;
     public:
         static constexpr float dim_x = 2 * 0.866; // dimension in X direction
         static constexpr float dim_y = 2 * 1.0; // dimension in Y direction
-        BoardTile(GameBoard *t, hextile::hexpoint_t o): _unit(nullptr), _board(t), _p(o), _render_offsets(glm::translate(glm::vec3(0,0,0))) {}
+        BoardTile(GameBoard *t, hextile::hexpoint_t o): _unit(nullptr), _board(t), _p(o), _render_offsets(glm::translate(glm::vec3(0,0,0))), _terrain(Terrain::getNormalTile()) {}
         BoardTile(const BoardTile &other) = delete;
-        BoardTile(BoardTile &&other): _unit(other._unit), _board(other._board), _p(other._p), _marker_layer(other._marker_layer), _render_offsets(other._render_offsets) {
+        BoardTile(BoardTile &&other): _unit(other._unit), _board(other._board), _p(other._p), _marker_layer(other._marker_layer), _render_offsets(other._render_offsets), _terrain(other._terrain) {
             other._unit = nullptr;
             other._board = nullptr;
         }
@@ -61,6 +64,9 @@ namespace gamespace {
         }
         hextile::hexpoint_t coord() {
             return _p;
+        }
+        Terrain &terrain() {
+            return _terrain;
         }
         GameBoard &board();
         bool mark(unsigned int layer, unsigned int d);

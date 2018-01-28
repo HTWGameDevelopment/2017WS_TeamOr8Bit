@@ -112,11 +112,52 @@ void Match::setMarkers() {
         {18,9},
         {17,8}
     };
+    const hextile::hexpoint_t water[] = {
+        {11,11},
+        {10,11},
+        {9,11},
+        {8,10},
+        {9,10},
+        {10,10},
+        {11,10},
+        {11,9},
+        {10,9},
+        {9,9},
+        {8,9},
+        {12,9},
+        {11,8},
+        {10,8},
+        {9,8},
+        {8,8},
+        {8,7},
+        {9,7},
+        {10,7},
+        {11,7},
+        {12,7},
+        {11,6},
+        {10,6},
+        {9,6},
+        {8,6},
+        {9,5},
+        {10,5},
+        {11,5},
+        {10,4},
+        {9,4},
+        {10,3},
+        {10,2},
+        {9,2},
+        {10,1},
+        {10,0},
+        {9,0}
+    };
     for(unsigned int i = 0; i < sizeof(aoe) / sizeof(hextile::hexpoint_t); ++i) {
         _board[aoe[i].x][aoe[i].y].mark(AOE_LAYER, 1);
     }
     for(unsigned int i = 0; i < sizeof(noground) / sizeof(hextile::hexpoint_t); ++i) {
         _board[noground[i].x][noground[i].y].mark(AOE_LAYER, 2);
+    }
+    for(unsigned int i = 0; i < sizeof(water) / sizeof(hextile::hexpoint_t); ++i) {
+        _board[water[i].x][water[i].y].terrain() = Terrain::getWaterTile();
     }
 }
 
