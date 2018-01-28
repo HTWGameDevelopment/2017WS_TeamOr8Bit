@@ -60,21 +60,6 @@ namespace gamespace {
         void linkGame(GameScreen *game) {
             _gamescreen = game;
         }
-        void render_button(glm::vec2 origin, glm::vec2 size) {
-            qe::Cache::sprite2d->use();
-            // set shader
-            qe::Cache::sprite2d->setUniform<qe::UNIORIGIN>(origin);
-            qe::Cache::sprite2d->setUniform<qe::UNISIZE>(size);
-            // set texture
-            qe::Cache::buttont->bindTo();
-            // set vao
-            qe::Cache::meshm->render();
-        }
-        void render_button(ui::Point a, ui::Point b) {
-            glm::vec2 origin = glm::vec2(a.x, a.y) * glm::vec2(2, 2) / _ctxt->getResolution();
-            glm::vec2 dimension = glm::vec2(b.x, b.y) * glm::vec2(2, 2) / _ctxt->getResolution();
-            render_button(origin - glm::vec2(1, 1), dimension);
-        }
         void render_background() {
             // TODO
         }

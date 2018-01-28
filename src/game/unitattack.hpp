@@ -27,8 +27,8 @@ namespace gamespace {
             return MOVE_ATTACK;
         }
         virtual void __introspect(size_t off) {
-            // TODO
-            (void)off;
+            std::cout << std::string(off, ' ') << "UnitAttack["
+                << GV2TOSTR(_from) << " -> " << GV2TOSTR(_to) << "]" << std::endl;
         }
     };
 

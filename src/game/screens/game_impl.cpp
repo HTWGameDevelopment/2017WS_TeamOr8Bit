@@ -170,8 +170,6 @@ void GameScreenImpl::initializeHUD() {
 
 void GameScreenImpl::initializeAssets() {
     // MODELS
-    _cube.reset(new qe::Mesh<qe::OBJV1>(qe::Loader<qe::OBJV1>("assets/models/cube.objv1"_p)));
-    _tile.reset(new qe::Mesh<qe::OBJV2>(qe::Loader<qe::OBJV2>("assets/models/hextile.objv2"_p)));
     _ground.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/map.objv3"_p)));
     // RESOLVE SUBOBJS
         const char* names[] = {
@@ -196,7 +194,6 @@ void GameScreenImpl::initializeAssets() {
         _ground_indices[i] = _ground->get_object(names[i]);
     }
     // TEXTURES
-    _textures.hextile_grass.reset(new qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>(qe::Loader<qe::PNGRGBA>("assets/textures/hextile-grass.png"_p)));
     _cam.controlling = false;
     _cam.camera.reset(new qe::Camera(
                           glm::vec3(4, 4, 4),
@@ -279,8 +276,6 @@ void GameScreenImpl::run() {
     unsigned int fps = 0;
     glm::mat4 m = glm::translate(glm::vec3(0, 0, 0));
     glClearColor(255.0 / 255, 226.0 / 255, 152.0 / 255, 1);
-
-    _textures.hextile_grass->bindTo();
 
     const auto max_x = _match.board().x();
     const auto max_y = _match.board().y();
@@ -417,7 +412,6 @@ void GameScreenImpl::renderUnitOf(gamespace::BoardTile *b) {
 void GameScreenImpl::__introspect(size_t off) {
     std::cout << std::string(off, ' ') << "GameScreenImpl" << std::endl;
     _match.__introspect(off + 2);
-    if(_cube.get()) _cube->__introspect(off + 2);
     _unitmanager.__introspect(off + 2);
     if(_ground.get()) _ground->__introspect(off + 2);
     if(_ui.get()) _ui->__introspect(off + 2);

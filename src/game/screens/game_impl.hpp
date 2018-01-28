@@ -32,8 +32,6 @@ namespace gamespace {
         gamespace::Match _match;
         qe::Context *_ctxt;
         std::shared_ptr<font::Font> _font;
-        std::unique_ptr<qe::Mesh<qe::OBJV1>> _cube;
-        std::unique_ptr<qe::Mesh<qe::OBJV2>> _tile;
         std::unique_ptr<qe::Mesh<qe::OBJV3>> _ground;
         std::unique_ptr<qe::Program> _terrain_shader;
         std::unique_ptr<qe::Program> _terrain_tileno_shader;
@@ -45,9 +43,6 @@ namespace gamespace {
             std::unique_ptr<qe::Camera> camera;
             bool controlling;
         } _cam;
-        struct Textures {
-            std::unique_ptr<qe::Texture<qe::PNGRGBA, qe::DIFFTEXBIND_GL>> hextile_grass;
-        } _textures;
         std::unique_ptr<ui::UI> _ui;
         SelectionState _selection;
         bool _shouldClose;
