@@ -278,7 +278,7 @@ void GameScreenImpl::run() {
     _shouldClose = false;
     unsigned int fps = 0;
     glm::mat4 m = glm::translate(glm::vec3(0, 0, 0));
-    glClearColor(0.3, 0.3, 0.3, 1);
+    glClearColor(255.0 / 255, 226.0 / 255, 152.0 / 255, 1);
 
     _textures.hextile_grass->bindTo();
 
