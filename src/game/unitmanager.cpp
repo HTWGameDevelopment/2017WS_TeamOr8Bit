@@ -103,6 +103,7 @@ UnitManager::UnitManager(GameScreenImpl *impl): _impl(impl) {
     };
     auto moveoutstring = [this](Unit *u) -> std::string {
         if(u->container() == nullptr) return "Move Out (unavailable)"s;
+        if(u->player() != _impl->match().currentPlayer()) return "Move Out (unavailable)"s;
         if(u->getLastTurnId() == _impl->match().getTurnId()) return "Move Out (unavailable)"s;
         return "Move Out"s;
     };
