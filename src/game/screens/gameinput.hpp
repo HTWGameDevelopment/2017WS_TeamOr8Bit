@@ -19,8 +19,8 @@ namespace gamespace {
         double _last_y;
         ui::Point _origin_save;
         ui::Point _mouse_save;
-        double _resy;
         movement_mode _mouse_mode;
+        double _resy;
         ui::Renderable *_selected_menu;
         GameScreenImpl *_impl;
     public:

@@ -3,6 +3,7 @@
 #include<game/screens/game_impl.hpp>
 
 using namespace gamespace;
+using namespace std::literals::string_literals;
 
 UnitManager::UnitManager(GameScreenImpl *impl): _impl(impl) {
     _meshes.tank.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/tank.objv3"_p)));
@@ -77,7 +78,7 @@ UnitManager::UnitManager(GameScreenImpl *impl): _impl(impl) {
         gamespace::defaultFalloff,
         gamespace::defaultFalloff,
         gamespace::defaultFalloff));
-    _units.tank->setSpecialAction("Convert to turret", [this](Unit *u) {
+    _units.tank->setSpecialAction([](Unit*){return "Convert to turret"s;}, [this](Unit *u) {
         auto *p = u->tile();
         auto *player = &u->player();
         u->tile()->destroyUnit();
@@ -87,6 +88,8 @@ UnitManager::UnitManager(GameScreenImpl *impl): _impl(impl) {
     _units.gtrans->setContainerMask({"Infantry"});
     _units.theli->setContainerMask({"Infantry"});
     auto moveoutaction = [this](Unit *u) {
+        if(u->container() == nullptr) return;
+        if(u->getLastTurnId() == _impl->match().getTurnId()) return;
         // mark map
         u->container()->markMovement(*u->tile());
         u->tile()->board().clearMarker(ACTION_LAYER);
@@ -96,8 +99,13 @@ UnitManager::UnitManager(GameScreenImpl *impl): _impl(impl) {
         s.selected = u->tile();
         s.type = SelectionState::Type::SEL_TO_ACTION;
         GDBG("set up selection flags");
-        // TODO disable on turn
+        u->setLastTurnId(_impl->match().getTurnId());
     };
-    _units.gtrans->setSpecialAction("Move out", moveoutaction);
-    _units.aheli->setSpecialAction("Move out", moveoutaction);
+    auto moveoutstring = [this](Unit *u) -> std::string {
+        if(u->container() == nullptr) return "Move Out (unavailable)"s;
+        if(u->getLastTurnId() == _impl->match().getTurnId()) return "Move Out (unavailable)"s;
+        return "Move Out"s;
+    };
+    _units.gtrans->setSpecialAction(moveoutstring, moveoutaction);
+    _units.aheli->setSpecialAction(moveoutstring, moveoutaction);
 }

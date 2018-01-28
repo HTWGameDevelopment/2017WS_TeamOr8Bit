@@ -13,9 +13,9 @@ public:
         void deactivate_screen() {
 
         }
-        void key_callback(int key, int action) {}
-        void mouse_callback(double x, double y) {}
-        void mouse_button_callback(int button, int action, int mods) {}
+        void key_callback(int, int) {}
+        void mouse_callback(double, double) {}
+        void mouse_button_callback(int, int, int) {}
         void idle_callback() {}
         void __introspect(size_t off) {
             std::cout << std::string(off, ' ') << "AboutScreen" << std::endl;

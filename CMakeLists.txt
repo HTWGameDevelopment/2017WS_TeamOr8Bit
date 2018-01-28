@@ -23,20 +23,46 @@ set(QE_GLFW_PATH "${CMAKE_SOURCE_DIR}/extern/GLFW/include" CACHE PATH "" FORCE)
 set(QE_PNG_PATH "${CMAKE_SOURCE_DIR}/extern/libpng-1.6.32" CACHE PATH "" FORCE)
 set(QE_GLM_PATH "${CMAKE_SOURCE_DIR}/extern/glm" CACHE PATH "" FORCE)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic")
+
 # program
 add_executable(Or8Bit
-    src/game/main.cpp
-    src/game/board.cpp
-    src/game/match.cpp
-    src/game/unit.cpp
-    src/game/context/coordinatemenu.cpp
-    src/game/screens/game_impl.cpp
-    src/game/screens/gameinput.cpp
-    src/game/screens/ending.cpp
-    src/game/unitmanager.cpp
     src/logger.cpp
+    src/game/terrain.hpp
+    src/game/screens/screen.hpp
+    src/game/screens/about.hpp
+    src/game/screens/ending.cpp
+    src/game/screens/ending.hpp
+    src/game/screens/game.hpp
+    src/game/screens/game_impl.cpp
+    src/game/screens/game_impl.hpp
+    src/game/screens/gameinput.cpp
+    src/game/screens/gameinput.hpp
+    src/game/screens/main.hpp
+    src/game/screens/screens.hpp
+    src/game/context/coordinatemenu.cpp
+    src/game/context/coordinatemenu.hpp
+    src/game/player.hpp
+    src/game/board.cpp
+    src/game/board.hpp
+    src/game/gameboard.hpp
+    src/game/main.cpp
+    src/game/match.cpp
+    src/game/match.hpp
+    src/game/move.hpp
+    src/game/unit.cpp
+    src/game/unit.hpp
+    src/game/unitattack.hpp
+    src/game/unitcmove.hpp
+    src/game/unitmanager.cpp
+    src/game/unitmanager.hpp
+    src/game/unitmove.hpp
+    src/game/framebuffer_first_pass.hpp
+    src/font/font.hpp
     src/font/font_linux.cpp
-    src/font/font_win.cpp)
+    src/font/font_win.cpp
+    src/font/font_linux.hpp
+    src/font/font_win.hpp)
 
 # dependencies
 find_package(Freetype)

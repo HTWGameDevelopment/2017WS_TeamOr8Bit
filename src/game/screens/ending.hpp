@@ -79,12 +79,12 @@ namespace gamespace {
             glm::vec2 dimension = glm::vec2(b.x, b.y) * glm::vec2(2, 2) / _ctxt->getResolution();
             render_button(origin - glm::vec2(1, 1), dimension);
         }
-        void key_callback(int key, int action) {}
+        void key_callback(int, int) {}
         void mouse_callback(double x, double y) {
             _last_x = x;
             _last_y = y;
         }
-        void mouse_button_callback(int button, int action, int mods) {
+        void mouse_button_callback(int button, int action, int) {
             if(action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_LEFT) {
                 ui::Point s{_last_x, _resy - _last_y};
                 _ui->click(s);

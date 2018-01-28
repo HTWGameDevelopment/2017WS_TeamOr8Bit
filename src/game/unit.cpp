@@ -2,7 +2,7 @@
 
 using namespace gamespace;
 
-unsigned int gamespace::defaultFalloff(BoardTile &t) {
+unsigned int gamespace::defaultFalloff(BoardTile &) {
     return 1;
 }
 
@@ -32,7 +32,7 @@ void Unit::markAttack(BoardTile &tile) {
     tile.board().markByEdge(tile.coord(), _ar, ACTION_LAYER, getEdgeRelation(tile.unit(), ACTION_LAYER, _a, _player, false, true));
 }
 
-void Unit::render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m) {
+void Unit::render(BoardTile &, glm::mat4 &mvp, glm::mat4 &m) {
     qe::Cache::objv3->use();
     qe::Cache::objv3->setUniform<qe::UNIMVP>(mvp);
     qe::Cache::objv3->setUniform<qe::UNIM>(m);

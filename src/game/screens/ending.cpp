@@ -5,7 +5,7 @@
 using namespace gamespace;
 
 void EndingScreen::load_ui() {
-    _ui.reset(new ui::UI(ui::Point {_ctxt->width(), _ctxt->height()}));
+    _ui.reset(new ui::UI(ui::Point {(float)_ctxt->width(), (float)_ctxt->height()}));
     std::unique_ptr<ui::Box> box(new ui::Box());
     std::unique_ptr<ui::Text> text1(new ui::Text());
     std::unique_ptr<ui::Text> text2(new ui::Text());

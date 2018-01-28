@@ -26,7 +26,7 @@ inline hextile::hexpoint_t getLookedAtTile(glm::vec3 _pc) {
     if(d == distances.x) return hextile::hexpoint_t {(int)xval.x, (int)yval.x};
     else if(d == distances.y) return hextile::hexpoint_t {(int)xval.y, (int)yval.y};
     else if(d == distances.z) return hextile::hexpoint_t {(int)xval.z, (int)yval.z};
-    else if(d == distances.w) return hextile::hexpoint_t {(int)xval.w, (int)yval.w};
+    else return hextile::hexpoint_t {(int)xval.w, (int)yval.w};
 }
 
 GameScreenInputState::GameScreenInputState(GameScreenImpl &impl): _mouse_mode(FREE), _resy(impl.context()->getResolution().y), _impl(&impl) {
@@ -63,7 +63,7 @@ void GameScreenInputState::mouse(double x, double y) {
     _last_y = y;
     if(_mouse_mode == UIINTERACTION) {
         assert(_selected_menu);
-        _selected_menu->origin() = _origin_save + ui::Point {x, _resy - y} - _mouse_save;
+        _selected_menu->origin() = _origin_save + ui::Point {(float)x, (float)(_resy - y)} - _mouse_save;
         ((CoordinateMenu*)_selected_menu->payload())->invalidate();
     } else {
         _impl->camera()->mouseMoved(_impl->context()->deltaT(), x, y, _mouse_mode == LOCKED);
@@ -73,7 +73,7 @@ void GameScreenInputState::mouse(double x, double y) {
     }
 }
 
-void GameScreenInputState::button(int button, int action, int mods) {
+void GameScreenInputState::button(int button, int action, int) {
     static bool release_ignore = false;
     if(action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_MIDDLE && _mouse_mode == FREE) {
         _impl->context()->hideCursor();
@@ -86,7 +86,7 @@ void GameScreenInputState::button(int button, int action, int mods) {
     if(action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT && _mouse_mode == FREE) {
         auto p = getLookedAtTile(_impl->camera()->getPlaneCoord());
         GDBG(GV2TOSTR(p));
-        ui::Point s{_last_x, _resy - _last_y};
+        ui::Point s{(float)_last_x, (float)(_resy - _last_y)};
         if(_impl->ui()->click(s) == false) { // check for registered handlers first
             _selected_menu = _impl->ui()->hovers(s);
             if(_selected_menu) {

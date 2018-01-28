@@ -24,7 +24,7 @@ namespace gamespace {
     };
 
     struct saction_t {
-        std::string name;
+        std::function<std::string(Unit*)> name;
         std::function<void(Unit*)> f;
     };
 
@@ -85,7 +85,7 @@ namespace gamespace {
             return _container;
         }
         template<typename S, typename F>
-        void setSpecialAction(S name, F &&f) {
+        void setSpecialAction(S &&name, F &&f) {
             _actions.push_back(saction_t {name, f});
         }
         std::vector<saction_t> &getSpecialActions() {

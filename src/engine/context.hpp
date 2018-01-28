@@ -108,7 +108,7 @@ namespace qe {
 
             glfwMakeContextCurrent(_window);
             glfwSwapInterval(qe::VSYNC());
-            qe::VSYNC() << [this](int old, int upd) {
+            qe::VSYNC() << [this](int, int upd) {
                 glfwSwapInterval(upd);
             };
             glfwSetErrorCallback(errorcallback);

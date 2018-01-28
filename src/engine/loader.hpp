@@ -110,7 +110,7 @@ namespace qe {
         LoaderContainer(glm::ivec2 size): _width(size.x), _height(size.y) {
             _pixels.reset(new T[_width * _height]);
         }
-        LoaderContainer(LoaderContainer &&other): _width(other._width), _height(other._height), _pixels(std::move(other._pixels)) {}
+        LoaderContainer(LoaderContainer &&other): _pixels(std::move(other._pixels)), _width(other._width), _height(other._height) {}
         virtual ~LoaderContainer() {}
         T *parse() {
             return _pixels.get();
@@ -192,7 +192,7 @@ namespace qe {
         /**
          * \brief Construct loader from file path
          */
-        Loader(std::string path): _pixels(nullptr, std::free), _path(path), _size(0) {}
+        Loader(std::string path): _pixels(nullptr, std::free), _size(0), _path(path) {}
         /**
          * \brief Parse file and return data pointer
          */
@@ -253,7 +253,7 @@ namespace qe {
             file.exceptions(std::ifstream::badbit);
             std::vector<glm::vec3> tvertices;
             std::vector<glm::vec3> tnormals;
-            std::vector<glm::ivec2> indices;
+            std::vector<glm::uvec2> indices;
 
             subobj_t tobj {"", 0, 0};
 
@@ -279,7 +279,7 @@ namespace qe {
 
                     tnormals.push_back(v);
                 } else if(startswith(line, "f ")) {
-                    std::array<glm::ivec2, 3> points;
+                    std::array<glm::uvec2, 3> points;
 
                     switch(sscanf(line.c_str(), "f %u//%u %u//%u %u//%u",
                                   &points[0].x, &points[0].y,
@@ -373,7 +373,7 @@ namespace qe {
             std::vector<glm::vec3> tvertices;
             std::vector<glm::vec2> tuvs;
             std::vector<glm::vec3> tnormals;
-            std::vector<glm::ivec3> indices;
+            std::vector<glm::uvec3> indices;
 
             subobj_t tobj {"", 0, 0};
 
@@ -410,7 +410,7 @@ namespace qe {
 
                     tnormals.push_back(v);
                 } else if(startswith(line, "f ")) {
-                    std::array<glm::ivec3, 3> points;
+                    std::array<glm::uvec3, 3> points;
 
                     switch(sscanf(line.c_str(), "f %u/%u/%u %u/%u/%u %u/%u/%u",
                                   &points[0].x, &points[0].y, &points[0].z,

@@ -53,7 +53,7 @@ hextile::hexpoint_t GameScreenImpl::getLookedAtTile(glm::vec2 uv) {
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glReadPixels(uv.x, _ctxt->getResolution().y - uv.y, 1, 1, GL_RG_INTEGER, GL_UNSIGNED_INT, &r);
     GLSERRORCHECK;
-    return hextile::hexpoint_t {r.r, r.g};
+    return hextile::hexpoint_t {(int)r.r, (int)r.g};
 }
 
 GameScreenImpl::GameScreenImpl(gamespace::Match &&match, qe::Context *ctxt, std::shared_ptr<font::Font> font)
@@ -154,7 +154,7 @@ void GameScreenImpl::initializeHUD() {
     t->payload([](void* t){delete (text_t*)t;});
     t2->payload([](void* t){delete (text_t*)t;});
     t3->payload([](void* t){delete (text_t*)t;});
-    _match.observe_player_change([this, t](auto np) {
+    _match.observe_player_change([this, t](Player &np) {
         ((ui::Text*)t)->text() = "Or8Bit - (c) 2017-2018 Team Or8Bit\n"s
             + "LMB to move, RMB to attack\n"
             + "Current player (. for ending a turn): " + np.name();
@@ -275,7 +275,7 @@ void GameScreenImpl::pre_run() {
 void GameScreenImpl::createContextForLookAt() {
     if(_selection.hovering == nullptr) return;
     auto *u = _selection.hovering->unit();
-    if(u && _ui->hasModelMatching(_selection.hovering->unit(), [u](std::string name, void *m){return name == "unitctxt" && ((CoordinateMenu*)m)->unit() == u;}) == false)
+    if(u && _ui->hasModelMatching([u](std::string name, void *m){return name == "unitctxt" && ((CoordinateMenu*)m)->unit() == u;}) == false)
         CoordinateMenu::createForTile(_selection.hovering, _ui.get(), _ctxt->getResolution());
 }
 
@@ -298,7 +298,7 @@ void GameScreenImpl::run() {
         if(_cam.controlling == false) {
             auto pc = getLookedAtTile(_cam.camera->save());
             _selection.lastLookedAtTile = pc;
-            if(pc.x < 0 || pc.y < 0 || pc.x >= max_x || pc.y >= max_y) {
+            if(pc.x < 0 || pc.y < 0 || pc.x >= (int)max_x || pc.y >= (int)max_y) {
                 _selection.hovering = nullptr;
             } else {
                 _selection.hovering = &_match.board().get(pc);

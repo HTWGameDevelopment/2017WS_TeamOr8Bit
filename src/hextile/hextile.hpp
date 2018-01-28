@@ -105,8 +105,8 @@ namespace hextile {
                 }
             }
             bool inbounds(ssize_t x, ssize_t y) { // unsigned to signed. just use signed? TODO
-                return (x >= 0 && x < _board->x())
-                    && (y >= 0 && y < _board->y());
+                return (x >= 0 && x < (int)_board->x())
+                    && (y >= 0 && y < (int)_board->y());
             }
         };
         template<typename P>
@@ -122,18 +122,18 @@ namespace hextile {
     public:
         HexTile(size_t x, size_t y): _x(x), _y(y) {
             resetMarkers();
-            for(int i = 0; i < _x; ++i) {
-                for(int j = 0; j < _y; ++j) {
-                    _data.push_back(T(nullptr, hexpoint_t {i, j}));
+            for(unsigned int i = 0; i < _x; ++i) {
+                for(unsigned int j = 0; j < _y; ++j) {
+                    _data.push_back(T(nullptr, hexpoint_t {(int)i, (int)j}));
                 }
             }
         }
         HexTile(const HexTile &other) = delete;
         HexTile(HexTile &&other): _x(other._x), _y(other._y), _data(std::move(other._data)), _marker_ids(std::move(other._marker_ids)) {}
-        ssize_t x() {
+        size_t x() {
             return _x;
         }
-        ssize_t y() {
+        size_t y() {
             return _y;
         }
         C &get_marker_container() {
@@ -164,7 +164,7 @@ namespace hextile {
             ++_marker_ids[layer];
         }
         void resetMarkers() {
-            for(int i = 0; i < L; ++i)
+            for(unsigned int i = 0; i < L; ++i)
                 _marker_ids[i] = 0;
         }
         void __introspect(size_t off) {

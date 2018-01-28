@@ -35,6 +35,7 @@ namespace gamespace {
 
     class BoardTile;
     class Unit;
+    class Match;
 
     class CoordinateMenu {
     private:
@@ -50,6 +51,8 @@ namespace gamespace {
         Unit *_u;
         std::vector<ui::Renderable*> _action_items;
         unsigned int _udisp;
+        unsigned int _mdisp;
+        Match *_match;
         void update();
         void registerCallbacks();
         void destroy();

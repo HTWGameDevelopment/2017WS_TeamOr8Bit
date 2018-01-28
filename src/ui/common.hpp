@@ -151,7 +151,7 @@ namespace ui {
         template<typename F> void payload(F &&d) {
             _deleter = d;
         }
-        virtual Renderable *get(const char* str) {
+        virtual Renderable *get(const char*) {
             return this;
         }
         virtual void set_root(Renderable *r) {

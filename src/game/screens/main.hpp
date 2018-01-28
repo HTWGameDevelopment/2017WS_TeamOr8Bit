@@ -80,15 +80,15 @@ namespace gamespace {
         void process_events() {
             _ctxt->waitEvents();
         }
-        virtual void mouse_button_callback(int button, int action, int mods) {
+        virtual void mouse_button_callback(int, int, int) {
             glm::ivec2 cpos = _ctxt->getMousePos();
-            _ui->click(ui::Point {cpos.x, _ctxt->getResolution().y - cpos.y});
+            _ui->click(ui::Point {(float)cpos.x, (float)(_ctxt->getResolution().y - cpos.y)});
         }
-        void key_callback(int key, int action) {}
-        void mouse_callback(double x, double y) {}
+        void key_callback(int, int) {}
+        void mouse_callback(double, double) {}
         void idle_callback() {}
         void load_ui() {
-            _ui.reset(new ui::UI(ui::Point {_ctxt->width(), _ctxt->height()}));
+            _ui.reset(new ui::UI(ui::Point {(float)_ctxt->width(), (float)_ctxt->height()}));
             std::unique_ptr<ui::Box> box(new ui::Box());
             std::unique_ptr<ui::Text> text1(new ui::Text());
             std::unique_ptr<ui::Text> text2(new ui::Text());

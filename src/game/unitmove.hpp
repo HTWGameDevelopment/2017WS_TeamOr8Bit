@@ -31,6 +31,7 @@ namespace gamespace {
         }
         virtual void __introspect(size_t off) {
             // TODO
+            (void)off;
         }
     };
 
