@@ -113,12 +113,14 @@ void GameScreenImpl::initializeHUD() {
 
     std::unique_ptr<ui::Box> lower_box(new ui::Box());
     lower_box->append(new ui::Text());
+    lower_box->append(new ui::Text());
     lower_box->orientation() = ui::Box::HORIZONTAL;
     lower_box->align_x() = ui::Box::END;
     lower_box->align_y() = ui::Box::BEGINNING;
     lower_box->expand() = false;
     lower_box->dimension() = ui::Point {1, 0.2};
     lower_box->get("1")->dimension() = ui::Point {0.15, 0.1};
+    lower_box->get("2")->dimension() = ui::Point {0.15, 0.1};
 
     box->append(lower_box.release());
     box->append(upper_box.release());
@@ -130,6 +132,7 @@ void GameScreenImpl::initializeHUD() {
 
     auto *t = _ui->get(0, "1.1.1");
     auto *t2 = _ui->get(0, "1.2.1");
+    auto *t3 = _ui->get(0, "1.2.2");
     // TODO Various text rendering issues
     auto text_renderer = [this](ui::Renderable *t) mutable {
         if(t->payload() == nullptr) {
@@ -147,8 +150,10 @@ void GameScreenImpl::initializeHUD() {
     };
     t->render_with(text_renderer);
     t2->render_with(text_renderer);
+    t3->render_with(text_renderer);
     t->payload([](void* t){delete (text_t*)t;});
     t2->payload([](void* t){delete (text_t*)t;});
+    t3->payload([](void* t){delete (text_t*)t;});
     _match.observe_player_change([this, t](auto np) {
         ((ui::Text*)t)->text() = "Or8Bit - (c) 2017-2018 Team Or8Bit\n"s
             + "LMB to move, RMB to attack\n"
@@ -157,10 +162,15 @@ void GameScreenImpl::initializeHUD() {
     });
     t->payload() = nullptr;
     t2->payload() = nullptr;
-    ((ui::Text*)t2)->text() = "Trigger flood";
-    t2->on_click([this](ui::Renderable*){
+    t3->payload() = nullptr;
+    ((ui::Text*)t2)->text() = "Trigger Flood";
+    ((ui::Text*)t3)->text() = "End Turn";
+    t2->on_click([this](ui::Renderable*) {
         if(_match.can_trigger_map_event())
             _match.trigger_map_event();
+    });
+    t3->on_click([this](ui::Renderable*) {
+        _match.endTurn();
     });
 }
 
