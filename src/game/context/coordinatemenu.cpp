@@ -7,7 +7,7 @@
 #include<game/unit.hpp>
 
 using namespace gamespace;
-CoordinateMenu *CoordinateMenu::createForTile(BoardTile *b, ui::UI *dui, glm::vec2 res) {
+CoordinateMenu *CoordinateMenu::createForTile(BoardTile *b, ui::UI *dui, glm::vec2 res, glm::dvec2 mp) {
     std::unique_ptr<ui::Box> contextui(new ui::Box());
     std::unique_ptr<ui::Box> cb11(new ui::Box());
     std::unique_ptr<ui::Box> cb2(new ui::Box());
@@ -74,7 +74,9 @@ CoordinateMenu *CoordinateMenu::createForTile(BoardTile *b, ui::UI *dui, glm::ve
     };
     m->set_renderer_payload(text_renderer, [](void *t){delete (text_t*)t;});
     contextui->convert_coords(dui->res());
-    dui->add_layer("unitctxt", contextui.release());
+    auto *s = contextui.release();
+    dui->add_layer("unitctxt", s);
+    s->origin() = ui::Point {(float)mp.x, (float)(res.y - mp.y)};
     m->update();
     return m;
 }

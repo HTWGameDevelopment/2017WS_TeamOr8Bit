@@ -34,7 +34,7 @@ namespace gamespace {
         void registerCallbacks();
         void destroy();
     public:
-        static CoordinateMenu *createForTile(BoardTile *b, ui::UI *dui, glm::vec2 res);
+        static CoordinateMenu *createForTile(BoardTile *b, ui::UI *dui, glm::vec2 res, glm::dvec2 mp);
         CoordinateMenu(BoardTile *b, ui::UI *ui);
         virtual ~CoordinateMenu();
         ui::Renderable *view() {

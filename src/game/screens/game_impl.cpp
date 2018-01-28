@@ -267,7 +267,7 @@ void GameScreenImpl::createContextForLookAt() {
     if(_selection.hovering == nullptr) return;
     auto *u = _selection.hovering->unit();
     if(u && _ui->hasModelMatching([u](std::string name, void *m){return name == "unitctxt" && ((CoordinateMenu*)m)->unit() == u;}) == false)
-        CoordinateMenu::createForTile(_selection.hovering, _ui.get(), _ctxt->getResolution());
+        CoordinateMenu::createForTile(_selection.hovering, _ui.get(), _ctxt->getResolution(), _ctxt->getMousePos());
 }
 
 void GameScreenImpl::run() {
