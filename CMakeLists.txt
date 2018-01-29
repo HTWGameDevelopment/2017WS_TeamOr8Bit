@@ -23,7 +23,7 @@ set(QE_GLFW_PATH "${CMAKE_SOURCE_DIR}/extern/GLFW/include" CACHE PATH "" FORCE)
 set(QE_PNG_PATH "${CMAKE_SOURCE_DIR}/extern/libpng-1.6.32" CACHE PATH "" FORCE)
 set(QE_GLM_PATH "${CMAKE_SOURCE_DIR}/extern/glm" CACHE PATH "" FORCE)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
 
 # program
 add_executable(Or8Bit
