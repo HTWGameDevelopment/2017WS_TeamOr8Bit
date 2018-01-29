@@ -9,20 +9,16 @@
 using namespace gamespace;
 using namespace std::string_literals;
 
-const char* GameScreenImpl::ground_names[16] = {
+const char* GameScreenImpl::ground_names[] = {
     "Cylinder.002_Cylinder.007",
     "Cylinder.001_Cylinder.006",
     "Cylinder_Cylinder.003",
     "WaterPlane_Plane.003",
     "WaterBlock_Cube.004",
     "DamBaseBottom.002_Cube.003",
-    "DamBaseMiddle.002_Cylinder.002",
-    "DamBaseTop.002_Cone.002",
     "DamBaseBottom.001_Cube.002",
     "DamBaseMiddle.001_Cylinder.001",
     "DamBaseTop.001_Cone.001",
-    "DamBaseTop_Cone",
-    "DamBaseMiddle_Cylinder",
     "DamBaseBottom_Cube.001",
     "DamMain_CUBezierCurve",
     "Ground_Plane.002"
@@ -34,16 +30,12 @@ const char* GameScreenImpl::ground_names[16] = {
 #define WaterPlane_Plane_003 3
 #define WaterBlock_Cube_004 4
 #define DamBaseBottom_002_Cube_003 5
-#define DamBaseMiddle_002_Cylinder_002 6
-#define DamBaseTop_002_Cone_002 7
-#define DamBaseBottom_001_Cube_002 8
-#define DamBaseMiddle_001_Cylinder_001 9
-#define DamBaseTop_001_Cone_001 10
-#define DamBaseTop_Cone 11
-#define DamBaseMiddle_Cylinder 12
-#define DamBaseBottom_Cube_001 13
-#define DamMain_CUBezierCurve 14
-#define Ground_Plane_002 15
+#define DamBaseBottom_001_Cube_002 6
+#define DamBaseMiddle_001_Cylinder_001 7
+#define DamBaseTop_001_Cone_001 8
+#define DamBaseBottom_Cube_001 9
+#define DamMain_CUBezierCurve 10
+#define Ground_Plane_002 11
 
 inline glm::uvec2 to_uvec2(hextile::hexpoint_t t) {
     return glm::uvec2(t.x, t.y);
@@ -172,26 +164,8 @@ void GameScreenImpl::initializeAssets() {
     // MODELS
     _ground.reset(new qe::Mesh<qe::OBJV3>(qe::Loader<qe::OBJV3>("assets/models/map.objv3"_p)));
     // RESOLVE SUBOBJS
-        const char* names[] = {
-            "Cylinder.002_Cylinder.007",
-            "Cylinder.001_Cylinder.006",
-            "Cylinder_Cylinder.003",
-            "WaterPlane_Plane.003",
-            "WaterBlock_Cube.004",
-            "DamBaseBottom.002_Cube.003",
-            "DamBaseMiddle.002_Cylinder.002",
-            "DamBaseTop.002_Cone.002",
-            "DamBaseBottom.001_Cube.002",
-            "DamBaseMiddle.001_Cylinder.001",
-            "DamBaseTop.001_Cone.001",
-            "DamBaseTop_Cone",
-            "DamBaseMiddle_Cylinder",
-            "DamBaseBottom_Cube.001",
-            "DamMain_CUBezierCurve",
-            "Ground_Plane.002"
-        };
-    for(size_t i = 0; i < 16; ++i) {
-        _ground_indices[i] = _ground->get_object(names[i]);
+    for(size_t i = 0; i < 12; ++i) {
+        _ground_indices[i] = _ground->get_object(ground_names[i]);
     }
     // TEXTURES
     _cam.controlling = false;
@@ -387,12 +361,8 @@ void GameScreenImpl::renderTerrain() {
     _ground->render_sub(_ground_indices[Cylinder_001_Cylinder_006]);
     _ground->render_sub(_ground_indices[Cylinder_002_Cylinder_007]);
     // TODO render faction colors
-    _ground->render_sub(_ground_indices[DamBaseMiddle_Cylinder]);
     _ground->render_sub(_ground_indices[DamBaseMiddle_001_Cylinder_001]);
-    _ground->render_sub(_ground_indices[DamBaseMiddle_002_Cylinder_002]);
-    _ground->render_sub(_ground_indices[DamBaseTop_Cone]);
     _ground->render_sub(_ground_indices[DamBaseTop_001_Cone_001]);
-    _ground->render_sub(_ground_indices[DamBaseTop_002_Cone_002]);
     // render ground areas
     if(_terrain_render_geometry_pass == false) ts->setUniform<qe::UNICOLOR>(glm::vec3(0.8, 0.567, 0.305));
     _ground->render_sub(_ground_indices[Ground_Plane_002]);
