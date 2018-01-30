@@ -126,6 +126,7 @@ namespace gamespace {
             _player2.__introspect(off + 2);
         }
         void setMarkers();
+        void setDefaultUnits(UnitManager &manager);
         void setRenderOffsets(UnitManager &manager);
     };
 }

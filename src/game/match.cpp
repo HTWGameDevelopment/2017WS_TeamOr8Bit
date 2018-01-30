@@ -166,6 +166,62 @@ struct roff_t {
     glm::mat4 prem;
 };
 
+void Match::setDefaultUnits(UnitManager &manager) {
+    //Infantry
+    _board[17][0].setUnit(manager.createInfantry(&player1()));
+    _board[18][0].setUnit(manager.createInfantry(&player1()));
+    _board[19][1].setUnit(manager.createInfantry(&player1()));
+    _board[19][13].setUnit(manager.createInfantry(&player1()));
+    _board[18][13].setUnit(manager.createInfantry(&player1()));
+    _board[17][13].setUnit(manager.createInfantry(&player1()));
+    _board[16][5].setUnit(manager.createInfantry(&player1()));
+    _board[17][5].setUnit(manager.createInfantry(&player1()));
+    _board[15][5].setUnit(manager.createInfantry(&player1()));
+    _board[15][4].setUnit(manager.createInfantry(&player1()));
+    _board[16][4].setUnit(manager.createInfantry(&player1()));
+
+    _board[1][0].setUnit(manager.createInfantry(&player2()));
+    _board[2][0].setUnit(manager.createInfantry(&player2()));
+    _board[0][1].setUnit(manager.createInfantry(&player2()));
+    _board[1][13].setUnit(manager.createInfantry(&player2()));
+    _board[2][13].setUnit(manager.createInfantry(&player2()));
+    _board[3][13].setUnit(manager.createInfantry(&player2()));
+    _board[2][5].setUnit(manager.createInfantry(&player2()));
+    _board[3][5].setUnit(manager.createInfantry(&player2()));
+    _board[4][5].setUnit(manager.createInfantry(&player2()));
+    _board[3][4].setUnit(manager.createInfantry(&player2()));
+    _board[2][4].setUnit(manager.createInfantry(&player2()));
+
+    //Tanks
+    _board[19][2].setUnit(manager.createTank(&player1()));
+    _board[17][1].setUnit(manager.createTank(&player1()));
+    _board[19][7].setUnit(manager.createTank(&player1()));
+    _board[17][6].setUnit(manager.createTank(&player1()));
+    _board[16][3].setUnit(manager.createTank(&player1()));
+
+    _board[0][2].setUnit(manager.createTank(&player2()));
+    _board[2][1].setUnit(manager.createTank(&player2()));
+    _board[0][7].setUnit(manager.createTank(&player2()));
+    _board[2][6].setUnit(manager.createTank(&player2()));
+    _board[3][3].setUnit(manager.createTank(&player2()));
+
+    //A-Helis
+    _board[19][0].setUnit(manager.createAHeli(&player1()));
+    _board[19][8].setUnit(manager.createAHeli(&player1()));
+    _board[19][3].setUnit(manager.createAHeli(&player1()));
+
+    _board[0][0].setUnit(manager.createAHeli(&player2()));
+    _board[0][8].setUnit(manager.createAHeli(&player2()));
+    _board[0][3].setUnit(manager.createAHeli(&player2()));
+
+    //T-Helis
+    _board[18][1].setUnit(manager.createTHeli(&player1()));
+    _board[17][12].setUnit(manager.createTHeli(&player1()));
+
+    _board[1][1].setUnit(manager.createTHeli(&player2()));
+    _board[2][12].setUnit(manager.createTHeli(&player2()));
+}
+
 void Match::setRenderOffsets(UnitManager &manager) {
     const roff_t offs[] = {
         roff_t{hextile::hexpoint_t{0,4}, glm::translate(glm::vec3(0.0, 0.2, 0.0))*glm::rotate(-44.2f, glm::vec3(1, 0, 0))},
@@ -224,11 +280,8 @@ void Match::setRenderOffsets(UnitManager &manager) {
     };
     for(unsigned int i = 0; i < sizeof(offs) / sizeof(roff_t); ++i) {
         _board[offs[i].c.x][offs[i].c.y].renderData() = offs[i].prem;
-        if(i % 2 == 1)
-            _board[offs[i].c.x][offs[i].c.y].setUnit(manager.createInfantry(&player2()));
-        else
-            _board[offs[i].c.x][offs[i].c.y].setUnit(manager.createGTrans(&player2()));
     }
+    setDefaultUnits(manager);
     _board.synchronize();
 }
 
