@@ -93,11 +93,11 @@ void main() {
             visvalue += 0.2;
         }
         if(ismarked(uvec2(tcoord), uint(1)) == uint(1)) {
-            if(floor(mod(dot(pos_world.xz, glm::vec2(1, -1)) / 0.4, 2)) == 1)
+            if(floor(mod(dot(pos_world.xz, vec2(1, -1)) / 0.4, 2)) == 1)
                 color = vec3(1, 0.2, 0.2) * (0.1 + cosTheta);
         }
         if(ismarked(uvec2(tcoord), uint(3)) == uint(1)) {
-            if(floor(mod(dot(pos_world.xz, glm::vec2(-1, 1)) / 0.4, 2)) == 1)
+            if(floor(mod(dot(pos_world.xz, vec2(-1, 1)) / 0.4, 2)) == 1)
                 color = vec3(0, 0.551, 0.8) * (0.1 + cosTheta);
         } else if(ismarked(uvec2(tcoord), uint(3)) == uint(2)) {
             color = 0.1 * uni_color + cosTheta_s * uni_color;

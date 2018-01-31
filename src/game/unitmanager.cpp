@@ -108,5 +108,5 @@ UnitManager::UnitManager(GameScreenImpl *impl): _impl(impl) {
         return "Move Out"s;
     };
     _units.gtrans->setSpecialAction(moveoutstring, moveoutaction);
-    _units.aheli->setSpecialAction(moveoutstring, moveoutaction);
+    _units.theli->setSpecialAction(moveoutstring, moveoutaction);
 }
