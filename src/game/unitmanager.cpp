@@ -57,7 +57,7 @@ UnitManager::UnitManager(GameScreenImpl *impl): _impl(impl) {
         gamespace::defaultFalloff,
         gamespace::defaultFalloff));
     _units.gtrans.reset(new gamespace::Unit(_meshes.gtrans.get(), nullptr, "Ground Transporter", true, true,
-        60, // Health
+        120, // Health
         80,  // Defense Points
         20,  // Attack Points
         1,   // Attack Range
@@ -68,9 +68,9 @@ UnitManager::UnitManager(GameScreenImpl *impl): _impl(impl) {
         gamespace::defaultFalloff,
         gamespace::defaultFalloff));
     _units.theli.reset(new gamespace::Unit(_meshes.theli.get(), nullptr, "Transport Helicopter", false, true,
-        70,  // Health
+        140,  // Health
         20,  // Defense Points
-        80,  // Attack Points
+        10,  // Attack Points
         4,   // Attack Range
         6,   // Visibility
         4,   // Max move distance
