@@ -71,6 +71,10 @@ namespace ui {
     inline Point operator-(Point a, Point b) {return Point {a.x - b.x, a.y - b.y};}
     inline Point operator*(Point a, Point b) {return Point {a.x * b.x, a.y * b.y};}
     inline Point operator/(Point a, Point b) {return Point {a.x / b.x, a.y / b.y};}
+    template<typename T> Point operator+(T a, Point b) {return Point {a + b.x, a + b.y};}
+    template<typename T> Point operator-(T a, Point b) {return Point {a - b.x, a - b.y};}
+    template<typename T> Point operator*(T a, Point b) {return Point {a * b.x, a * b.y};}
+    template<typename T> Point operator/(T a, Point b) {return Point {a / b.x, a / b.y};}
 
     class Area {
     private:
@@ -151,7 +155,7 @@ namespace ui {
         template<typename F> void payload(F &&d) {
             _deleter = d;
         }
-        virtual Renderable *get(const char* str) {
+        virtual Renderable *get(const char*) {
             return this;
         }
         virtual void set_root(Renderable *r) {

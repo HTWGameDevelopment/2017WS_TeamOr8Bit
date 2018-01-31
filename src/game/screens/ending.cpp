@@ -1,11 +1,12 @@
 #include "ending.hpp"
 
 #include<game/screens/main.hpp>
+#include<game/uirender.hpp>
 
 using namespace gamespace;
 
 void EndingScreen::load_ui() {
-    _ui.reset(new ui::UI(ui::Point {_ctxt->width(), _ctxt->height()}));
+    _ui.reset(new ui::UI(ui::Point {(float)_ctxt->width(), (float)_ctxt->height()}));
     std::unique_ptr<ui::Box> box(new ui::Box());
     std::unique_ptr<ui::Text> text1(new ui::Text());
     std::unique_ptr<ui::Text> text2(new ui::Text());
@@ -37,17 +38,7 @@ void EndingScreen::load_ui() {
     ret->on_click([this](void*) mutable {
         _active = false;
     });
-    auto renderer = [this](ui::Renderable *t) mutable {
-        if(t->payload() == nullptr) {
-            t->payload() = new text_t(
-                ((ui::Text*)t)->text(),
-                _glyphmap,
-                to_ivec2(t->origin() + t->margin() + t->padding() + ui::Point {0, 0.5} * (t->dimension() - t->margin() - t->padding())),
-                (int)(0.5 * (t->dimension().y - t->margin().y - t->padding().y)),
-                (int)(t->dimension().x - t->margin().x - t->padding().x));
-        }
-        ((text_t*)(t->payload()))->render();
-    };
+    auto renderer = [this](ui::Renderable *t) mutable {render_text(t, glm::vec3(1, 1, 1));};
     ret->render_with(renderer);
     congrats->render_with(renderer);
     auto d = [](void *t){delete (text_t*)t;};

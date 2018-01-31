@@ -4,25 +4,26 @@
 
 using namespace gamespace;
 
-GameBoard::GameBoard(int x, int y): hextile::HexTile<BoardTile, 4>(x, y) {
-    for(int i = 0; i < _x; ++i) {
-        for(int j = 0; j < _y; ++j) {
+GameBoard::GameBoard(int x, int y, Match *match): hextile::HexTile<BoardTile, 4>(x, y), _match(match) {
+    assert(match);
+    for(unsigned int i = 0; i < _x; ++i) {
+        for(unsigned int j = 0; j < _y; ++j) {
             _data[i * _y + j].setBoard(this);
         }
     }
 }
 
-GameBoard::GameBoard(GameBoard &&other): hextile::HexTile<BoardTile, 4>(std::move(other)) {
-    for(int i = 0; i < _x; ++i) {
-        for(int j = 0; j < _y; ++j) {
+GameBoard::GameBoard(GameBoard &&other): hextile::HexTile<BoardTile, 4>(std::move(other)), _match(other._match) {
+    for(unsigned int i = 0; i < _x; ++i) {
+        for(unsigned int j = 0; j < _y; ++j) {
             _data[i * _y + j].setBoard(this);
         }
     }
 }
 
 void GameBoard::synchronize() {
-    for(int i = 0; i < x(); ++i) {
-        for(int j = 0; j < y(); ++j) {
+    for(unsigned int i = 0; i < x(); ++i) {
+        for(unsigned int j = 0; j < y(); ++j) {
             if(operator[](i)[j].unit()) {
                 operator[](i)[j].unit()->tile() = &operator[](i)[j];
             }

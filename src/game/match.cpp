@@ -112,11 +112,52 @@ void Match::setMarkers() {
         {18,9},
         {17,8}
     };
+    const hextile::hexpoint_t water[] = {
+        {11,11},
+        {10,11},
+        {9,11},
+        {8,10},
+        {9,10},
+        {10,10},
+        {11,10},
+        {11,9},
+        {10,9},
+        {9,9},
+        {8,9},
+        {12,9},
+        {11,8},
+        {10,8},
+        {9,8},
+        {8,8},
+        {8,7},
+        {9,7},
+        {10,7},
+        {11,7},
+        {12,7},
+        {11,6},
+        {10,6},
+        {9,6},
+        {8,6},
+        {9,5},
+        {10,5},
+        {11,5},
+        {10,4},
+        {9,4},
+        {10,3},
+        {10,2},
+        {9,2},
+        {10,1},
+        {10,0},
+        {9,0}
+    };
     for(unsigned int i = 0; i < sizeof(aoe) / sizeof(hextile::hexpoint_t); ++i) {
         _board[aoe[i].x][aoe[i].y].mark(AOE_LAYER, 1);
     }
     for(unsigned int i = 0; i < sizeof(noground) / sizeof(hextile::hexpoint_t); ++i) {
         _board[noground[i].x][noground[i].y].mark(AOE_LAYER, 2);
+    }
+    for(unsigned int i = 0; i < sizeof(water) / sizeof(hextile::hexpoint_t); ++i) {
+        _board[water[i].x][water[i].y].terrain() = Terrain::getWaterTile();
     }
 }
 
@@ -125,69 +166,122 @@ struct roff_t {
     glm::mat4 prem;
 };
 
+void Match::setDefaultUnits(UnitManager &manager) {
+    //Infantry
+    _board[17][0].setUnit(manager.createInfantry(&player1()));
+    _board[18][0].setUnit(manager.createInfantry(&player1()));
+    _board[19][1].setUnit(manager.createInfantry(&player1()));
+    _board[19][13].setUnit(manager.createInfantry(&player1()));
+    _board[18][13].setUnit(manager.createInfantry(&player1()));
+    _board[17][13].setUnit(manager.createInfantry(&player1()));
+    _board[16][5].setUnit(manager.createInfantry(&player1()));
+    _board[17][5].setUnit(manager.createInfantry(&player1()));
+    _board[15][5].setUnit(manager.createInfantry(&player1()));
+    _board[15][4].setUnit(manager.createInfantry(&player1()));
+    _board[16][4].setUnit(manager.createInfantry(&player1()));
+
+    _board[1][0].setUnit(manager.createInfantry(&player2()));
+    _board[2][0].setUnit(manager.createInfantry(&player2()));
+    _board[0][1].setUnit(manager.createInfantry(&player2()));
+    _board[1][13].setUnit(manager.createInfantry(&player2()));
+    _board[2][13].setUnit(manager.createInfantry(&player2()));
+    _board[3][13].setUnit(manager.createInfantry(&player2()));
+    _board[2][5].setUnit(manager.createInfantry(&player2()));
+    _board[3][5].setUnit(manager.createInfantry(&player2()));
+    _board[4][5].setUnit(manager.createInfantry(&player2()));
+    _board[3][4].setUnit(manager.createInfantry(&player2()));
+    _board[2][4].setUnit(manager.createInfantry(&player2()));
+
+    //Tanks
+    _board[19][2].setUnit(manager.createTank(&player1()));
+    _board[17][1].setUnit(manager.createTank(&player1()));
+    _board[19][7].setUnit(manager.createTank(&player1()));
+    _board[17][6].setUnit(manager.createTank(&player1()));
+    _board[16][3].setUnit(manager.createTank(&player1()));
+
+    _board[0][2].setUnit(manager.createTank(&player2()));
+    _board[2][1].setUnit(manager.createTank(&player2()));
+    _board[0][7].setUnit(manager.createTank(&player2()));
+    _board[2][6].setUnit(manager.createTank(&player2()));
+    _board[3][3].setUnit(manager.createTank(&player2()));
+
+    //A-Helis
+    _board[19][0].setUnit(manager.createAHeli(&player1()));
+    _board[19][8].setUnit(manager.createAHeli(&player1()));
+    _board[19][3].setUnit(manager.createAHeli(&player1()));
+
+    _board[0][0].setUnit(manager.createAHeli(&player2()));
+    _board[0][8].setUnit(manager.createAHeli(&player2()));
+    _board[0][3].setUnit(manager.createAHeli(&player2()));
+
+    //T-Helis
+    _board[18][1].setUnit(manager.createTHeli(&player1()));
+    _board[17][12].setUnit(manager.createTHeli(&player1()));
+
+    _board[1][1].setUnit(manager.createTHeli(&player2()));
+    _board[2][12].setUnit(manager.createTHeli(&player2()));
+}
+
 void Match::setRenderOffsets(UnitManager &manager) {
     const roff_t offs[] = {
-        roff_t{hextile::hexpoint_t{0,4}, glm::translate(glm::vec3(0.0, 0.1, 0.0))},
+        roff_t{hextile::hexpoint_t{0,4}, glm::translate(glm::vec3(0.0, 0.2, 0.0))*glm::rotate(-44.2f, glm::vec3(1, 0, 0))},
         roff_t{hextile::hexpoint_t{1,4}, glm::translate(glm::vec3(0.0, 0.1, 0.0))},
-        roff_t{hextile::hexpoint_t{2,5}, glm::translate(glm::vec3(0.0, 0.1, 0.0))},
+        roff_t{hextile::hexpoint_t{2,5}, glm::translate(glm::vec3(0.0, 0.1, 0.0))*glm::rotate(-44.2f, glm::vec3(1, 0, 1))},
         roff_t{hextile::hexpoint_t{2,6}, glm::translate(glm::vec3(0.0, 0.1, 0.0))},
         roff_t{hextile::hexpoint_t{1,6}, glm::translate(glm::vec3(0.0, 0.5, 0.0))},
-        roff_t{hextile::hexpoint_t{1,5}, glm::translate(glm::vec3(0.0, 0.3, 0.0))},
-        roff_t{hextile::hexpoint_t{0,5}, glm::translate(glm::vec3(0.0, 0.5, 0.0))},
-        roff_t{hextile::hexpoint_t{0,6}, glm::translate(glm::vec3(0.0, 0.6, 0.0))},
-        roff_t{hextile::hexpoint_t{1,7}, glm::translate(glm::vec3(0.0, 0.9, 0.0))},
-        roff_t{hextile::hexpoint_t{0,7}, glm::translate(glm::vec3(0.0, 0.8, 0.0))},
+        roff_t{hextile::hexpoint_t{1,5}, glm::translate(glm::vec3(0.0, 0.4, 0.0))*glm::rotate(-44.15f, glm::vec3(1, 0, 1))},
+        roff_t{hextile::hexpoint_t{0,5}, glm::translate(glm::vec3(0.0, 0.6, 0.0))*glm::rotate(-44.15f, glm::vec3(1, 0, 0))},
+        roff_t{hextile::hexpoint_t{0,6}, glm::translate(glm::vec3(0.0, 0.8, 0.0))*glm::rotate(-44.15f, glm::vec3(1, 0, 0))},
+        roff_t{hextile::hexpoint_t{1,7}, glm::translate(glm::vec3(0.0, 1, 0.0))},
+        roff_t{hextile::hexpoint_t{0,7}, glm::translate(glm::vec3(0.0, 0.9, 0.0))},
         roff_t{hextile::hexpoint_t{1,8}, glm::translate(glm::vec3(0.0, 1.2, 0.0))},
-        roff_t{hextile::hexpoint_t{0,8}, glm::translate(glm::vec3(0.0, 1.2, 0.0))},
+        roff_t{hextile::hexpoint_t{0,8}, glm::translate(glm::vec3(0.0, 1.2, 0.0))*glm::rotate(44.15f, glm::vec3(0, 0, 1))},
         roff_t{hextile::hexpoint_t{1,9}, glm::translate(glm::vec3(0.0, 1.4, 0.0))},
-        roff_t{hextile::hexpoint_t{1,10}, glm::translate(glm::vec3(0.0, 1.6, 0.0))},
-        roff_t{hextile::hexpoint_t{0,10}, glm::translate(glm::vec3(0.0, 1.6, 0.0))},
-        roff_t{hextile::hexpoint_t{0,9}, glm::translate(glm::vec3(0.0, 1.3, 0.0))},
-        roff_t{hextile::hexpoint_t{0,11}, glm::translate(glm::vec3(0.0, 2.0, 0.0))},
-        roff_t{hextile::hexpoint_t{1,11}, glm::translate(glm::vec3(0.0, 2.3, 0.0))},
+        roff_t{hextile::hexpoint_t{1,10}, glm::translate(glm::vec3(0.0, 1.7, 0.0))},
+        roff_t{hextile::hexpoint_t{0,10}, glm::translate(glm::vec3(0.0, 1.5, 0.0))*glm::rotate(44.2f, glm::vec3(0, 0, 1))},
+        roff_t{hextile::hexpoint_t{0,9}, glm::translate(glm::vec3(0.0, 1.1, 0.0))*glm::rotate(44.35f, glm::vec3(0, 0, 1))},
+        roff_t{hextile::hexpoint_t{0,11}, glm::translate(glm::vec3(0.0, 1.2, 0.0))*glm::rotate(44.55f, glm::vec3(0, 0, 1))},
+        roff_t{hextile::hexpoint_t{1,11}, glm::translate(glm::vec3(0.0, 2, 0.0))*glm::rotate(-44.15f, glm::vec3(1, 0, 0))},
         roff_t{hextile::hexpoint_t{1,12}, glm::translate(glm::vec3(0.0, 2.3, 0.0))},
-        roff_t{hextile::hexpoint_t{0,12}, glm::translate(glm::vec3(0.0, 2.3, 0.0))},
-        roff_t{hextile::hexpoint_t{0,13}, glm::translate(glm::vec3(0.0, 2.0, 0.0))},
-        roff_t{hextile::hexpoint_t{1,13}, glm::translate(glm::vec3(0.0, 2.3, 0.0))},
-        roff_t{hextile::hexpoint_t{2,13}, glm::translate(glm::vec3(0.0, 2.3, 0.0))},
-        roff_t{hextile::hexpoint_t{2,12}, glm::translate(glm::vec3(0.0, 2.3, 0.0))},
-        roff_t{hextile::hexpoint_t{3,13}, glm::translate(glm::vec3(0.0, 2.5, 0.0))},
+        roff_t{hextile::hexpoint_t{0,12}, glm::translate(glm::vec3(0.0, 1.8, 0.0))*glm::rotate(44.5f, glm::vec3(0, 0, 1))},
+        roff_t{hextile::hexpoint_t{0,13}, glm::translate(glm::vec3(0.0, 1.4, 0.0))*glm::rotate(44.55f, glm::vec3(0, 0, 1))},
+        roff_t{hextile::hexpoint_t{1,13}, glm::translate(glm::vec3(0.0, 2.1, 0.0))*glm::rotate(44.3f, glm::vec3(0, 0, 1))},
+        roff_t{hextile::hexpoint_t{2,13}, glm::translate(glm::vec3(0.0, 2.5, 0.0))},
+        roff_t{hextile::hexpoint_t{2,12}, glm::translate(glm::vec3(0.0, 2.4, 0.0))*glm::rotate(-44.15f, glm::vec3(1, 0, 0))},
+        roff_t{hextile::hexpoint_t{3,13}, glm::translate(glm::vec3(0.0, 2.6, 0.0))},
         roff_t{hextile::hexpoint_t{4,13}, glm::translate(glm::vec3(0.0, 2.8, 0.0))},
-        roff_t{hextile::hexpoint_t{5,13}, glm::translate(glm::vec3(0.0, 2.8, 0.0))},
-        roff_t{hextile::hexpoint_t{6,13}, glm::translate(glm::vec3(0.0, 2.8, 0.0))},
+        roff_t{hextile::hexpoint_t{5,13}, glm::translate(glm::vec3(0.0, 3.0, 0.0))},
+        roff_t{hextile::hexpoint_t{6,13}, glm::translate(glm::vec3(0.0, 2.9, 0.0))*glm::rotate(-44.00f, glm::vec3(1, 0, 1))},
         roff_t{hextile::hexpoint_t{7,13}, glm::translate(glm::vec3(0.0, 2.8, 0.0))},
         roff_t{hextile::hexpoint_t{13,13}, glm::translate(glm::vec3(0.0, 2.8, 0.0))},
-        roff_t{hextile::hexpoint_t{14,13}, glm::translate(glm::vec3(0.0, 2.8, 0.0))},
-        roff_t{hextile::hexpoint_t{15,13}, glm::translate(glm::vec3(0.0, 2.8, 0.0))},
+        roff_t{hextile::hexpoint_t{14,13}, glm::translate(glm::vec3(0.0, 2.9, 0.0))},
+        roff_t{hextile::hexpoint_t{15,13}, glm::translate(glm::vec3(0.0, 2.9, 0.0))},
         roff_t{hextile::hexpoint_t{16,13}, glm::translate(glm::vec3(0.0, 2.8, 0.0))},
-        roff_t{hextile::hexpoint_t{17,13}, glm::translate(glm::vec3(0.0, 2.8, 0.0))},
-        roff_t{hextile::hexpoint_t{18,12}, glm::translate(glm::vec3(0.0, 2.8, 0.0))},
-        roff_t{hextile::hexpoint_t{17,12}, glm::translate(glm::vec3(0.0, 2.8, 0.0))},
-        roff_t{hextile::hexpoint_t{18,13}, glm::translate(glm::vec3(0.0, 2.8, 0.0))},
-        roff_t{hextile::hexpoint_t{19,13}, glm::translate(glm::vec3(0.0, 2.8, 0.0))},
-        roff_t{hextile::hexpoint_t{19,11}, glm::translate(glm::vec3(0.0, 2.1, 0.0))},
-        roff_t{hextile::hexpoint_t{18,10}, glm::translate(glm::vec3(0.0, 2.1, 0.0))},
-        roff_t{hextile::hexpoint_t{18,11}, glm::translate(glm::vec3(0.0, 2.1, 0.0))},
-        roff_t{hextile::hexpoint_t{19,10}, glm::translate(glm::vec3(0.0, 2.1, 0.0))},
-        roff_t{hextile::hexpoint_t{19,9}, glm::translate(glm::vec3(0.0, 1.6, 0.0))},
-        roff_t{hextile::hexpoint_t{18,8}, glm::translate(glm::vec3(0.0, 1.6, 0.0))},
-        roff_t{hextile::hexpoint_t{19,8}, glm::translate(glm::vec3(0.0, 1.6, 0.0))},
-        roff_t{hextile::hexpoint_t{19,7}, glm::translate(glm::vec3(0.0, 1.3, 0.0))},
-        roff_t{hextile::hexpoint_t{18,7}, glm::translate(glm::vec3(0.0, 1.3, 0.0))},
-        roff_t{hextile::hexpoint_t{18,6}, glm::translate(glm::vec3(0.0, 1.1, 0.0))},
-        roff_t{hextile::hexpoint_t{19,6}, glm::translate(glm::vec3(0.0, 1.1, 0.0))},
-        roff_t{hextile::hexpoint_t{17,6}, glm::translate(glm::vec3(0.0, 0.6, 0.0))},
-        roff_t{hextile::hexpoint_t{18,5}, glm::translate(glm::vec3(0.0, 0.6, 0.0))},
-        roff_t{hextile::hexpoint_t{19,5}, glm::translate(glm::vec3(0.0, 0.6, 0.0))},
-        roff_t{hextile::hexpoint_t{19,4}, glm::translate(glm::vec3(0.0, 0.6, 0.0))}
+        roff_t{hextile::hexpoint_t{17,13}, glm::translate(glm::vec3(0.0, 2.6, 0.0))},
+        roff_t{hextile::hexpoint_t{18,12}, glm::translate(glm::vec3(0.0, 2.2, 0.0))},
+        roff_t{hextile::hexpoint_t{17,12}, glm::translate(glm::vec3(0.0, 2.3, 0.0))*glm::rotate(-44.15f, glm::vec3(1, 0, 0))},
+        roff_t{hextile::hexpoint_t{18,13}, glm::translate(glm::vec3(0.0, 2.4, 0.0))},
+        roff_t{hextile::hexpoint_t{19,13}, glm::translate(glm::vec3(0.0, 2.1, 0.0))*glm::rotate(-44.2f, glm::vec3(1, 0, 1))},
+        roff_t{hextile::hexpoint_t{19,11}, glm::translate(glm::vec3(0.0, 2.0, 0.0))*glm::rotate(-44.15f, glm::vec3(0, 0, 1))},
+        roff_t{hextile::hexpoint_t{18,10}, glm::translate(glm::vec3(0.0, 1.7, 0.0))*glm::rotate(-44.15f, glm::vec3(1, 0, 1))},
+        roff_t{hextile::hexpoint_t{18,11}, glm::translate(glm::vec3(0.0, 2.1, 0.0))*glm::rotate(44.25f, glm::vec3(0, 0, 1))},
+        roff_t{hextile::hexpoint_t{19,10}, glm::translate(glm::vec3(0.0, 1.4, 0.0))*glm::rotate(-44.2f, glm::vec3(1, 0, 1))},
+        roff_t{hextile::hexpoint_t{19,9}, glm::translate(glm::vec3(0.0, 1.4, 0.0))},
+        roff_t{hextile::hexpoint_t{18,8}, glm::translate(glm::vec3(0.0, 1.3, 0.0))},
+        roff_t{hextile::hexpoint_t{19,8}, glm::translate(glm::vec3(0.0, 1.1, 0.0))*glm::rotate(-44.15f, glm::vec3(1, 0, 1))},
+        roff_t{hextile::hexpoint_t{19,7}, glm::translate(glm::vec3(0.0, 1.0, 0.0))},
+        roff_t{hextile::hexpoint_t{18,7}, glm::translate(glm::vec3(0.0, 0.8, 0.0))*glm::rotate(44.35f, glm::vec3(0, 0, 1))},
+        roff_t{hextile::hexpoint_t{18,6}, glm::translate(glm::vec3(0.0, 0.8, 0.0))*glm::rotate(44.15f, glm::vec3(0, 0, 1))},
+        roff_t{hextile::hexpoint_t{19,6}, glm::translate(glm::vec3(0.0, 0.8, 0.0))},
+        roff_t{hextile::hexpoint_t{17,6}, glm::translate(glm::vec3(0.0, 0.1, 0.0))*glm::rotate(44.15f, glm::vec3(0, 0, 1))},
+        roff_t{hextile::hexpoint_t{18,5}, glm::translate(glm::vec3(0.0, 0.2, 0.0))*glm::rotate(44.15f, glm::vec3(0, 0, 1))},
+        roff_t{hextile::hexpoint_t{19,5}, glm::translate(glm::vec3(0.0, 0.4, 0.0))*glm::rotate(-44.15f, glm::vec3(1, 0, 0))},
+        roff_t{hextile::hexpoint_t{19,4}, glm::translate(glm::vec3(0.0, 0.2, 0.0))*glm::rotate(-44.2f, glm::vec3(1, 0, 1))}
     };
     for(unsigned int i = 0; i < sizeof(offs) / sizeof(roff_t); ++i) {
         _board[offs[i].c.x][offs[i].c.y].renderData() = offs[i].prem;
-        if(i % 2 == 1)
-            _board[offs[i].c.x][offs[i].c.y].setUnit(manager.createInfantry(&player2()));
-        else
-            _board[offs[i].c.x][offs[i].c.y].setUnit(manager.createGTrans(&player2()));
     }
+    setDefaultUnits(manager);
     _board.synchronize();
 }
 

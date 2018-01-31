@@ -8,33 +8,11 @@
 #include<ui/text.hpp>
 #include<ui/box.hpp>
 
-inline void render_button(glm::vec2 origin, glm::vec2 size, glm::vec3 bg) {
-    qe::Cache::sprite2dcolor->use();
-    // set shader
-    qe::Cache::sprite2dcolor->setUniform<qe::UNIORIGIN>(origin);
-    qe::Cache::sprite2dcolor->setUniform<qe::UNISIZE>(size);
-    qe::Cache::sprite2dcolor->setUniform<qe::UNITEXTBG>(bg);
-    // set vao
-    qe::Cache::meshm->render();
-}
-
-inline void render_rectangle(ui::Point a, ui::Point b, glm::vec3 bg, glm::vec2 res) {
-    glm::vec2 origin = glm::vec2(a.x, a.y) * glm::vec2(2, 2) / res;
-    glm::vec2 dimension = glm::vec2(b.x, b.y) * glm::vec2(2, 2) / res;
-    render_button(origin - glm::vec2(1, 1), dimension, bg);
-}
-
-inline glm::ivec2 to_ivec2(ui::Point t) {
-    return glm::ivec2(t.x, t.y);
-}
-
 namespace gamespace {
-
-    typedef decltype(qe::Cache::glyphlatin) glyphmap;
-    typedef qe::Text<std::remove_pointer<glyphmap>::type> text_t;
 
     class BoardTile;
     class Unit;
+    class Match;
 
     class CoordinateMenu {
     private:
@@ -50,11 +28,13 @@ namespace gamespace {
         Unit *_u;
         std::vector<ui::Renderable*> _action_items;
         unsigned int _udisp;
+        unsigned int _mdisp;
+        Match *_match;
         void update();
         void registerCallbacks();
         void destroy();
     public:
-        static CoordinateMenu *createForTile(BoardTile *b, ui::UI *dui, glm::vec2 res);
+        static CoordinateMenu *createForTile(BoardTile *b, ui::UI *dui, glm::vec2 res, glm::dvec2 mp);
         CoordinateMenu(BoardTile *b, ui::UI *ui);
         virtual ~CoordinateMenu();
         ui::Renderable *view() {

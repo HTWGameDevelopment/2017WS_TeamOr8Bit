@@ -139,7 +139,7 @@ namespace qe {
             return _linespace;
         }
         fontmetrics getMetrics(unsigned char c) {
-            return _metrics[c <= 255 ? c : 0];
+            return _metrics[c];
         }
         /**
          * \brief Return position and scaling vector in screen coordinates

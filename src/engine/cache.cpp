@@ -29,7 +29,6 @@ qe::Program *Cache::texts;
 qe::Program *Cache::sprite2d;
 qe::Program *Cache::sprite2dcolor;
 qe::Mesh<TEXTG> *Cache::meshm;
-qe::Texture<PNGRGBA, DIFFTEXBIND_GL> *Cache::buttont;
 
 void Cache::__introspect(size_t off) {
     std::cout << std::string(off, ' ') << "Cache" << std::endl;
@@ -41,5 +40,4 @@ void Cache::__introspect(size_t off) {
     sprite2d->__introspect(off + 2);
     sprite2dcolor->__introspect(off + 2);
     meshm->__introspect(off + 2);
-    buttont->__introspect(off + 2);
 }

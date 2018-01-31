@@ -13,6 +13,7 @@
 #include<ui/box.hpp>
 #include<ui/text.hpp>
 #include<screenmanager/screen.hpp>
+#include<game/uirender.hpp>
 
 
 namespace gamespace {
@@ -59,36 +60,21 @@ namespace gamespace {
         void linkGame(GameScreen *game) {
             _gamescreen = game;
         }
-        void render_button(glm::vec2 origin, glm::vec2 size) {
-            qe::Cache::sprite2d->use();
-            // set shader
-            qe::Cache::sprite2d->setUniform<qe::UNIORIGIN>(origin);
-            qe::Cache::sprite2d->setUniform<qe::UNISIZE>(size);
-            // set texture
-            qe::Cache::buttont->bindTo();
-            // set vao
-            qe::Cache::meshm->render();
-        }
-        void render_button(ui::Point a, ui::Point b) {
-            glm::vec2 origin = glm::vec2(a.x, a.y) * glm::vec2(2, 2) / _ctxt->getResolution();
-            glm::vec2 dimension = glm::vec2(b.x, b.y) * glm::vec2(2, 2) / _ctxt->getResolution();
-            render_button(origin - glm::vec2(1, 1), dimension);
-        }
         void render_background() {
             // TODO
         }
         void process_events() {
             _ctxt->waitEvents();
         }
-        virtual void mouse_button_callback(int button, int action, int mods) {
+        virtual void mouse_button_callback(int, int, int) {
             glm::ivec2 cpos = _ctxt->getMousePos();
-            _ui->click(ui::Point {cpos.x, _ctxt->getResolution().y - cpos.y});
+            _ui->click(ui::Point {(float)cpos.x, (float)(_ctxt->getResolution().y - cpos.y)});
         }
-        void key_callback(int key, int action) {}
-        void mouse_callback(double x, double y) {}
+        void key_callback(int, int) {}
+        void mouse_callback(double, double) {}
         void idle_callback() {}
         void load_ui() {
-            _ui.reset(new ui::UI(ui::Point {_ctxt->width(), _ctxt->height()}));
+            _ui.reset(new ui::UI(ui::Point {(float)_ctxt->width(), (float)_ctxt->height()}));
             std::unique_ptr<ui::Box> box(new ui::Box());
             std::unique_ptr<ui::Text> text1(new ui::Text());
             std::unique_ptr<ui::Text> text2(new ui::Text());
@@ -127,16 +113,8 @@ namespace gamespace {
                 _manager->quit();
             });
             auto renderer = [this](ui::Renderable *t) mutable {
-                this->render_button(t->origin() + t->margin(), t->dimension() - t->margin());
-                if(t->payload() == nullptr) {
-                    t->payload() = new text_t(
-                        ((ui::Text*)t)->text(),
-                        _glyphmap,
-                        to_ivec2(t->origin() + t->margin() + t->padding() + ui::Point {0, 0.5} * (t->dimension() - t->margin() - t->padding())),
-                        (int)(0.5 * (t->dimension().y - t->margin().y - t->padding().y)),
-                        (int)(t->dimension().x - t->margin().x - t->padding().x));
-                }
-                ((text_t*)(t->payload()))->render();
+                render_rectangle(t->origin() + t->margin(), t->dimension() - t->margin(), glm::vec3(0.3, 0.3, 0.3), _ctxt->getResolution());
+                render_text(t, glm::vec3(1, 1, 1));
             };
             start->render_with(renderer);
             quit->render_with(renderer);

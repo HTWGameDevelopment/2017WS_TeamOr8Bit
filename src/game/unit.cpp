@@ -1,17 +1,23 @@
 #include "unit.hpp"
 
+#include<game/match.hpp>
+
 using namespace gamespace;
 
 unsigned int gamespace::defaultFalloff(BoardTile &t) {
-    return 1;
+    return t.terrain().falloff();
 }
 
 std::function<bool(BoardTile&,unsigned int&)> gamespace::getEdgeRelation(Unit *u, unsigned int layer, relation _v, Player *player, bool noground_block = false, bool unit_block = false) {
     return [player, layer, _v, noground_block, unit_block, u](BoardTile &b, unsigned int &p) {
-        if(p == 0) return false;
+        unsigned int v = _v(b);
+        if(p < v) return false;
         if(noground_block && b.marked_value(AOE_LAYER) == 2) return false;
-        if(unit_block && b.unit() && b.unit()->player() == *player && b.unit()->containerMatchesType(u->name()) == false) return false;
-        bool r = b.mark(layer, p--);
+        if(unit_block && b.unit() && b.unit()->player() == *player
+            && (b.unit()->containerMatchesType(u->name()) == false
+                || b.unit()->getLastTurnId() == b.board().match()->getTurnId())) return false;
+        bool r = b.mark(layer, p);
+        p -= v;
         if(unit_block && b.unit()) return false;
         return r;
     };
@@ -32,7 +38,7 @@ void Unit::markAttack(BoardTile &tile) {
     tile.board().markByEdge(tile.coord(), _ar, ACTION_LAYER, getEdgeRelation(tile.unit(), ACTION_LAYER, _a, _player, false, true));
 }
 
-void Unit::render(BoardTile &tile, glm::mat4 &mvp, glm::mat4 &m) {
+void Unit::render(BoardTile &, glm::mat4 &mvp, glm::mat4 &m) {
     qe::Cache::objv3->use();
     qe::Cache::objv3->setUniform<qe::UNIMVP>(mvp);
     qe::Cache::objv3->setUniform<qe::UNIM>(m);

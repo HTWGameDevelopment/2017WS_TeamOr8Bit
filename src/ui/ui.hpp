@@ -57,7 +57,7 @@ namespace ui {
             }
         }
         template<typename F>
-        bool hasModelMatching(void *u, F &&f) {
+        bool hasModelMatching(F &&f) {
             for(auto &c : _layers) {
                 if(f(c.name, c.layer->payload())) return true;
             }

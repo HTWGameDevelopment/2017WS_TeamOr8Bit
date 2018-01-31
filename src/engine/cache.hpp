@@ -38,7 +38,6 @@ namespace qe {
         static qe::Program *sprite2d; //!< 2D sprite shader
         static qe::Program *sprite2dcolor; //!< 2D sprite color shader
         static qe::Mesh<TEXTG> *meshm; //!< glyph rendering mesh
-        static qe::Texture<PNGRGBA, DIFFTEXBIND_GL> *buttont; //!< 2D button texture
         static void __introspect(size_t off);
         /**
          * \brief Destroy all objects
@@ -52,7 +51,6 @@ namespace qe {
             delete sprite2d;
             delete sprite2dcolor;
             delete meshm;
-            delete buttont;
         }
     };
 

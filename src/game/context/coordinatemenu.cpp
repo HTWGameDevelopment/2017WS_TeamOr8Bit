@@ -1,10 +1,13 @@
 #include "coordinatemenu.hpp"
 
+#include<game/uirender.hpp>
+
+#include<game/match.hpp>
 #include<game/board.hpp>
 #include<game/unit.hpp>
 
 using namespace gamespace;
-CoordinateMenu *CoordinateMenu::createForTile(BoardTile *b, ui::UI *dui, glm::vec2 res) {
+CoordinateMenu *CoordinateMenu::createForTile(BoardTile *b, ui::UI *dui, glm::vec2 res, glm::dvec2 mp) {
     std::unique_ptr<ui::Box> contextui(new ui::Box());
     std::unique_ptr<ui::Box> cb11(new ui::Box());
     std::unique_ptr<ui::Box> cb2(new ui::Box());
@@ -53,7 +56,8 @@ CoordinateMenu *CoordinateMenu::createForTile(BoardTile *b, ui::UI *dui, glm::ve
     contextui->append(cb11.release());
     contextui->origin() = ui::Point {0, 0};
     auto *m = new CoordinateMenu(b, dui);
-    m->init(contextui.get());
+    auto *rr = contextui.get();
+    m->init(rr);
     contextui->payload() = m;
     contextui->payload([](void *t){delete (CoordinateMenu*)t;});
     contextui->render_with([res](ui::Renderable *t) mutable {
@@ -70,7 +74,9 @@ CoordinateMenu *CoordinateMenu::createForTile(BoardTile *b, ui::UI *dui, glm::ve
     };
     m->set_renderer_payload(text_renderer, [](void *t){delete (text_t*)t;});
     contextui->convert_coords(dui->res());
-    dui->add_layer("unitctxt", contextui.release());
+    auto *s = contextui.release();
+    dui->add_layer("unitctxt", s);
+    s->origin() = ui::Point {(float)mp.x, (float)(res.y - mp.y)};
     m->update();
     return m;
 }
@@ -84,10 +90,15 @@ CoordinateMenu::CoordinateMenu(BoardTile *b, ui::UI *ui): _top(ui), _b(b), _u(b-
             update();
         }
     });
+    _match = _u->tile()->board().match();
+    _mdisp = _match->on_player_change([this](Player &) {
+        update();
+    });
 }
 
 CoordinateMenu::~CoordinateMenu() {
     _u->on_change_r(_udisp);
+    _match->on_player_change_r(_mdisp);
 }
 
 void CoordinateMenu::destroy() {
@@ -105,20 +116,21 @@ void rebuild_payload(ui::Renderable *t) {
         (int)(0.5 * (t->dimension().y - t->margin().y - t->padding().y)),
         (int)(t->dimension().x - t->margin().x - t->padding().x));
     auto i = ((text_t*)t->payload())->recalculate_dimension();
-    auto pi = ui::Point {i.x, i.y};
+    auto pi = ui::Point {(float)i.x, (float)i.y};
     t->dimension().x = std::max(t->dimension().x, pi.x);
     t->dimension().y = std::max(t->dimension().y, pi.y);
     t->origin() -= t->root()->origin();
 }
 
 void CoordinateMenu::init(ui::Renderable *ui) {
+    assert(ui);
     _ui = ui;
     _titlebar = ui->get("1");
     _coordinates = (ui::Text*)ui->get("1.1");
     _unit_text = (ui::Text*)ui->get("1.2");
     _qt = (ui::Text*)ui->get("1.3");
     _qt->text() = "X";
-    _qt->on_click([this](ui::Renderable* t) {
+    _qt->on_click([this](ui::Renderable*) {
         destroy();
     });
     _hp_text = (ui::Text*)ui->get("2.1");
@@ -131,7 +143,7 @@ void CoordinateMenu::init(ui::Renderable *ui) {
         std::unique_ptr<ui::Text> t(new ui::Text());
         t->dimension() = ui::Point {0.045, 0.03};
         t->margin() = ui::Point {0.005, 0.005};
-        t->text() = b->name;
+        t->text() = b->name(_u);
         t->set_root(ui);
         auto text_renderer = [](ui::Renderable *t) mutable {
             assert(t->payload());
@@ -156,6 +168,13 @@ void CoordinateMenu::update() {
         _coordinates->text() = "[in unit]";
     _unit_text->text() = _u->name();
     _unit_hp->text() = std::to_string(_u->hp()) + "/" + std::to_string(_u->max_hp());
+    // actions
+    auto &c = _u->getSpecialActions();
+    for(size_t i = 0; i < _action_items.size(); ++i) {
+        ui::Text* t = (ui::Text*)_action_items[i];
+        t->text() = c[i].name(_u);
+    }
+
     invalidate();
     auto osave = _ui->origin();
     _ui->origin() = ui::Point {0, 0};

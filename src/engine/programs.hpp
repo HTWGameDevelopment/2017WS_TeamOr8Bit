@@ -145,7 +145,7 @@ namespace qe {
             size_t i = 0;
             while((i = r.find("#assign ", i)) != std::string::npos) {
                 std::string name = r.substr(i + 8, strcspn(r.data() + i + 8, "\n"));
-                auto as = std::find(_assigns.begin(), _assigns.end(), assigns_t {name});
+                auto as = std::find(_assigns.begin(), _assigns.end(), assigns_t {name, ""});
                 assert(as != _assigns.end());
                 r.replace(i, 8 + name.size(), "#define " + as->name + " "  + as->value);
             }

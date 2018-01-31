@@ -17,6 +17,7 @@ namespace gamespace {
             std::unique_ptr<qe::Mesh<qe::OBJV3>> btank;
             std::unique_ptr<qe::Mesh<qe::OBJV3>> gtrans;
             std::unique_ptr<qe::Mesh<qe::OBJV3>> infantry;
+            std::unique_ptr<qe::Mesh<qe::OBJV3>> aheli;
         } _meshes;
         struct {
             std::unique_ptr<Unit> tank;
@@ -24,10 +25,16 @@ namespace gamespace {
             std::unique_ptr<Unit> btank;
             std::unique_ptr<Unit> gtrans;
             std::unique_ptr<Unit> infantry;
+            std::unique_ptr<Unit> aheli;
         } _units;
         GameScreenImpl *_impl;
     public:
         UnitManager(GameScreenImpl *impl);
+        Unit *createAHeli(Player *p) {
+            auto *t = new Unit(*_units.aheli);
+            t->setPlayer(p);
+            return t;
+        }
         Unit *createTank(Player *p) {
             auto *t = new Unit(*_units.tank);
             t->setPlayer(p);
@@ -54,7 +61,7 @@ namespace gamespace {
             return t;
         }
         void __introspect(size_t off) {
-
+            (void)off;
         }
     };
 
